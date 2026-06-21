@@ -23,7 +23,6 @@ async function fetchApiData() {
     console.error('Error fetching API data:', error)
   }
 }
-
 fetchApiData()
 </script>
 
