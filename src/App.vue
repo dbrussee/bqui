@@ -1,38 +1,28 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { ref } from 'vue'
+import BQAPIFetcher from './BQAPI'
 
-interface CustomApiResponse {
-  meta: Record<string, any>
-  issue: Record<string, any>
-  result: Record<string, any>
-}
-
-const json = ref<CustomApiResponse | null>(null)
-async function fetchApiData() {
-  try {
-    const response = await fetch('http://192.168.68.202:8080/bqapi/v2.1/user/admin')
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`)
-    }
-
-    json.value = await response.json()
-    console.log('API response (pretty JSON):')
-    console.dir(json)
-  } catch (error) {
-    console.error('Error fetching API data:', error)
+const fetcher = ref<BQAPIFetcher>(new BQAPIFetcher())
+async function fetchUser() {
+  const el = document.getElementById('uid') as HTMLInputElement | null
+  if (el) {
+    await fetcher.value.fetch('/user/' + el.value)
+    // console.dir(fetcher.value)
   }
 }
-fetchApiData()
 </script>
 
+<style scoped></style>
+
 <template>
-  <h1>You did it!</h1>
-  <div v-if="json">
-    You are: {{ json.result.fstnam }} {{ json.result.lstnam }}<br />
-    Your email is: {{ json.result.email }}<br />
-    Took: {{ json.meta.times.ms }}ms
+  <input id="uid" placeholder="Enter User ID" />
+  <button @click="fetchUser()">Fetch User</button>
+  <div v-if="fetcher.getStatus() == 'UNUSED'">User not loaded</div>
+  <div v-else-if="fetcher.getStatus() == 'FETCHING'">...</div>
+  <div v-else-if="fetcher.getStatus() == `FETCHED`">
+    You are: {{ fetcher.json.resp.fstnam }} {{ fetcher.json.resp.lstnam }}<br />
+    Your email is: {{ fetcher.json.resp.email }}<br />
+    Took: {{ fetcher.json.meta.times.ms }}ms
   </div>
 </template>
-
-<style scoped></style>
