@@ -1,3 +1,5 @@
+import { countersStore } from '../stores/Counters'
+
 export default class BQAPIFetcher {
   private static readonly BASE_URL = 'http://192.168.68.202:8080/bqapi/v2.1'
   private status: 'FETCHED' | 'FETCHING' | 'UNUSED' | 'ERROR' = 'UNUSED'
@@ -20,6 +22,10 @@ export default class BQAPIFetcher {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     body: any = {},
   ): Promise<BQAPIFetcher> {
+    const counters = countersStore()
+
+    counters.apiCalls.total++
+    counters.apiCalls.active++
     if (!endpoint.startsWith('/')) endpoint = `/${endpoint}` // Ensure the endpoint starts with a slash
     try {
       this.status = 'FETCHING'
@@ -48,8 +54,12 @@ export default class BQAPIFetcher {
 
       // Return the same value to the caller
       this.status = 'FETCHED'
+      counters.apiCalls.active--
+      counters.apiCalls.success++
       return this
     } catch (error) {
+      counters.apiCalls.active--
+      counters.apiCalls.error++
       this.status = 'ERROR'
       console.error(`Failed to fetch from ${endpoint}:`, error)
       // this._json.value = null

@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { appUserStore } from '../stores/AppUser'
-import { appMessageStore } from '../stores/Messages'
 const userStore = appUserStore()
+import { appMessageStore } from '../stores/Messages'
 const messageStore = appMessageStore()
+import { countersStore } from '../stores/Counters'
+const counters = countersStore()
 const uid = ref('')
 const loginuid = ref('')
 
@@ -60,20 +62,26 @@ const ts = (d: string) => {
             Roles: {{ userStore.otherUser.config.roles }}
           </div>
         </td>
+        <td style="vertical-align: top; text-align: right">
+          API: ({{ counters.apiCalls.active }} active, {{ counters.apiCalls.success }} success,
+          {{ counters.apiCalls.error }} error)
+        </td>
       </tr>
     </tbody>
   </table>
-  <h3>Messages</h3>
-  <div v-for="msg in messageStore.messages" :key="msg.id">
-    Sent: {{ ts(msg.sentat) }}<br />
-    <b>{{ msg.subject }}</b
-    ><br />
-    <i>{{ msg.msgtxt }}</i>
-    <hr />
-  </div>
-  <h3>Rights</h3>
-  <div v-for="(value, key) in userStore.user.rights" :key="key">
-    {{ key }}: {{ value.value }} ({{ value.source }})
+  <div v-if="userStore.user">
+    <h3>Messages</h3>
+    <div v-for="msg in messageStore.messages" :key="msg.id">
+      Sent: {{ ts(msg.sentat) }}<br />
+      <b>{{ msg.subject }}</b
+      ><br />
+      <i>{{ msg.msgtxt }}</i>
+      <hr />
+    </div>
+    <h3>Rights</h3>
+    <div v-for="(value, key) in userStore.user.rights" :key="key">
+      {{ key }}: {{ value.value }} ({{ value.source }})
+    </div>
   </div>
 </template>
 
