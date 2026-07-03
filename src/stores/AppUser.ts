@@ -20,6 +20,15 @@ export const appUserStore = defineStore('appUserStore', () => {
   })
   const issue = ref<any>({})
 
+  initialize()
+
+  function initialize() {
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      login(storedUser)
+    }
+  }
+
   async function getOtherUser(uid: string) {
     otherUser.value = null
     const fetcher = await new BQAPIFetcher().callAPI(`/user/${uid}`, 'GET')
@@ -34,8 +43,17 @@ export const appUserStore = defineStore('appUserStore', () => {
     user.value = fetcher.resp
     meta.value = fetcher.meta
     issue.value = fetcher.issue
+    if (user.value) {
+      localStorage.setItem('user', uid)
+    } else {
+      localStorage.removeItem('user')
+    }
     return user.value
   }
+  function logout() {
+    user.value = null
+    localStorage.removeItem('user')
+  }
 
-  return { getOtherUser, login, otherUser, user, meta, issue }
+  return { getOtherUser, login, logout, otherUser, user, meta, issue }
 })

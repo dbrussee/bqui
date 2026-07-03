@@ -11,11 +11,16 @@ const loginuid = ref('')
 
 async function login() {
   if (loginuid.value != '') {
+    logout()
     await userStore.login(loginuid.value)
     console.dir(userStore.user)
-    await messageStore.getMessages(loginuid.value)
-    console.dir(messageStore.messages)
+    // await messageStore.getMessages(loginuid.value)
+    // console.dir(messageStore.messages)
   }
+}
+function logout() {
+  userStore.logout()
+  messageStore.messages.length = 0
 }
 async function getOtherUser() {
   if (uid.value != '') {
@@ -43,12 +48,15 @@ const ts = (d: string) => {
       <tr>
         <td style="vertical-align: top; width: 30%">
           <input v-model="loginuid" placeholder="Enter User ID" />
-          <button @click="login()">Login</button><br />
+          <button @click="login()">Login</button>
+          <button @click="logout()">Logout</button>
+          <br />
           <div v-if="userStore.user">
-            Logged In: {{ userStore.user.fstnam }} {{ userStore.user.lstnam }}<br />
+            Logged In: {{ userStore.user.fstnam }} {{ userStore.user.lstnam }} ({{
+              userStore.user.id
+            }})<br />
             Your email is: {{ userStore.user.email }}<br />
-            Last Login: {{ ts(userStore.user.lst_login) }}<br />
-            Roles: {{ userStore.user.config.roles }}
+            Last Login: {{ ts(userStore.user.lst_login) }}
           </div>
           <div v-else>Not logged in</div>
         </td>
@@ -58,8 +66,7 @@ const ts = (d: string) => {
           <div v-if="userStore.otherUser">
             Name: {{ userStore.otherUser.fstnam }} {{ userStore.otherUser.lstnam }}<br />
             Your email is: {{ userStore.otherUser.email }}<br />
-            Last Login: {{ ts(userStore.otherUser.lst_login) }}<br />
-            Roles: {{ userStore.otherUser.config.roles }}
+            Last Login: {{ ts(userStore.otherUser.lst_login) }}
           </div>
         </td>
         <td style="vertical-align: top; text-align: right">
@@ -70,7 +77,10 @@ const ts = (d: string) => {
     </tbody>
   </table>
   <div v-if="userStore.user">
-    <h3>Messages</h3>
+    <b>Messages</b>
+    &nbsp;<button :disabled="!userStore.user" @click="messageStore.getMessages(userStore.user.id)">
+      Load
+    </button>
     <div v-for="msg in messageStore.messages" :key="msg.id">
       Sent: {{ ts(msg.sentat) }}<br />
       <b>{{ msg.subject }}</b
@@ -78,9 +88,12 @@ const ts = (d: string) => {
       <i>{{ msg.msgtxt }}</i>
       <hr />
     </div>
-    <h3>Rights</h3>
+    <br />
+    <b>Roles:</b> {{ userStore.user.config.roles }}
+    <br />
+    <b>Rights</b>
     <div v-for="(value, key) in userStore.user.rights" :key="key">
-      {{ key }}: {{ value.value }} ({{ value.source }})
+      {{ key }}: {{ value.value }}<span v-if="value.source != '@DFLT'"> ({{ value.source }})</span>
     </div>
   </div>
 </template>
