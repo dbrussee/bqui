@@ -58,9 +58,23 @@ export default class BQAPIFetcher {
       counters.apiCalls.success++
       return this
     } catch (error) {
+      this.status = 'ERROR'
+
+      try {
+        const targetUrl = `${BQAPIFetcher.BASE_URL}/logerror`
+
+        const response = await fetch(targetUrl, {
+          method: 'POST',
+          body: JSON.stringify(this),
+        })
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+      } catch (innerError) {
+        console.error(`Failed to log Error: `, innerError)
+      }
       counters.apiCalls.active--
       counters.apiCalls.error++
-      this.status = 'ERROR'
       console.error(`Failed to fetch from ${endpoint}:`, error)
       // this._json.value = null
       throw error // Re-throw so the calling code knows it failed
