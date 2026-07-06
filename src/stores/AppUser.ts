@@ -38,7 +38,7 @@ export const appUserStore = defineStore('appUserStore', () => {
     return otherUser.value
   }
   async function login(uid: string) {
-    user.value = null
+    user.value = 'LOADING'
     const fetcher = await new BQAPIFetcher().callAPI(`/user/login/${uid}`, 'POST')
     user.value = fetcher.resp
     meta.value = fetcher.meta

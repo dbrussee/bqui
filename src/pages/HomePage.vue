@@ -51,7 +51,8 @@ const ts = (d: string) => {
           <button @click="login()">Login</button>
           <button @click="logout()">Logout</button>
           <br />
-          <div v-if="userStore.user">
+          <div v-if="userStore.user == 'LOADING'">Loading...</div>
+          <div v-else-if="userStore.user">
             Logged In: {{ userStore.user.fstnam }} {{ userStore.user.lstnam }} ({{
               userStore.user.id
             }})<br />
