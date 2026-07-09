@@ -18,7 +18,7 @@ export const appUserStore = defineStore('appUserStore', () => {
       ms: 0,
     },
   })
-  const issue = ref<any>({})
+  const issue = ref<any>(null)
 
   initialize()
 
@@ -38,7 +38,7 @@ export const appUserStore = defineStore('appUserStore', () => {
     return otherUser.value
   }
   async function login(uid: string) {
-    user.value = 'LOADING'
+    // user.value = 'LOADING'
     const fetcher = await new BQAPIFetcher().callAPI(`/user/login/${uid}`, 'POST')
     user.value = fetcher.resp
     meta.value = fetcher.meta
@@ -52,6 +52,8 @@ export const appUserStore = defineStore('appUserStore', () => {
   }
   function logout() {
     user.value = null
+    issue.value = null
+    meta.value = null
     localStorage.removeItem('user')
   }
 

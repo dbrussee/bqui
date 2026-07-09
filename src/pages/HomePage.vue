@@ -5,13 +5,14 @@ const userStore = appUserStore()
 import { appMessageStore } from '../stores/Messages'
 const messageStore = appMessageStore()
 import { countersStore } from '../stores/Counters'
+import APIIssue from '@/components/APIIssue.vue'
 const counters = countersStore()
 const uid = ref('')
 const loginuid = ref('')
 
 async function login() {
+  logout()
   if (loginuid.value != '') {
-    logout()
     await userStore.login(loginuid.value)
     console.dir(userStore.user)
     // await messageStore.getMessages(loginuid.value)
@@ -97,6 +98,7 @@ const ts = (d: string) => {
       {{ key }}: {{ value.value }}<span v-if="value.source != '@DFLT'"> ({{ value.source }})</span>
     </div>
   </div>
+  <APIIssue :issue="userStore.issue"></APIIssue>
 </template>
 
 <style scoped></style>
