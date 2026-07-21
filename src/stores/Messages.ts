@@ -19,9 +19,9 @@ export const appMessageStore = defineStore('appMessageStore', () => {
   })
   const issue = ref<any>({})
 
-  async function getMessages(uid: string) {
+  async function getMessages() {
     messages.value.length = 0
-    const fetcher = await new BQAPIFetcher().callAPI(`/messages/${uid}`, 'GET')
+    const fetcher = await new BQAPIFetcher().callAPI(`/messages`, 'GET')
     if (fetcher.resp != null) {
       messages.value.push(...(fetcher.resp as any[]))
     }

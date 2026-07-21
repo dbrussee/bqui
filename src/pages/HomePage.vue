@@ -80,7 +80,7 @@ const ts = (d: string) => {
   </table>
   <div v-if="userStore.user">
     <b>Messages</b>
-    &nbsp;<button :disabled="!userStore.user" @click="messageStore.getMessages(userStore.user.id)">
+    &nbsp;<button :disabled="!userStore.user" @click="messageStore.getMessages()">
       Load
     </button>
     <div v-for="msg in messageStore.messages" :key="msg.id">

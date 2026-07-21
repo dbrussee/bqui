@@ -1,7 +1,7 @@
 import { countersStore } from '../stores/Counters'
 
 export default class BQAPIFetcher {
-  private static readonly BASE_URL = 'http://192.168.68.202:8080/bqapi/v2.1'
+  private static readonly BASE_URL = 'http://localhost:8080/bqapi/v2.1'
   private status: 'FETCHED' | 'FETCHING' | 'UNUSED' | 'ERROR' = 'UNUSED'
   public resp: unknown = {}
   public meta: unknown = {}
@@ -34,6 +34,7 @@ export default class BQAPIFetcher {
 
       const response = await fetch(targetUrl, {
         method: method,
+        credentials: 'include',
         body: method == 'GET' ? null : JSON.stringify(body),
       })
       if (!response.ok) {
