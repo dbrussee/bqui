@@ -6,6 +6,7 @@ import { appMessageStore } from '../stores/Messages'
 const messageStore = appMessageStore()
 import { countersStore } from '../stores/Counters'
 import APIIssue from '@/components/APIIssue.vue'
+import UserComponent from '@/components/UserComponent.vue'
 const counters = countersStore()
 const uid = ref('')
 const loginuid = ref('')
@@ -50,17 +51,6 @@ const ts = (d: string) => {
         <td style="vertical-align: top; width: 30%">
           <input v-model="loginuid" placeholder="Enter User ID" />
           <button @click="login()">Login</button>
-          <button @click="logout()">Logout</button>
-          <br />
-          <div v-if="userStore.user == 'LOADING'">Loading...</div>
-          <div v-else-if="userStore.user">
-            Logged In: {{ userStore.user.fstnam }} {{ userStore.user.lstnam }} ({{
-              userStore.user.id
-            }})<br />
-            Your email is: {{ userStore.user.email }}<br />
-            Last Login: {{ ts(userStore.user.lst_login) }}
-          </div>
-          <div v-else>Not logged in</div>
         </td>
         <td style="vertical-align: top; padding-left: 10px">
           <input v-model="uid" placeholder="Enter Other User ID" />
@@ -78,6 +68,7 @@ const ts = (d: string) => {
       </tr>
     </tbody>
   </table>
+  <UserComponent/>
   <div v-if="userStore.user">
     <b>Messages</b>
     &nbsp;<button :disabled="!userStore.user" @click="messageStore.getMessages()">
