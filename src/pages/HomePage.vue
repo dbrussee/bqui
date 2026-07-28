@@ -12,7 +12,9 @@ import UserComponent from '@/components/UserComponent.vue'
 import ProspectComponent from '@/components/prospectComponent.vue'
 const counters = countersStore()
 const loginuid = ref('')
-const prospect_id = ref(null)
+const prospect_id = ref('')
+const pickedFave = ref('')
+const pickedRecent = ref('')
 
 const which_tab = ref('MSG')
 
@@ -28,6 +30,17 @@ async function login() {
 function logout() {
   userStore.logout()
   messageStore.messages.length = 0
+}
+
+function pickFave() {
+  which_tab.value='PROSP'
+  prospectStore.getProspect(pickedFave.value)
+  pickedFave.value = ''
+}
+function pickRecent() {
+  which_tab.value='PROSP'
+  prospectStore.getProspect(pickedRecent.value)
+  pickedRecent.value = ''
 }
 
 const ts = (d: string) => {
@@ -61,6 +74,15 @@ const ts = (d: string) => {
   <UserComponent>Nobody logged in</UserComponent>
   <div v-if="userStore.user">
     <label><input type='radio' @click="which_tab = 'PROSP'" :checked="which_tab=='PROSP'" name='disp_tab'><b>Prospect</b >
+      &nbsp;<select v-model="pickedFave" @change="pickFave()">
+        <option value="" selected>Select a favorite...</option>
+        <option v-for="fave in userStore.user.faves" :key="fave.pid" :value="fave.pid">{{ fave.name }}</option>
+      </select>
+      &nbsp;<select v-model="pickedRecent" @change="pickRecent()">
+        <option value="" selected>Select a recent...</option>
+        <option v-for="recent in userStore.user.recents" :key="recent.pid" :value="recent.pid">{{ recent.name }}</option>
+      </select>
+
       &nbsp;<input v-model="prospect_id" placeholder="Prospect ID" />
       &nbsp;<button @click="which_tab='PROSP'; prospectStore.getProspect(prospect_id)">Load</button>
     </label>&nbsp;&nbsp;

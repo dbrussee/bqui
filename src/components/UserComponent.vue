@@ -41,6 +41,7 @@ function ts(timestamp = Date.now()) {
 <template>
   <div v-if="userStore.user">
       User: {{userStore.user.id }} ({{ userStore.user.fstnam }} {{ userStore.user.lstnam }})
+      &nbsp;
       <button @click="userStore.logout()">Logout</button>
   </div>
   <div v-else>

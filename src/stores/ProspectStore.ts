@@ -19,8 +19,8 @@ export const appProspectStore = defineStore('appProspectStore', () => {
   })
   const issue = ref<any>({})
 
-  async function getProspect(pid : number | null) {
-    if (pid == null) return
+  async function getProspect(pid : string) {
+    if (pid == '') return
     prospect.value = {}
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect/${pid}`, 'GET')
     if (fetcher.resp != null) {
