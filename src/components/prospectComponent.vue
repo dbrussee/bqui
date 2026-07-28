@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { appUserStore } from '../stores/AppUserStore'
-const userStore = appUserStore()
+import { appProspectStore } from '../stores/ProspectStore'
+const store = appProspectStore()
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ts(timestamp = Date.now()) {
   const date = new Date(timestamp);
 
@@ -39,9 +38,15 @@ function ts(timestamp = Date.now()) {
 </style>
 
 <template>
-  <div v-if="userStore.user">
-      User: {{userStore.user.id }} ({{ userStore.user.fstnam }} {{ userStore.user.lstnam }})
-      <button @click="userStore.logout()">Logout</button>
+  <div v-if="store.prospect.id">
+      Prospect ID: {{ store.prospect.id }} (Subs: {{ store.prospect.subs_estimate }} : {{ store.prospect.group_type }})<br/>
+      Name: {{ store.prospect.name }}<br/>
+      {{ store.prospect.addr1 }}<br/>
+      <span v-if="store.prospect.addr2">{{ store.prospect.addr2 }}<br/></span>
+      {{ store.prospect.city }}, {{ store.prospect.state_cd }}&nbsp; {{ store.prospect.zip_cd }} ({{ store.prospect.county }})<br/>
+      Created By: {{ store.prospect.created_by }} on {{ ts(store.prospect.created_ts) }}<br/>
+      <div v-if="store.prospect.last_quoted_ts">Last Quoted: {{ ts(store.prospect.last_quoted_ts) }}</div>
+      <div v-if="store.prospect.enrolled_ts">Enrolled: {{ ts(store.prospect.enrolled_ts) + ' as ' + store.prospect.grpnum }}</div>
   </div>
   <div v-else>
     <slot/>

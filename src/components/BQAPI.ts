@@ -1,4 +1,4 @@
-import { countersStore } from '../stores/Counters'
+import { countersStore } from '../stores/CountersStore'
 
 export default class BQAPIFetcher {
   private static readonly BASE_URL = 'http://localhost:8080/bqapi/v2.1'
