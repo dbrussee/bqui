@@ -4,7 +4,7 @@ import BQAPIFetcher from '@/components/BQAPI'
 import { ref } from 'vue'
 
 export const appProspectStore = defineStore('appProspectStore', () => {
-  const prospect = ref<any>({})
+  const prospect = ref<any>(null)
   const meta = ref<any>({
     ip: 'UNKNOWN',
     name: 'UNKNOWN',
@@ -25,6 +25,7 @@ export const appProspectStore = defineStore('appProspectStore', () => {
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect/${pid}`, 'GET')
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp as any[]
+      // console.dir(prospect.value)
     }
     meta.value = fetcher.meta
     issue.value = fetcher.issue

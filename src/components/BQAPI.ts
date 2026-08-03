@@ -44,14 +44,9 @@ export default class BQAPIFetcher {
 
       // Wait for the JSON parsing to complete
       const temp = await response.json()
-      // temp.meta = temp.meta
-      // temp.resp = temp.resp
-      // temp.issue = temp.issue
       this.meta = temp.meta
       this.resp = temp.resp
       this.issue = temp.issue
-      // Update internal state (triggers Vue reactivity updates)
-      // this._json.value = data
 
       // Return the same value to the caller
       this.status = 'FETCHED'

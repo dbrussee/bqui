@@ -1,0 +1,86 @@
+:root {
+  --text-color: black;
+  --current-color: black;
+  --current-bgcolor: lightgray;
+  --heading-color: #1e293b;
+  --heading-bgcolor: #93c5f7;
+  --unused_bgcolor: #f1f5f9;
+}
+.current_style {
+  color: var(--current-color);
+  background-color: var(--current-bgcolor);
+  cursor: pointer;
+}
+
+/* Reset defaults and set baseline height */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+p {
+  margin-top: .2rem;
+}
+
+button {
+  padding: 0.05rem .3rem;
+  cursor: pointer;
+}
+/* Grid Layout Definition */
+.page-container {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header  header"
+    "sidebar main"
+    "footer  footer";
+  min-height: 100vh;
+}
+
+/* Assign elements to grid areas */
+.header {
+  grid-area: header;
+  background-color: #1e293b;
+  color: #fff;
+  padding: 1rem 1.5rem;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  background-color: var(--unused_bgcolor);
+  padding: 0;
+  border-right: 1px solid #e2e8f0;
+}
+
+.main-content {
+  grid-area: main;
+  background-color: #ffffff;
+  padding: .3rem;
+}
+
+.footer {
+  grid-area: footer;
+  background-color: #1e293b;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  text-align: left;
+}
+
+/* Responsive collapse for small screens */
+@media (max-width: 768px) {
+  .page-container {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "sidebar"
+      "main"
+      "footer";
+  }
+}

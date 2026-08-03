@@ -63,8 +63,17 @@ export const appUserStore = defineStore('appUserStore', () => {
     user.value = null
     issue.value = null
     meta.value = null
-    // localStorage.removeItem('user')
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function addFaveoriteProspect(pid:number) {
+    const fetcher = await new BQAPIFetcher().callAPI(`/user_favorite/add/${pid}`, "POST")
+    user.value.faves = fetcher.resp
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function removeFavoriteProspect(pid:number) {
+    const fetcher = await new BQAPIFetcher().callAPI(`/user_favorite/remove/${pid}`, "POST")
+    user.value.faves = fetcher.resp
+  }
   return { getOtherUser, login, logout, otherUser, user, meta, issue }
 })
