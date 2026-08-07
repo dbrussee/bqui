@@ -7,7 +7,13 @@ interface IColumn {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formatter?: any;
 }
+const emit = defineEmits(["pick", "dblpick", "hdrclick"]);
 const props = defineProps({
+  heading: {
+    type: String,
+    required: false,
+    default: "",
+  },
   config: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type: Object as () => any,
@@ -48,6 +54,9 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
 </script>
 
 <template>
+  <div v-if="props.heading != ''" class="b-table-heading">
+    {{ props.heading }}
+  </div>
   <div
     :class="props.config.width ? 'b-table-container' : null"
     :style="{
@@ -66,9 +75,10 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
       <tbody>
         <tr v-for="row in props.rows" :key="row">
           <td
-            v-for="col in props.config.columns"
+            v-for="col, cn in props.config.columns"
             :key="col.id"
             :style="deduceTDStyle(col)"
+            @click="emit('pick', row, col, cn)"
             :innerHTML="col.formatter ? col.formatter(row, col, this) : row[col.id]"
           ></td>
         </tr>
@@ -84,6 +94,11 @@ div.b-table-container {
   background-color: var(--unused_bgcolor);
   width: fit-content;
   overscroll-behavior: none;
+}
+div.b-table-heading {
+  padding: 0.2rem 0.5rem;
+  font-style: italic;
+  color: var(--heading-color);
 }
 table {
   border-right: 1px solid var(--heading-color);
@@ -110,5 +125,6 @@ tbody tr td {
   border-bottom: 1px solid black;
   padding: 0.1rem 0.2rem;
   vertical-align: top;
+  cursor: pointer;
 }
 </style>

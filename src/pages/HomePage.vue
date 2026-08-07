@@ -3,7 +3,7 @@ import { appUserStore } from '../stores/AppUserStore'
 const userStore = appUserStore()
 import APIIssue from '@/components/APIIssue.vue'
 import SettingsPage from './SettingsPage.vue'
-
+import LoginPage from './LoginPage.vue'
 import { appPageStore } from '@/stores/PageStore';
 import ProspectsPage from './ProspectsPage.vue'
 import MessagesPage from './MessagesPage.vue'
@@ -16,7 +16,10 @@ const pageStore = appPageStore()
     <MessagesPage v-if="pageStore.page == 'MSGS'" />
     <SettingsPage v-if="pageStore.page == 'SETTINGS'" />
   </div>
-  <APIIssue :issue="userStore.issue"></APIIssue>
+  <div v-else>
+    <LoginPage />
+  </div>
+  <APIIssue v-if="userStore.issue" :issue="userStore.issue"></APIIssue>
 </template>
 
 <style scoped></style>
