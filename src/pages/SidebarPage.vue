@@ -47,8 +47,8 @@ onRenderTriggered(() => {
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
       >Prospect{{ prospectStore.prospect && prospectStore.prospect.id ? ' ID: ' + prospectStore.prospect.id : '' }}<br />
-      <i>- <button popovertarget="recentPopover" class="anchor">Recent</button> <span style="font-size:.8em;">({{ userStore.user.recents ? userStore.user.recents.length : 'none' }})</span></i><br />
-      <i>- <button popovertarget="favesPopover" class="anchor">Faves</button> <span style="font-size:.8em;">({{ userStore.user.faves ? userStore.user.faves.length : 'none' }})</span></i>
+      &nbsp; <i><button popovertarget="recentPopover" class="anchor">Recent</button> <span style="font-size:.8em;">({{ userStore.user.recents ? userStore.user.recents.length : 'none' }})</span></i><br />
+      &nbsp; <i><button popovertarget="favesPopover" class="anchor">Faves</button> <span style="font-size:.8em;">({{ userStore.user.faves ? userStore.user.faves.length : 'none' }})</span></i>
       <div popover id="recentPopover" class="popover">
         <div class="popover-content">
           <BTable

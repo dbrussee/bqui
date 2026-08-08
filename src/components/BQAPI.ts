@@ -7,6 +7,7 @@ export default class BQAPIFetcher {
   public resp: any = {}
   public meta: any = {}
   public issue: any = {}
+  public lastError: any = null
 
   public getStatus(): 'FETCHED' | 'FETCHING' | 'UNUSED' | 'ERROR' {
     return this.status
@@ -56,6 +57,7 @@ export default class BQAPIFetcher {
       counters.apiCalls.success++
       return this
     } catch (error) {
+      this.lastError = error
       this.status = 'ERROR'
 
       try {
