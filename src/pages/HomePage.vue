@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { appUserStore } from '../stores/AppUserStore'
 const userStore = appUserStore()
-import APIIssue from '@/components/APIIssue.vue'
+// import APIIssue from '@/components/APIIssue.vue'
 import SettingsPage from './SettingsPage.vue'
 import LoginPage from './LoginPage.vue'
 import { appPageStore } from '@/stores/PageStore';
 import ProspectsPage from './ProspectsPage.vue'
 import MessagesPage from './MessagesPage.vue'
 const pageStore = appPageStore()
+
+import { countersStore } from "../stores/CountersStore";
+const counters = countersStore();
+
 </script>
 
 <template>
@@ -17,9 +21,9 @@ const pageStore = appPageStore()
     <SettingsPage v-if="pageStore.page == 'SETTINGS'" />
   </div>
   <div v-else>
-    <LoginPage />
+    <LoginPage v-if="counters.apiCalls.active == 0" />
   </div>
-  <APIIssue v-if="userStore.issue" :issue="userStore.issue"></APIIssue>
+  <!-- <APIIssue v-if="userStore.issue" :issue="userStore.issue"></APIIssue> -->
 </template>
 
 <style scoped></style>

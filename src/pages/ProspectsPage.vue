@@ -9,7 +9,7 @@ const prospect_id = ref("");
 </script>
 <template>
   &nbsp;<input v-model="prospect_id" placeholder="Prospect ID" /> &nbsp;<button
-    @click="prospectStore.getProspect(prospect_id)"
+    @click="prospectStore.getProspect(prospect_id, true)"
   >
     Load
   </button>

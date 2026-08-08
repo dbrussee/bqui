@@ -22,7 +22,8 @@ const props = defineProps({
   rows: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type: Array as () => any[],
-    required: true,
+    required: false,
+    default: () => [],
   },
 });
 

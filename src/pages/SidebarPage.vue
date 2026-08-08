@@ -12,12 +12,12 @@ import BTable from "@/components/BTable.vue";
 const pickedFave = ref("");
 const pickedRecent = ref("");
 function pickFave(pid: string) {
-  prospectStore.getProspect(pid);
+  prospectStore.getProspect(pid, true);
   pickedFave.value = "";
   document.getElementById("favesPopover")?.togglePopover();
 }
 function pickRecent(pid: string) {
-  prospectStore.getProspect(pid);
+  prospectStore.getProspect(pid, true);
   pickedRecent.value = "";
   document.getElementById("recentPopover")?.togglePopover();
 }
@@ -47,8 +47,8 @@ onRenderTriggered(() => {
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
       >Prospect{{ prospectStore.prospect && prospectStore.prospect.id ? ' ID: ' + prospectStore.prospect.id : '' }}<br />
-      <i>- <button popovertarget="recentPopover" class="anchor">Recent</button> <span style="font-size:.8em;">({{ userStore.user.recents.length }})</span></i><br />
-      <i>- <button popovertarget="favesPopover" class="anchor">Faves</button> <span style="font-size:.8em;">({{ userStore.user.faves.length }})</span></i>
+      <i>- <button popovertarget="recentPopover" class="anchor">Recent</button> <span style="font-size:.8em;">({{ userStore.user.recents ? userStore.user.recents.length : 'none' }})</span></i><br />
+      <i>- <button popovertarget="favesPopover" class="anchor">Faves</button> <span style="font-size:.8em;">({{ userStore.user.faves ? userStore.user.faves.length : 'none' }})</span></i>
       <div popover id="recentPopover" class="popover">
         <div class="popover-content">
           <BTable

@@ -53,21 +53,12 @@ export const appUserStore = defineStore("appUserStore", () => {
     return user.value;
   }
   async function logout() {
+    if (!user.value) return;
     await new BQAPIFetcher().callAPI(`/logout`, "POST");
     user.value = null;
     issue.value = null;
     meta.value = null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function addFaveoriteProspect(pid: number) {
-    const fetcher = await new BQAPIFetcher().callAPI(`/user_favorite/add/${pid}`, "POST");
-    user.value.faves = fetcher.resp;
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function removeFavoriteProspect(pid: number) {
-    const fetcher = await new BQAPIFetcher().callAPI(`/user_favorite/remove/${pid}`, "POST");
-    user.value.faves = fetcher.resp;
-  }
-  return { getOtherUser, login, logout, otherUser, user, meta, issue };
+  return { getOtherUser, relogin, login, logout, otherUser, user, meta, issue };
 });
