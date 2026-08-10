@@ -21,14 +21,24 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   });
   const issue = ref<any>({});
 
+  async function clearRecents() {
+    const userStore = appUserStore()
+    delete userStore.user.recents
+
+    const fetcher = new BQAPIFetcher()
+    fetcher.callAPI(`/recents`, "DELETE")
+    // meta.value = fetcher.meta
+    // issue.value = fetcher.issue
+
+  }
+
   async function getProspect(pid: string, registerRecent: boolean = false) {
     if (pid == "") return;
     prospect.value = {};
     const fetcher = new BQAPIFetcher()
     await fetcher.callAPI(`/prospect/${pid}`, "GET")
-    if (fetcher.resp != null) {
-      prospect.value = fetcher.resp
-    }
+    if (fetcher.resp == null) return
+    prospect.value = fetcher.resp
     meta.value = fetcher.meta
     issue.value = fetcher.issue
     if (registerRecent) {
@@ -54,5 +64,5 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     }
   }
 
-  return { getProspect, prospect, meta, issue, setFavorite };
+  return { getProspect, clearRecents, prospect, meta, issue, setFavorite };
 });

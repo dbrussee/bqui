@@ -1,9 +1,9 @@
 :root {
   --text-color: black;
   --current-color: black;
-  --current-bgcolor: lightgray;
-  --heading-color: #1e293b;
-  --heading-bgcolor: #93c5f7;
+  --current-bgcolor: lightskyblue;
+  --heading-color: black;
+  --heading-bgcolor: lightskyblue;
   --unused_bgcolor: #f1f5f9;
 }
 .current_style {
@@ -19,6 +19,15 @@
   padding: 0;
 }
 
+ul {
+  padding-left: 1.2em;
+}
+
+ul li {
+  display: list-item; /* Required for bullets to render */
+}
+
+
 body {
   font-family: system-ui, -apple-system, sans-serif;
   min-height: 100vh;
@@ -31,6 +40,14 @@ p {
 button {
   padding: 0.05rem .3rem;
   cursor: pointer;
+}
+sup {
+    font-size: 50%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+    top: -0.25em;
+    left: .2em;
 }
 
 [popover]:popover-open {
@@ -47,8 +64,21 @@ button {
   position-area: bottom span-right;
 }
 [popover]::backdrop {
-  background-color: rgba(0, 0, 0, 0.1);
-  /* backdrop-filter: blur(1px); */
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+div.drop_menu {
+  /* background-color: var(--current-bgcolor); */
+  padding-bottom: .2em;
+  border-bottom: 1px solid black;
+  margin-bottom: .3em;
+}
+
+div.info {
+  color: sienna;
+  font-style: italic;
+  padding-right: .5em;
+  text-align: left;
 }
 
 
@@ -113,10 +143,18 @@ button.anchor {
   background: none;
   border: none;
   color: blue;
-  text-decoration: underline;
   cursor: pointer;
   padding: 0;
   font-size: inherit;
+
+  &:focus,
+  &:active {
+    outline: none;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 /* Responsive collapse for small screens */

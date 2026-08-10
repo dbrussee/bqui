@@ -8,6 +8,8 @@ export const countersStore = defineStore('countersStore', () => {
     success: 0,
     error: 0,
   })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const lastError = ref<any[]>([])
 
-  return { apiCalls }
+  return { apiCalls, lastError }
 })

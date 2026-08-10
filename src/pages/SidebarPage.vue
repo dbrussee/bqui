@@ -5,39 +5,15 @@ const userStore = appUserStore();
 import { appPageStore } from "@/stores/PageStore";
 const pageStore = appPageStore();
 import { appProspectStore } from "@/stores/ProspectStore";
-import { ref, onRenderTriggered } from "vue";
+import { onRenderTriggered } from "vue";
 const prospectStore = appProspectStore();
-import BTable from "@/components/BTable.vue";
-
-const pickedFave = ref("");
-const pickedRecent = ref("");
-function pickFave(pid: string) {
-  prospectStore.getProspect(pid, true);
-  pickedFave.value = "";
-  document.getElementById("favesPopover")?.togglePopover();
-}
-function pickRecent(pid: string) {
-  prospectStore.getProspect(pid, true);
-  pickedRecent.value = "";
-  document.getElementById("recentPopover")?.togglePopover();
-}
-const cfgFaves = {
-  columns: [
-    { id: "pid", heading: "Prosp#", width: "4em", flags: "R" },
-    { id: "name", heading: "Name", width: "20em" },
-  ],
-}
-const cfgRecents = {
-  columns: [
-    { id: "pid", heading: "Prosp#", width: "4em", flags: "R" },
-    { id: "name", heading: "Name", width: "20em" },
-  ],
-}
 
 onRenderTriggered(() => {
-  if (userStore.user) {
+  if (userStore.user && userStore.user.recents) {
     if (userStore.user.recents.length > 0) {
-      prospectStore.getProspect(userStore.user.recents[0].pid);
+      if (!prospectStore.prospect) {
+        prospectStore.getProspect(userStore.user.recents[0].pid);
+      }
     }
   }
 })
@@ -46,27 +22,7 @@ onRenderTriggered(() => {
 <template>
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
-      >Prospect{{ prospectStore.prospect && prospectStore.prospect.id ? ' ID: ' + prospectStore.prospect.id : '' }}<br />
-      &nbsp; <i><button popovertarget="recentPopover" class="anchor">Recent</button> <span style="font-size:.8em;">({{ userStore.user.recents ? userStore.user.recents.length : 'none' }})</span></i><br />
-      &nbsp; <i><button popovertarget="favesPopover" class="anchor">Faves</button> <span style="font-size:.8em;">({{ userStore.user.faves ? userStore.user.faves.length : 'none' }})</span></i>
-      <div popover id="recentPopover" class="popover">
-        <div class="popover-content">
-          <BTable
-            :rows="userStore.user.recents"
-            :config="cfgRecents"
-            @pick="(row: any) => pickRecent(row.pid)"
-          />
-        </div>
-      </div>
-      <div popover id="favesPopover" class="popover">
-        <div class="popover-content">
-          <BTable
-            :rows="userStore.user.faves"
-            :config="cfgFaves"
-            @pick="(row: any) => pickFave(row.pid)"
-          />
-        </div>
-      </div>
+      >Prospect{{ prospectStore.prospect && prospectStore.prospect.id ? ' ID: ' + prospectStore.prospect.id : '' }}
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
       >Messages</SidebarItem

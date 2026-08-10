@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { appUserStore } from "../stores/AppUserStore";
+import UserConfirm from "./UserConfirm.vue";
 const userStore = appUserStore();
 
 </script>
@@ -9,6 +10,6 @@ const userStore = appUserStore();
 <template>
   <div v-if="userStore.user">
     {{ userStore.user.id }} ({{ userStore.user.fstnam }} {{ userStore.user.lstnam }}) &nbsp;
-    <button @click="userStore.logout()">Logout</button>
+    <UserConfirm @confirm="userStore.logout()">Logout&hellip;</UserConfirm>
   </div>
 </template>

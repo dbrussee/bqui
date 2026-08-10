@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { defineStore } from "pinia";
 import BQAPIFetcher from "@/components/BQAPI";
+import { appMessageStore } from "./MessagesStore";
 import { ref } from "vue";
 
 export const appUserStore = defineStore("appUserStore", () => {
@@ -43,6 +44,9 @@ export const appUserStore = defineStore("appUserStore", () => {
     meta.value = fetcher.meta;
     issue.value = fetcher.issue;
 
+    const msgStore = appMessageStore()
+    msgStore.getMessages()
+
     return user.value;
   }
   async function relogin() {
@@ -50,6 +54,10 @@ export const appUserStore = defineStore("appUserStore", () => {
     user.value = fetcher.resp;
     meta.value = fetcher.meta;
     issue.value = fetcher.issue;
+
+    const msgStore = appMessageStore()
+    msgStore.getMessages()
+
     return user.value;
   }
   async function logout() {

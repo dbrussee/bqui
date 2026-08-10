@@ -55,6 +55,7 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
 </script>
 
 <template>
+  <div>
   <div v-if="props.heading != ''" class="b-table-heading">
     {{ props.heading }}
   </div>
@@ -85,6 +86,7 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
         </tr>
       </tbody>
     </table>
+  </div>
   </div>
 </template>
 
