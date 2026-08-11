@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { countersStore } from '../stores/CountersStore'
+import { B } from '@/composables/BUtils'
 export default class BQAPIFetcher {
   private static readonly BASE_URL = 'http://localhost:8080/bqapi/v2.1'
   private status: 'FETCHED' | 'FETCHING' | 'UNUSED' | 'ERROR' = 'UNUSED'
@@ -50,11 +51,13 @@ export default class BQAPIFetcher {
       this.issue = temp.issue
 
       if (this.issue) {
+        // console.dir(this.issue)
         if (this.issue.severity == 'FATAL') {
           let codeLoc = this.issue.className.replace('com.bcnc.bq.', '...')
           codeLoc += "." + this.issue.methodName
           codeLoc += "(" + this.issue.line + ")"
-          const msg = `${codeLoc} : ${this.issue.message}`
+          const stack = "..." + this.issue.stackTrace.join('\n...')
+          const msg = `${codeLoc} : ${this.issue.message}\t${stack}`
           throw new Error(msg)
         }
       }
@@ -65,8 +68,10 @@ export default class BQAPIFetcher {
       counters.apiCalls.success++
       return this
     } catch (error) {
-      const msg = String(error).replace("Error: ", "")
-      counters.lastError.push({path: endpoint, method: method, msg: msg})
+      const msg_list = String(error).replace("Error: ", "").split("\t")
+      const msg = msg_list[0]
+      const stack = msg_list[1]
+      counters.lastError.push({path: endpoint, method: method, msg: msg, stack: stack, ts: B.ts(new Date)})
       this.status = 'ERROR'
 
       try {
@@ -86,9 +91,9 @@ export default class BQAPIFetcher {
       counters.apiCalls.error++
       console.error(`Failed to fetch from ${endpoint}:`, error)
       // this._json.value = null
-      throw error // Re-throw so the calling code knows it failed
+      // throw error // Re-throw so the calling code knows it failed
     }
+    return this
   }
-
 
 }

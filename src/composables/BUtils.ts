@@ -1,6 +1,6 @@
 //export function B() {
 export const B = {
-  ts: (d: string) => {
+  ts: (d: string | Date) => {
     if (!d) return "";
     const date = new Date(d);
 

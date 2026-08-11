@@ -139,7 +139,7 @@ table.form-table {
   }
 }
 
-button.anchor {
+.anchor {
   background: none;
   border: none;
   color: blue;

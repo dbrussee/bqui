@@ -10,9 +10,16 @@ import UserConfirm from "@/components/UserConfirm.vue";
 
 const errsGrid = {
   columns: [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    { id: "ts", heading: "Time", width: "5.5em", flags: "R", formatter: (row:any) => {
+      return row.ts.split(" ")[3]
+    } },
     { id: "method", heading: "Mth", width: "3em", flags: "C" },
     { id: "path", heading: "Path", width: "14em" },
-    { id: "msg", heading: "Message", width: "25em" },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    { id: "msg", heading: "Message", width: "25em", formatter: (row:any) => {
+      return row.msg //+ "<div style='font-size:.8em;'>" + row.stack.replace("\n","<br/>") + "</div>"
+    }},
   ],
 };
 

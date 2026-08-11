@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 interface IColumn {
   id: string;
   flags?: string;
@@ -52,6 +53,14 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
     }
   }
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const renderCell = (row:any, el:HTMLTableCellElement, col:any) => {
+  // renderCell is called twice... first time to render, 2nd to clean up. Need to ignore 2nd call
+  if (!el) return
+  if (!col.formatter) return el.innerHTML = row[col.id]
+  el.innerHTML = col.formatter(row, el)
+}
 </script>
 
 <template>
@@ -76,12 +85,11 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
       </thead>
       <tbody>
         <tr v-for="row in props.rows" :key="row">
-          <td
+          <td :ref="(el:any) => renderCell(row, el, col)"
             v-for="col, cn in props.config.columns"
             :key="col.id"
             :style="deduceTDStyle(col)"
             @click="emit('pick', row, col, cn)"
-            :innerHTML="col.formatter ? col.formatter(row, col, this) : row[col.id]"
           ></td>
         </tr>
       </tbody>
