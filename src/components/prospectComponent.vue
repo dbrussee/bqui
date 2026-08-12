@@ -28,7 +28,7 @@ const isCurrentlyFavorite = () => {
 <template>
   <div v-if="prospectStore.prospect.id">
     Prospect ID: {{ prospectStore.prospect.id }}
-    <InfoBox>
+    <InfoBox class="R2B">
       <ul>
         <li>
           {{ prospectStore.prospect.subs_estimate }}

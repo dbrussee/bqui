@@ -12,7 +12,6 @@ const recentPopover = ref()
 
 const prospect_id = ref("");
 import BTable from "@/components/BTable.vue";
-import UserConfirm from "@/components/UserConfirm.vue";
 import BPopup from "@/components/BPopup.vue";
 
 const pickedFave = ref("");
@@ -35,8 +34,8 @@ function clearRecents() {
 const cfgFaves = {
   columns: [
     { id: "pid", heading: "Prosp#", width: "4em", flags: "R" },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     { id: "name", heading: "Name", width: "20em", formatter: (row:any, td:HTMLTableCellElement) => {
-      if (row.pid == 3) td.style.color = 'red'
       return row.name
     } },
   ],
@@ -47,23 +46,23 @@ const cfgRecents = {
     { id: "name", heading: "Name", width: "20em" },
   ],
 };
+const clearHistoryButton = "Clear History|Are you sure you want to delete history?<p style='color:red;'>It cannot be undone!"
 </script>
 <template>
   <div class="drop_menu">
-    <BPopup as="anchor" linktext="History" ref="recentPopover">
+    <BPopup as="anchor" linktext="History" class="B2R"
+      ref="recentPopover"
+      :buttons="!userStore.user.recents || userStore.user.recents.length == 0 ? '' : clearHistoryButton"
+      @button-clicked="(id) => {
+        if (id == 'Clear History') clearRecents()
+      }">
       <BTable
         :rows="userStore.user.recents"
         :config="cfgRecents"
         @pick="(row: any) => pickRecent(row.pid)"
       />
-      <UserConfirm
-        as_anchor
-        v-if="userStore.user.recents && userStore.user.recents.length > 0"
-        @confirm="clearRecents()"
-        >Clear History&hellip;</UserConfirm
-      >
     </BPopup>&nbsp;
-    <BPopup as="anchor" linktext="Faves" ref="favesPopover">
+    <BPopup as="anchor" linktext="Faves" ref="favesPopover" class="B2R">
       <BTable
         :rows="userStore.user.faves"
         :config="cfgFaves"

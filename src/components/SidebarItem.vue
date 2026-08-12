@@ -9,7 +9,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="content" :class="{'current_style': props.current}">
+  <div class="content" :class="{'current_style': props.current, 'non_current_style': !props.current}">
     <slot />
   </div>
 </template>

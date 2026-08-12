@@ -70,8 +70,8 @@ export default class BQAPIFetcher {
     } catch (error) {
       const msg_list = String(error).replace("Error: ", "").split("\t")
       const msg = msg_list[0]
-      const stack = msg_list[1]
-      counters.lastError.push({path: endpoint, method: method, msg: msg, stack: stack, ts: B.ts(new Date)})
+      const stack = msg_list.length > 1 ? msg_list[1] : ''
+      counters.lastError.unshift({path: endpoint, method: method, msg: msg, stack: stack, ts: B.ts(new Date)})
       this.status = 'ERROR'
 
       try {

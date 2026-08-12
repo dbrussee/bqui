@@ -68,8 +68,7 @@ const renderCell = (row:any, el:HTMLTableCellElement, col:any) => {
   <div v-if="props.heading != ''" class="b-table-heading">
     {{ props.heading }}
   </div>
-  <div
-    :class="props.config.width ? 'b-table-container' : null"
+  <div class="b-table-container"
     :style="{
       height: props.config.height,
       'overflow-y': props.config.height == '' ? 'visible' : 'scroll',
@@ -100,8 +99,6 @@ const renderCell = (row:any, el:HTMLTableCellElement, col:any) => {
 
 <style scoped lang="css">
 div.b-table-container {
-  /* border-top: 1px solid black; */
-  /* border-bottom: 1px solid black; */
   background-color: var(--unused_bgcolor);
   width: fit-content;
   overscroll-behavior: none;
@@ -132,6 +129,7 @@ thead tr th {
   vertical-align: top;
 }
 tbody tr td {
+  line-height: 1.1em;
   border-left: 1px solid black;
   border-bottom: 1px solid black;
   padding: 0.1rem 0.2rem;

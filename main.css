@@ -1,14 +1,20 @@
 :root {
   --text-color: black;
   --current-color: black;
+  --noncurrent-color: midnightblue;
   --current-bgcolor: lightskyblue;
   --heading-color: black;
   --heading-bgcolor: lightskyblue;
-  --unused_bgcolor: #f1f5f9;
+  --unused_bgcolor: snow;
 }
 .current_style {
   color: var(--current-color);
   background-color: var(--current-bgcolor);
+  cursor: pointer;
+}
+.non_current_style {
+  color: var(--noncurrent-color);
+  background-color: transparent;
   cursor: pointer;
 }
 
@@ -137,6 +143,20 @@ table.form-table {
     color: var(--heading-color);
     font-weight: normal;
   }
+}
+
+.spinner {
+  /* position:xx absolute; */
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 3px solid #ccc;
+  border-top-color: #42b883;
+  border-radius: 50%;
+  animation: spinner_spin_keyframes 0.8s linear infinite;
+}
+@keyframes spinner_spin_keyframes {
+  to { transform: rotate(360deg); }
 }
 
 .anchor {

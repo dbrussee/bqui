@@ -3,12 +3,11 @@ import BTable from "@/components/BTable.vue";
 import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
 const gridConfig = {
-  height: "20em",
+  height: "calc(100vh - 8em)",
   columns: [
     { id: "id", heading: "Right Code" },
     { id: "value", heading: "Value", flags: "C", width: "5em" },
-    {
-      id: "source",
+    { id: "source",
       heading: "Source",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
       formatter: (row: any, col: any) => {
