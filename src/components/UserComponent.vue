@@ -8,8 +8,8 @@ const userStore = appUserStore();
 <style scoped></style>
 
 <template>
-  <div v-if="userStore.user">
+  <span v-if="userStore.user">
     {{ userStore.user.id }} ({{ userStore.user.fstnam }} {{ userStore.user.lstnam }}) &nbsp;
-    <UserConfirm class="B2L" @confirm="userStore.logout()" linktext="Logout&hellip;"/>
-  </div>
+    <UserConfirm class="B2L theme_light" @confirm="userStore.logout()" linktext="Logout&hellip;"/>
+  </span>
 </template>

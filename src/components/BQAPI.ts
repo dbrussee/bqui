@@ -8,6 +8,11 @@ export default class BQAPIFetcher {
   public meta: any = {}
   public issue: any = {}
 
+  private static readonly no_user_ok_endpoints:string[] = [
+    "/login",
+    "/logout"
+  ]
+
   public getStatus(): 'FETCHED' | 'FETCHING' | 'UNUSED' | 'ERROR' {
     return this.status
   }
@@ -49,6 +54,12 @@ export default class BQAPIFetcher {
       this.meta = temp.meta
       this.resp = temp.resp
       this.issue = temp.issue
+
+      if (this.meta.username == '') {
+        if (!BQAPIFetcher.no_user_ok_endpoints.includes(endpoint)) {
+          throw new Error("User is not logged in")
+        }
+      }
 
       if (this.issue) {
         // console.dir(this.issue)

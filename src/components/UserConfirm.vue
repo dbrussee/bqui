@@ -62,23 +62,6 @@ function cancel() {
     :linktext="props.linktext"
     ><slot>Are you sure?</slot></BPopup
   >
-  <!-- :as="props.as as string">
-  </BPopup> -->
-  <!-- <button :popovertarget="popid" :class="{anchor: props.as_anchor}"><slot/></button>
-  <div :id="popid" popover>
-    <div v-if="props.title != ''" class="info_title">
-      {{ props.title }}
-    </div>
-    <div class="info">
-      <slot name="content">Are you sure?</slot>
-    </div>
-    <div class="buttonbar">
-      <form @submit.prevent="confirm()">
-      <button v-if="props.cancel_button_text != ''" type="button" :innerHTML="props.cancel_button_text" style="margin-right: .2em;" @click="cancel()"/>
-      <button autofocus type="submit" v-if="props.confirm_button_text != ''" :innerHTML="props.confirm_button_text"/>
-      </form>
-    </div>
-  </div> -->
 </template>
 
 <style lang="css" scoped>

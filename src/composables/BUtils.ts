@@ -3,7 +3,6 @@ export const B = {
   ts: (d: string | Date) => {
     if (!d) return "";
     const date = new Date(d);
-
     const formatter = new Intl.DateTimeFormat("en-US", {
       month: "short",
       day: "2-digit",
@@ -15,7 +14,13 @@ export const B = {
     });
 
     // Break the date down into raw layout tokens
-    const parts = formatter.formatToParts(date);
+    let parts = null
+    try {
+      parts = formatter.formatToParts(date);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch(err) {
+      return d
+    }
     const p = Object.fromEntries(parts.map((item) => [item.type, item.value]));
 
     // Extract the first letter of AM/PM and lowercase it ("AM" -> "a")

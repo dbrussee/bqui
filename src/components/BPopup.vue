@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useId, computed } from 'vue';
 import UserConfirm from './UserConfirm.vue';
+import FA from './FA.vue';
 const popid = useId()
 defineOptions({
   inheritAttrs: false
@@ -14,7 +15,8 @@ const props = defineProps({
   },
   linktext: {
     type: String,
-    required: true,
+    required: false,
+    default: "?"
   },
   width: {
     type: String,
@@ -31,7 +33,7 @@ const props = defineProps({
     required: false,
     default: 'anchor',
     validator(value: string) {
-      return ['anchor', 'button', 'icon'].includes(value);
+      return ['anchor', 'button', 'icon', 'text', 'info'].includes(value);
     }
   },
 })
@@ -98,7 +100,8 @@ function clickButton(id:string):void {
 </script>
 
 <template>
-  <button :popovertarget="popid" :class="{anchor:props.as=='anchor', icon:props.as=='icon'}" :innerHTML="props.linktext"></button>
+  <button v-if="props.as=='info'" :popovertarget="popid" :class="{button_as_info:true}"><FA icon="circle-question"/></button>
+  <button v-else :popovertarget="popid" :class="{anchor:props.as=='anchor', icon:props.as=='icon', button_as_text:props.as=='text'}" :innerHTML="props.linktext"></button>
   <div popover :id="popid" :class="$attrs.class" :style="{'max-width': props.width}">
     <div v-if="props.title != ''" class="info_title">
       <span v-html="props.title" />
@@ -119,6 +122,60 @@ function clickButton(id:string):void {
 <style lang="css" scoped>
 button.anchor:hover span.info_icon {
   text-decoration: none;
+}
+
+button.button_as_text {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+
+    &:focus,
+    &:active {
+      outline: transparent;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+}
+button.button_as_info {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: sienna;
+  padding: 0;
+  font-size: inherit;
+  margin-right: .2em;
+
+    &:focus,
+    &:active {
+      outline: transparent;
+    }
+
+    &:hover {
+      color: dodgerblue;
+    }
+}
+.icon {
+  position: relative;
+  bottom: 0.15em;
+  font-size: .9em;
+  border: 1px solid sienna;
+  padding-left: .25em;
+  padding-right: .25em;
+  border-radius: 50%;
+  color: sienna;
+  background-color: transparent;
+
+  &:hover {
+    background-color: antiquewhite;
+    /* border-color: transparent;
+    color: black;
+    text-decoration: none; */
+  }
 }
 
 div.buttonbar {
@@ -197,30 +254,14 @@ div[popover]::backdrop {
 }
 
 .info_title {
+  color: var(--text-color);
+  font-style: normal;
   padding-bottom: 0.2em;
-  margin-right: .5em;
+  /* margin-right: .5em; */
   border-bottom: 1px solid black;
   margin-bottom: 0.2em;
 }
 
-.icon {
-  position: relative;
-  bottom: 0.15em;
-  font-size: .9em;
-  border: 1px solid sienna;
-  padding-left: .25em;
-  padding-right: .25em;
-  border-radius: 50%;
-  color: sienna;
-  background-color: transparent;
-
-  &:hover {
-    background-color: antiquewhite;
-    /* border-color: transparent;
-    color: black;
-    text-decoration: none; */
-  }
-}
 
 
 </style>

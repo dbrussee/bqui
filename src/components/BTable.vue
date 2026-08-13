@@ -26,7 +26,7 @@ const props = defineProps({
     required: false,
     default: () => [],
   },
-});
+})
 
 const deduceTDStyle = (col: IColumn) => {
   const style = {} as Record<string, string>;

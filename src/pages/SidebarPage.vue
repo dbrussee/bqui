@@ -6,6 +6,7 @@ import { appPageStore } from "@/stores/PageStore";
 const pageStore = appPageStore();
 import { appProspectStore } from "@/stores/ProspectStore";
 import { onRenderTriggered } from "vue";
+import FA from "@/components/FA.vue";
 const prospectStore = appProspectStore();
 
 onRenderTriggered(() => {
@@ -22,13 +23,13 @@ onRenderTriggered(() => {
 <template>
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
-      >Prospect{{ prospectStore.prospect && prospectStore.prospect.id ? ' ID: ' + prospectStore.prospect.id : '' }}
+      ><FA icon='shop' ver="solid" /> Prospect: {{ prospectStore.prospect && prospectStore.prospect.id ? ' ID: ' + prospectStore.prospect.id : ' none' }}
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
-      >Messages</SidebarItem
+      ><FA icon='envelope' /> Messages</SidebarItem
     >
     <SidebarItem @click="pageStore.page = 'SETTINGS'" :current="pageStore.page == 'SETTINGS'"
-      >Settings</SidebarItem
+      ><FA icon='sliders' ver="solid" /> Settings</SidebarItem
     >
   </div>
   <data v-else>
