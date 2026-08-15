@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import FA from "@/components/FA.vue";
 import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
 
@@ -21,12 +22,22 @@ const loginpwd = ref("");
         </tr>
         <tr>
           <td colspan="2" style="text-align: right">
-            <button type="submit">Login</button>
+            <button :disabled="userStore.isLoading" type="submit">Login</button>
           </td>
         </tr>
       </tbody>
     </table>
   </form>
+  <div v-if="userStore.isLoading">
+    Loading...
+  </div>
+  <div v-if="userStore.issue?.severity == 'FATAL'" style="color: maroon;">
+    <FA style="color: red;" icon="bug" ver="solid" /> {{ userStore.issue.message }}
+  </div>
+  <div v-if="userStore.issue?.severity == 'INFO'" style="color: sienna;">
+    <FA style="color: sienna;" icon="circle-exclamation" ver="solid" /> {{ userStore.issue.message }}
+  </div>
+
 </template>
 
 <style lang="css" scoped></style>

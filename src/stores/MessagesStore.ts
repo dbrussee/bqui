@@ -30,5 +30,24 @@ export const appMessageStore = defineStore('appMessageStore', () => {
     return messages.value
   }
 
-  return { getMessages, messages, meta, issue }
+  function unreadCount():number {
+    let count = 0
+    messages.value.forEach((msg) => {
+      if (!msg.readat) count++
+    })
+    return count
+  }
+
+  async function acknowledge(index:number) {
+    const msg = messages.value[index]
+    if (msg.readat != null) return
+    const fetcher = await new BQAPIFetcher().callAPI(`/message/${msg.id}`, 'PUT')
+    if (fetcher.resp != null) {
+      msg.readat = fetcher.resp.readat
+    }
+    meta.value = fetcher.meta
+    issue.value = fetcher.issue
+  }
+
+  return { getMessages, acknowledge, unreadCount, messages, meta, issue }
 })

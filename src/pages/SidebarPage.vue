@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import SidebarItem from "@/components/SidebarItem.vue";
+import { appMessageStore } from "@/stores/MessagesStore";
+const messageStore = appMessageStore()
 import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
 import { appPageStore } from "@/stores/PageStore";
@@ -18,15 +20,32 @@ onRenderTriggered(() => {
     }
   }
 })
+
+function getProspectID():string {
+  if (!prospectStore.prospect) return " none"
+  if (prospectStore.isLoading) return " Loading..."
+  if (prospectStore.prospect.id) return " ID " + prospectStore.prospect.id
+  return ' unknown'
+}
+function getUnreadMessageCounts() {
+  if (messageStore.messages.length == 0) return "none"
+  const unread = messageStore.unreadCount()
+  if (unread > 0) {
+    const unread_msg = "<span style='color: white; background-color: red; border-radius: 50%; padding: 0 .2em;'>" + unread + "</span>"
+    if (unread == messageStore.messages.length) return unread_msg
+    return `${unread_msg} / ${messageStore.messages.length}`
+  }
+  return messageStore.messages.length
+}
 </script>
 
 <template>
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
-      ><FA icon='shop' ver="solid" /> Prospect: {{ prospectStore.prospect && prospectStore.prospect.id ? ' ID: ' + prospectStore.prospect.id : ' none' }}
+      ><FA icon='people-group' ver="solid" /> Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
-      ><FA icon='envelope' /> Messages</SidebarItem
+      ><FA icon='envelope' /> Messages: <span style="font-size: .8em;" v-html="getUnreadMessageCounts()"/></SidebarItem
     >
     <SidebarItem @click="pageStore.page = 'SETTINGS'" :current="pageStore.page == 'SETTINGS'"
       ><FA icon='sliders' ver="solid" /> Settings</SidebarItem

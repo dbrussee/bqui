@@ -20,6 +20,8 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     },
   });
   const issue = ref<any>({});
+  const isLoading = ref<boolean>(false)
+
 
   async function clearRecents() {
     const userStore = appUserStore()
@@ -32,24 +34,34 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
   }
 
-  async function getProspect(pid: string, registerRecent: boolean = false) {
+  function getProspect(pid: string, registerRecent: boolean = false) {
     if (pid == "") return;
     prospect.value = {};
+    issue.value = {}
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/prospect/${pid}`, "GET")
-    if (fetcher.resp == null) return
-    prospect.value = fetcher.resp
-    meta.value = fetcher.meta
-    issue.value = fetcher.issue
-    if (registerRecent) {
-      await fetcher.callAPI('/recents', "GET")
-      if (fetcher.resp) {
-        const userStore = appUserStore()
-        userStore.user.recents = fetcher.resp
+    isLoading.value = true
+    fetcher.callAPI(`/prospect/${pid}`, "GET").then(() => {
+      // Dont wait for recents to be updated
+      // Release the Prospect screen to show data
+      isLoading.value = false
+      meta.value = fetcher.meta
+      issue.value = fetcher.issue
+      // resp is null if not found
+      if (fetcher.resp == null) {
+        return
       }
-    }
-
-    return prospect.value;
+      prospect.value = fetcher.resp
+      // console.dir(prospect.value)
+      if (registerRecent) {
+        fetcher.callAPI('/recents', "GET").then(() => {
+          if (fetcher.resp) {
+            const userStore = appUserStore()
+            userStore.user.recents = fetcher.resp
+          }
+        })
+      }
+    })
+    // return prospect.value;
   }
 
   async function setFavorite(pid: number, isFavorite: boolean = true) {
@@ -64,5 +76,5 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     }
   }
 
-  return { getProspect, clearRecents, prospect, meta, issue, setFavorite };
+  return { isLoading, getProspect, clearRecents, prospect, meta, issue, setFavorite };
 });

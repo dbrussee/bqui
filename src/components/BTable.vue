@@ -58,8 +58,18 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
 const renderCell = (row:any, el:HTMLTableCellElement, col:any) => {
   // renderCell is called twice... first time to render, 2nd to clean up. Need to ignore 2nd call
   if (!el) return
-  if (!col.formatter) return el.innerHTML = row[col.id]
+  if (!col.formatter) return el.innerHTML = getCellValue(row, col)
   el.innerHTML = col.formatter(row, el)
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getCellValue = (row:any, col:any):string => {
+  const dotList:string[] = col.id.split(".")
+  let value = row
+  dotList.forEach(element => {
+    value = value[element]
+  });
+  return value as string
 }
 </script>
 

@@ -2,10 +2,13 @@
   --text-color: black;
   --current-color: black;
   --noncurrent-color: midnightblue;
+  --form-prompt-color: midnightblue;
   --current-bgcolor: lightskyblue;
   --heading-color: black;
   --heading-bgcolor: lightskyblue;
   --unused_bgcolor: snow;
+  --hover_light: blue;
+  --hover_dark: lightskyblue;
 }
 .current_style {
   color: var(--current-color);
@@ -23,6 +26,18 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+.material-symbols-outlined {
+  position: relative;
+  bottom: -.1em;
+  font-size: 1em;
+
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 600,
+  'GRAD' 0,
+  'opsz' 24
 }
 
 ul {
@@ -139,9 +154,13 @@ table.form-table {
   border-collapse: collapse;
   tr th {
     text-align: right;
-    padding-right: 0.5rem;
-    color: var(--heading-color);
+    padding-right: 0.2rem;
+    color: var(--form-prompt-color);
     font-weight: normal;
+    vertical-align: top;
+  }
+  tr td {
+    vertical-align: top;
   }
 }
 
@@ -178,7 +197,7 @@ table.form-table {
 }
 
 /* Responsive collapse for small screens */
-@media (max-width: 768px) {
+@media (max-width: .768px) {
   .page-container {
     grid-template-columns: 1fr;
     grid-template-areas:

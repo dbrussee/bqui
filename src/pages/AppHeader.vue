@@ -9,7 +9,7 @@ import InfoBox from '@/components/InfoBox.vue';
 <template>
   <div class="container">
     <div class="logo-area">
-      BlueQuote
+      <i><b>B</b>lueQuote</i>
     </div>
     <div class="user-area">
       <InfoBox title="This is the logged in user info" v-if="userStore.user" class="B2R">

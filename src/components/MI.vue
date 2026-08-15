@@ -7,7 +7,7 @@ const props = defineProps({
   ver: {
     type: String,
     required: false,
-    default: "regular"
+    default: "material-symbols-outlined"
   },
   hoverstyle: {
     type: String,
@@ -23,11 +23,11 @@ function getClasses() {
   let hover = ''
   if (props.hoverstyle == 'light') hover = ' hoverlight'
   if (props.hoverstyle == 'dark') hover = ' hoverdark'
-  return `fa-${props.ver} fa-${props.icon}` + hover
+  return props.ver + hover
 }
 </script>
 <template>
-  <i :class="getClasses()" aria-hidden="true" @click="emit('click')"/>
+  <span :class="getClasses()" aria-hidden="true" @click="emit('click')" v-html="props.icon"/>
 </template>
 <style lang="css" scoped>
 i.hoverlight:hover {

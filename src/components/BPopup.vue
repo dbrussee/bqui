@@ -33,7 +33,7 @@ const props = defineProps({
     required: false,
     default: 'anchor',
     validator(value: string) {
-      return ['anchor', 'button', 'icon', 'text', 'info'].includes(value);
+      return ['anchor', 'button', 'help', 'icon', 'text', 'info'].includes(value);
     }
   },
 })
@@ -96,17 +96,22 @@ function clickButton(id:string):void {
   emit('buttonClicked', id)
   close()
 }
+function getIcon() {
+  if (props.as == 'help') return "circle-question"
+  if (props.as == 'info') return "lightbulb"
+  return ""
+}
 
 </script>
 
 <template>
-  <button v-if="props.as=='info'" :popovertarget="popid" :class="{button_as_info:true}"><FA icon="circle-question"/></button>
+  <button v-if="getIcon()" :popovertarget="popid" :class="{button_as_info:true}"><FA :icon="getIcon()"/></button>
   <button v-else :popovertarget="popid" :class="{anchor:props.as=='anchor', icon:props.as=='icon', button_as_text:props.as=='text'}" :innerHTML="props.linktext"></button>
   <div popover :id="popid" :class="$attrs.class" :style="{'max-width': props.width}">
     <div v-if="props.title != ''" class="info_title">
-      <span v-html="props.title" />
+      <FA v-if="getIcon()" icon="getIcon()"/> <span v-html="props.title" />
     </div>
-    <slot/>
+    <FA v-if="!props.title && getIcon()" icon="getIcon()"/> <slot/>
     <div v-if="buttonsList.length > 0" class="buttonbar">
       <template v-for="(btn, i) in buttonsList" :key="i">
         <button v-if="btn.confirm == ''" @click="clickButton(btn.id)">{{ btn.text }}</button>
@@ -190,6 +195,8 @@ div.buttonbar {
 }
 div[popover] {
   text-align: left;
+  font-size: 11pt;
+  line-height: 1.3;
 }
 div[popover]:popover-open {
   /* 1. Reset default popover centering styles */
@@ -199,6 +206,7 @@ div[popover]:popover-open {
   border: 1px solid black;
   border-radius: 0.5rem;
   position-area: bottom;
+  box-shadow: 3px 3px 3px gray;
 }
 div.B[popover]:popover-open {
   position-area: bottom;

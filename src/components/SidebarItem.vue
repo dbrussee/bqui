@@ -17,10 +17,15 @@ const props = defineProps({
 <style lang="css">
   .content {
     display: block;
-    padding-top: .2em;
+    padding-top: .3em;
 
-    padding-bottom: .2em;
+    padding-bottom: .3em;
     border-bottom: 1px solid black;
-    padding-left: .2em;
+    padding-left: .3em;
+    border-left: 3px solid transparent;
+
+    &:hover {
+      border-left-color: dodgerblue;
+    }
   }
 </style>

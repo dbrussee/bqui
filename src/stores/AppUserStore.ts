@@ -2,6 +2,7 @@
 import { defineStore } from "pinia";
 import BQAPIFetcher from "@/components/BQAPI";
 import { appMessageStore } from "./MessagesStore";
+import { appProspectStore } from "./ProspectStore";
 import { ref } from "vue";
 
 export const appUserStore = defineStore("appUserStore", () => {
@@ -20,7 +21,8 @@ export const appUserStore = defineStore("appUserStore", () => {
   //     ms: 0,
   //   },
   // })
-  const issue = ref<any>(null);
+  const issue = ref<any>(null)
+  const isLoading = ref<boolean>(false)
 
   initialize();
 
@@ -38,16 +40,19 @@ export const appUserStore = defineStore("appUserStore", () => {
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function login(uid: string, pwd: string = "") {
+    if (uid == "") return
     logout();
-    const fetcher = await new BQAPIFetcher().callAPI(`/login/${uid}`, "POST");
-    user.value = fetcher.resp;
-    meta.value = fetcher.meta;
-    issue.value = fetcher.issue;
+    const fetcher = new BQAPIFetcher()
+    isLoading.value = true
+    fetcher.callAPI(`/login/${uid}`, "POST").then(() => {
+      isLoading.value = false
+      user.value = fetcher.resp;
+      meta.value = fetcher.meta;
+      issue.value = fetcher.issue;
 
-    const msgStore = appMessageStore()
-    msgStore.getMessages()
-
-    return user.value;
+      const msgStore = appMessageStore()
+      msgStore.getMessages()
+    })
   }
   async function relogin() {
     const fetcher = await new BQAPIFetcher().callAPI(`/relogin`, "POST");
@@ -61,6 +66,9 @@ export const appUserStore = defineStore("appUserStore", () => {
     return user.value;
   }
   async function logout() {
+    const prospStore = appProspectStore()
+    prospStore.prospect = null
+
     if (!user.value) return;
     await new BQAPIFetcher().callAPI(`/logout`, "POST");
     user.value = null;
@@ -68,5 +76,5 @@ export const appUserStore = defineStore("appUserStore", () => {
     meta.value = null;
   }
 
-  return { getOtherUser, relogin, login, logout, otherUser, user, meta, issue };
+  return { isLoading, getOtherUser, relogin, login, logout, otherUser, user, meta, issue };
 });

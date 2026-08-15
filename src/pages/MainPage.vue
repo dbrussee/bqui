@@ -8,6 +8,7 @@ const counters = countersStore();
 import BTable from "@/components/BTable.vue";
 import UserConfirm from "@/components/UserConfirm.vue";
 import BPopup from "@/components/BPopup.vue";
+import InfoBox from "@/components/InfoBox.vue";
 
 const errsGrid = {
   height: "15em",
@@ -40,7 +41,14 @@ const errsGrid = {
       <table style="width: 100%">
         <tbody>
           <tr>
-            <td style="text-align: left; width: 10em">v2.0.01</td>
+            <td style="text-align: left; width: 10em">
+              v2.0.270101
+              <InfoBox class="T2R" title="Application Version">
+                <ul>
+                  <li>Main version 2, subver 0</li>
+                  <li>Released: Jan 1, 2027</li>
+                </ul>
+              </InfoBox></td>
             <td style="text-align: center">Something</td>
             <td style="text-align: right; width: 10em">
               <div v-for="i in counters.apiCalls.active" :key="i" class="spinner"></div>&nbsp;
