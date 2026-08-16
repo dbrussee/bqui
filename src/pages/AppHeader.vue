@@ -12,7 +12,7 @@ import InfoBox from '@/components/InfoBox.vue';
       <i><b>B</b>lueQuote</i>
     </div>
     <div class="user-area">
-      <InfoBox title="This is the logged in user info" v-if="userStore.user" class="B2R">
+      <InfoBox title="Logged in user info" v-if="userStore.user" class="B2R">
         <ul>
           <li>ID: {{ userStore.user.id }}</li>
           <li>First Name: {{ userStore.user.fstnam }}</li>

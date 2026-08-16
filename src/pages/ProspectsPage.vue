@@ -50,7 +50,7 @@ const clearHistoryButton = "Clear History|Are you sure you want to delete histor
 </script>
 <template>
   <div class="drop_menu">
-    <BPopup as="anchor" linktext="History" class="B2R"
+    <BPopup as="anchor" linkicon="solid list_" linktext="History" class="B2R"
       ref="recentPopover"
       :buttons="!userStore.user.recents || userStore.user.recents.length == 0 ? '' : clearHistoryButton"
       @button-clicked="(id) => {
@@ -62,7 +62,7 @@ const clearHistoryButton = "Clear History|Are you sure you want to delete histor
         @pick="(row: any) => pickRecent(row.pid)"
       />
     </BPopup>&nbsp;
-    <BPopup as="anchor" linktext="Faves" ref="favesPopover" class="B2R">
+    <BPopup as="anchor" linkicon="regular heart_" linktext="Faves" ref="favesPopover" class="B2R">
       <BTable
         :rows="userStore.user.faves"
         :config="cfgFaves"

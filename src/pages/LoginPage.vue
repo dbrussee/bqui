@@ -32,10 +32,10 @@ const loginpwd = ref("");
     Loading...
   </div>
   <div v-if="userStore.issue?.severity == 'FATAL'" style="color: maroon;">
-    <FA style="color: red;" icon="bug" ver="solid" /> {{ userStore.issue.message }}
+    <FA style="color: red;" icon="solid bug" /> {{ userStore.issue.message }}
   </div>
   <div v-if="userStore.issue?.severity == 'INFO'" style="color: sienna;">
-    <FA style="color: sienna;" icon="circle-exclamation" ver="solid" /> {{ userStore.issue.message }}
+    <FA style="color: sienna;" icon="solid circle-exclamation" /> {{ userStore.issue.message }}
   </div>
 
 </template>

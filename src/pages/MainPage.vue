@@ -4,7 +4,8 @@ import HomePage from "./HomePage.vue";
 import SidebarPage from "./SidebarPage.vue";
 import { countersStore } from "../stores/CountersStore";
 const counters = countersStore();
-// import InfoBox from "@/components/InfoBox.vue";
+import { appStore } from "@/stores/AppStore.ts";
+const app = appStore()
 import BTable from "@/components/BTable.vue";
 import UserConfirm from "@/components/UserConfirm.vue";
 import BPopup from "@/components/BPopup.vue";
@@ -42,11 +43,11 @@ const errsGrid = {
         <tbody>
           <tr>
             <td style="text-align: left; width: 10em">
-              v2.0.270101
+              v{{app.version()}}
               <InfoBox class="T2R" title="Application Version">
                 <ul>
-                  <li>Main version 2, subver 0</li>
-                  <li>Released: Jan 1, 2027</li>
+                  <li>Version: Main {{app.vers.major}}, Minor {{app.vers.minor}}, Sub {{app.vers.sub}}{{app.vers.special}}</li>
+                  <li>{{app.vers.release.getTime() < new Date().getTime() ? 'Released: ' : 'Scheduled Release: '}}{{app.vers.release.toLocaleDateString('en-US')}}</li>
                 </ul>
               </InfoBox></td>
             <td style="text-align: center">Something</td>

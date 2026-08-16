@@ -4,11 +4,6 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  ver: {
-    type: String,
-    required: false,
-    default: "regular"
-  },
   hoverstyle: {
     type: String,
     required: false,
@@ -20,10 +15,34 @@ const props = defineProps({
 })
 const emit = defineEmits(["click"])
 function getClasses() {
-  let hover = ''
-  if (props.hoverstyle == 'light') hover = ' hoverlight'
-  if (props.hoverstyle == 'dark') hover = ' hoverdark'
-  return `fa-${props.ver} fa-${props.icon}` + hover
+  // icon is one of the following formats
+  // icon='name' -> <i class='fa-regular fa-name'/>
+  // icon='solid name' -> <i class='fa-solid fa-name'/>
+  // icon='name_' -> <i class='fa-regular fa-name gapright'/>
+  // icon='_name' -> <i class='fa-regular fa-name gapleft'/>
+  let vers = ""
+  let icon = ""
+  let classes = ""
+  const parts:string[] = props.icon.split(" ")
+  if (parts.length == 1) {
+    vers = "regular"
+    icon = parts[0] as string
+  } else {
+    vers = parts[0] as string
+    icon = parts[1] as string
+  }
+  if (icon.startsWith("_")) {
+    classes += " gapleft"
+    icon = icon.substring(1)
+  }
+  if (icon.endsWith("_")) {
+    classes += " gapright"
+    icon = icon.substring(0, icon.length-1)
+  }
+
+  if (props.hoverstyle == 'light') classes += ' hoverlight'
+  if (props.hoverstyle == 'dark') classes += ' hoverdark'
+  return `fa-${vers.trim().toLowerCase()} fa-${icon.trim().toLowerCase()}` + classes
 }
 </script>
 <template>
@@ -35,5 +54,11 @@ i.hoverlight:hover {
 }
 i.hoverdark:hover {
   color: var(--hover_dark)
+}
+i.gapleft {
+  padding-left: .2em;
+}
+i.gapright {
+  padding-right: .2em;
 }
 </style>

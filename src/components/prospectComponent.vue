@@ -4,8 +4,7 @@ const prospectStore = appProspectStore();
 import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
 import { B } from "@/composables/BUtils";
-// import InfoBox from "./InfoBox.vue";
-import HelpBox from "./HelpBox.vue";
+import InfoBox from "./InfoBox.vue";
 import FA from "./FA.vue";
 
 const fave = (pid: number, isFavorite: boolean) => {
@@ -29,11 +28,11 @@ const isCurrentlyFavorite = () => {
 
 <template>
   <div v-if="prospectStore.prospect.id">
-    <FA icon="heart"
+    <FA :icon="isCurrentlyFavorite() ? 'solid heart' : 'regular heart'"
      @click="fave(prospectStore.prospect.id, !isCurrentlyFavorite())"
-     :ver="isCurrentlyFavorite() ? 'solid' : 'regular'" :style="{cursor: 'pointer', color: isCurrentlyFavorite() ? 'crimson' : 'gray'}" />
+     :style="{cursor: 'pointer', color: isCurrentlyFavorite() ? 'crimson' : 'gray'}" />
     Prospect ID: {{ prospectStore.prospect.id }}
-    <HelpBox class="R2B" title="Prospect Details">
+    <InfoBox class="R2B" title="Prospect Details">
       <ul>
         <li>Agent of Record: {{ prospectStore.prospect.agent_id }}</li>
         <li>Subscribers:
@@ -50,7 +49,7 @@ const isCurrentlyFavorite = () => {
         </ul></li>
         <li v-if="prospectStore.prospect.last_quoted_ts">Last Quoted: {{ B.ts(prospectStore.prospect.last_quoted_ts) }}</li>
         <li v-if="prospectStore.prospect.enrolled_ts">Enrolled: {{ B.ts(prospectStore.prospect.enrolled_ts) + " as " + prospectStore.prospect.grpnum }}</li>
-      </ul> </HelpBox
+      </ul> </InfoBox
     ><br />
     Name: {{ prospectStore.prospect.name }}<br />
     {{ prospectStore.prospect.addr1 }}<br />
@@ -63,10 +62,10 @@ const isCurrentlyFavorite = () => {
       Loading...
     </div>
     <div v-if="prospectStore.issue?.severity == 'FATAL'" style="color: maroon;">
-      <FA style="color: red;" icon="bug" ver="solid" /> {{ prospectStore.issue.message }}
+      <FA style="color: red;" icon="solid bug_" />{{ prospectStore.issue.message }}
     </div>
     <div v-if="prospectStore.issue?.severity == 'INFO'" style="color: sienna;">
-      <FA style="color: sienna;" icon="circle-exclamation" ver="solid" /> {{ prospectStore.issue.message }}
+      <FA style="color: sienna;" icon="solid circle-exclamation_" />{{ prospectStore.issue.message }}
     </div>
   </div>
 </template>

@@ -19,20 +19,24 @@ const reloadMessageList = () => {
 }
 </script>
 <template>
-  <button @click="reloadMessageList()"><FA ver="solid" icon="arrow-rotate-left"/> Reload</button>
-  <br/>
+  <div class="drop_menu">
+    <button class="anchor" @click="reloadMessageList()"><FA icon="circle-down_"/>Reload</button>
+    &nbsp;
+    <button class="anchor"><FA icon="square-plus_"/>New Message</button>
+  </div>
   <div class="msgcontainer">
     <div class="msgitem" v-for="(message, index) in messageStore.messages" :key="index"
       :class="{current_style: currentMessage && currentMessage.id == message.id}"
       @click="showMessage(index)">
-      <FA v-if="message.readat" icon="envelope-open" style="color: green;"></FA>
-      <FA v-else icon="envelope" style="color: maroon;"></FA>
-      {{ message.subject }}</div>
+      <FA
+        :icon="message.readat ? 'envelope-open_' : 'envelope_'"
+        :style="{color: message.readat ? 'green' : 'maroon'}" />{{ message.subject }}
+    </div>
   </div>
   <div v-if="currentMessage" class="message">
     <div style="font-size: .9em; padding-bottom: .3em;">
-      <b><i>{{ currentMessage.subject }}</i></b>
-      <table class="form-table">
+      <b style="margin-bottom: .3em;"><i>{{ currentMessage.subject }}</i></b>
+      <table class="form-table" style="margin-left: 1em;">
         <tbody>
           <!-- <tr>
             <th>Subject:</th>
