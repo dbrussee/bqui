@@ -23,7 +23,12 @@ function getClasses() {
   let vers = ""
   let icon = ""
   let classes = ""
-  const parts:string[] = props.icon.split(" ")
+  let parts:string[] = []
+  try {
+    parts = props.icon.split(" ")
+  } catch(e) {
+    console.error(e)
+  }
   if (parts.length == 1) {
     vers = "regular"
     icon = parts[0] as string

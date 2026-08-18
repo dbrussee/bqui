@@ -19,10 +19,25 @@ export const appMessageStore = defineStore('appMessageStore', () => {
   })
   const issue = ref<any>({})
 
+  async function sendNewMessage(sendto:string, subject:string, message:string) {
+    const msgBody = {
+      sendto: sendto,
+      subject: subject,
+      message: message
+    }
+    const fetcher = await new BQAPIFetcher().callAPI(`/message`, 'POST', msgBody)
+    if (fetcher.resp != null) {
+      messages.value.unshift(fetcher.resp as any)
+    }
+    meta.value = fetcher.meta
+    issue.value = fetcher.issue
+  }
+
   async function getMessages() {
     messages.value.length = 0
     const fetcher = await new BQAPIFetcher().callAPI(`/messages`, 'GET')
     if (fetcher.resp != null) {
+      messages.value.length = 0
       messages.value.push(...(fetcher.resp as any[]))
     }
     meta.value = fetcher.meta
@@ -49,5 +64,5 @@ export const appMessageStore = defineStore('appMessageStore', () => {
     issue.value = fetcher.issue
   }
 
-  return { getMessages, acknowledge, unreadCount, messages, meta, issue }
+  return { getMessages, acknowledge, unreadCount, sendNewMessage, messages, meta, issue }
 })

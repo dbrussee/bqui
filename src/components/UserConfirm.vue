@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { useId } from "vue";
 import BPopup from "./BPopup.vue";
@@ -38,8 +39,8 @@ const props = defineProps({
   },
 });
 
-function clickButton(btn: string) {
-  if (btn == props.confirm_button_text) {
+function clickButton(btn:any) {
+  if (btn.text == props.confirm_button_text) {
     confirm();
   } else {
     cancel();
@@ -57,7 +58,10 @@ function cancel() {
     :id="popid"
     :class="$attrs.class"
     :as="props.as"
-    :buttons="props.confirm_button_text + ',' + props.cancel_button_text"
+    :buttons="[
+      {text: props.confirm_button_text},
+      {text: props.cancel_button_text}
+    ]"
     @button-clicked="clickButton($event)"
     :linktext="props.linktext"
     ><slot>Are you sure?</slot></BPopup

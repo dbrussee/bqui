@@ -5,8 +5,10 @@ import { B } from "@/composables/BUtils";
 import { ref } from "vue";
 import { appMessageStore } from "../stores/MessagesStore";
 import FA from "@/components/FA.vue";
+import BPopup from "@/components/BPopup.vue";
 const messageStore = appMessageStore();
 
+const newMessagePopup = ref()
 const currentMessage = ref<any>(null)
 const showMessage = (index:number) => {
   currentMessage.value = messageStore.messages[index]
@@ -17,12 +19,37 @@ const reloadMessageList = () => {
   currentMessage.value = null
   messageStore.getMessages()
 }
+
+const newMessage = ref({
+  sendto: "",
+  subject: "",
+  body: ""
+})
 </script>
 <template>
   <div class="drop_menu">
     <button class="anchor" @click="reloadMessageList()"><FA icon="circle-down_"/>Reload</button>
     &nbsp;
-    <button class="anchor"><FA icon="square-plus_"/>New Message</button>
+    <BPopup ref="newMessagePopup" title="New Internal Message" class="B2R" manual
+      linkicon="square-plus_" linktext="New Message"
+      :buttons="[
+        {icon:'solid x', text:'Cancel', iconcolor: 'red', class:'anchor', action:() => true},
+        {icon:'solid share', text:'Send', class:'modern', action:() => {
+          if (newMessage.sendto == '') return false
+          if (newMessage.body == '') return false
+          messageStore.sendNewMessage(newMessage.sendto, newMessage.subject, newMessage.body)
+          return true
+        }}
+      ]"
+      >
+      <table class="form-table">
+        <tbody>
+          <tr><th>Send To:</th><td><input v-model="newMessage.sendto"></td></tr>
+          <tr><th>Subject:</th><td><input style="width: 30em;" v-model="newMessage.subject"></td></tr>
+          <tr><th>Message:</th><td><textarea style="width: 30em; height: 6em;" v-model="newMessage.body"></textarea></td></tr>
+        </tbody>
+      </table>
+    </BPopup>
   </div>
   <div class="msgcontainer">
     <div class="msgitem" v-for="(message, index) in messageStore.messages" :key="index"
@@ -47,7 +74,7 @@ const reloadMessageList = () => {
             <td>{{ currentMessage.sender.id }}
                 ({{ (currentMessage.sender.fstnam + ' ' + currentMessage.sender.lstnam).trim() }})</td>
           </tr>
-          <tr>
+          <tr v-if="currentMessage.sentat">
             <th>Sent:</th>
             <td>{{ B.ts(currentMessage.sentat) }}</td>
           </tr>
@@ -59,7 +86,7 @@ const reloadMessageList = () => {
       </table>
     </div>
     <hr/>
-    <p>{{ currentMessage.msgtxt }}</p>
+    <pre><p>{{ currentMessage.msgtxt }}</p></pre>
     <!-- <p>{{ JSON.stringify(currentMessage) }}</p> -->
   </div>
   <div v-else class="message info">

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 
-interface IColumn {
-  id: string;
-  flags?: string;
-  heading: string;
-  width?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  formatter?: any;
-}
+// interface IColumn {
+//   id: string;
+//   flags?: string;
+//   heading: string;
+//   width?: string;
+//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   formatter?: any;
+// }
 const emit = defineEmits(["pick", "dblpick", "hdrclick"]);
 const props = defineProps({
   heading: {
@@ -28,53 +28,16 @@ const props = defineProps({
   },
 })
 
-const deduceTDStyle = (col: IColumn) => {
-  const style = {} as Record<string, string>;
-  deduceJustification(style, col);
-  return style;
-};
-const deduceTHStyle = (col: IColumn) => {
-  const style = {} as Record<string, string>;
-  deduceJustification(style, col);
-  if (col.width) {
-    style.width = col.width;
-  }
-  return style;
-};
-
-const deduceJustification = (style: Record<string, string>, col: IColumn) => {
-  if (col.flags) {
-    if (col.flags.includes("R")) {
-      style.textAlign = "right";
-    } else if (col.flags.includes("C")) {
-      style.textAlign = "center";
-    } else {
-      style.textAlign = "left";
-    }
-  }
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const renderCell = (row:any, el:HTMLTableCellElement, col:any) => {
+const renderCell = (row:any, el:HTMLTableCellElement) => {
   // renderCell is called twice... first time to render, 2nd to clean up. Need to ignore 2nd call
   if (!el) return
-  if (col.formatter) {
-    el.innerHTML = col.formatter(row, el)
-  } else {
-    el.innerHTML = getCellValue(row, col)
-  }
+  if (!props.config.formatter) return el.innerHTML = row
+  el.innerHTML = props.config.formatter(row, el)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getCellValue = (row:any, col:any):string => {
-  if (typeof row == 'string') return row
-  const dotList:string[] = col.id.split(".")
-  let value = row
-  dotList.forEach(element => {
-    value = value[element]
-  });
-  return value as string
-}
+console.dir(props.rows)
+
 </script>
 
 <template>
@@ -88,21 +51,18 @@ const getCellValue = (row:any, col:any):string => {
       'overflow-y': props.config.height == '' ? 'visible' : 'scroll',
     }"
   >
-    <table :style="{ width: props.config.width }">
+    <table :style="{ minWidth: props.config.width }">
       <thead>
         <tr>
-          <th v-for="col in props.config.columns" :key="col.id" :style="deduceTHStyle(col)">
-            {{ col.heading }}
+          <th style="text-align: left; font-weight: normal;">
+            {{ props.config.heading }}
           </th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="row in props.rows" :key="row">
-          <td :ref="(el:any) => renderCell(row, el, col)"
-            v-for="col, cn in props.config.columns"
-            :key="col.id"
-            :style="deduceTDStyle(col)"
-            @click="emit('pick', row, col, cn)"
+          <td :ref="(el:any) => renderCell(row, el)"
+            @click="emit('pick', row)"
           ></td>
         </tr>
       </tbody>

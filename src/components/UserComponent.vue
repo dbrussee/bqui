@@ -10,6 +10,8 @@ const userStore = appUserStore();
 <template>
   <span v-if="userStore.user">
     {{ userStore.user.id }} ({{ userStore.user.fstnam }} {{ userStore.user.lstnam }}) &nbsp;
-    <UserConfirm class="B2L theme_light" @confirm="userStore.logout()" linktext="Logout&hellip;"/>
+    <UserConfirm class="B2L theme_light" @confirm="userStore.logout()" linktext="Logout&hellip;">
+      Log out as '{{ userStore.user.id }}'?
+    </UserConfirm>
   </span>
 </template>

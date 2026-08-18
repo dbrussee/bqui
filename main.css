@@ -62,6 +62,21 @@ button {
   padding: 0.05rem .3rem;
   cursor: pointer;
 }
+button.modern {
+  padding: .3rem;
+  color: oklch(0.99 0 0);
+  background-color: oklch(0.6 0.25 250);
+  border: none;
+  /* border-radius: .2em; */
+  &:hover {
+    background-color: oklch(0.5 0.25 250);
+  }
+}
+pre {
+  white-space: pre-wrap;       /* Triggers natural word wrapping */
+  overflow-wrap: break-word;   /* Safely breaks un-spaced URLs or massive words */
+}
+
 sup {
     font-size: 50%;
     line-height: 0;
@@ -95,11 +110,14 @@ div.drop_menu {
   margin-bottom: .3em;
 }
 
-div.info {
+.info {
   color: sienna;
   font-style: italic;
   padding-right: .5em;
   text-align: left;
+}
+input::placeholder {
+  color: silver;
 }
 
 
@@ -161,6 +179,23 @@ table.form-table {
   }
   tr td {
     vertical-align: top;
+
+    textarea {
+      height: 5em;
+      width: 25em;
+    }
+    input, textarea {
+      outline: none;
+      border: 1px solid gray;
+      margin-bottom: .2em;
+      padding: .2em;
+      &:active, &:focus {
+        inset: unset;
+        background-color: snow;
+        border-style: solid;
+        border-color: blue;
+      }
+    }
   }
 }
 

@@ -31,6 +31,8 @@ export default class BQAPIFetcher {
   ): Promise<BQAPIFetcher> {
     const counters = countersStore()
 
+    console.log(method, endpoint)
+
     counters.apiCalls.total++
     counters.apiCalls.active++
     if (!endpoint.startsWith('/')) endpoint = `/${endpoint}` // Ensure the endpoint starts with a slash

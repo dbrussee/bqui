@@ -44,15 +44,15 @@ const errsGrid = {
           <tr>
             <td style="text-align: left; width: 10em">
               v{{app.version()}}
-              <InfoBox class="T2R" title="Application Version">
+              <InfoBox class="T2R" :title="'Application Ver ' + app.version()">
                 <ul>
-                  <li>Version: Main {{app.vers.major}}, Minor {{app.vers.minor}}, Sub {{app.vers.sub}}{{app.vers.special}}</li>
+                  <li>Ver: {{ app.versionDescription() }}</li>
                   <li>{{app.vers.release.getTime() < new Date().getTime() ? 'Released: ' : 'Scheduled Release: '}}{{app.vers.release.toLocaleDateString('en-US')}}</li>
                 </ul>
               </InfoBox></td>
             <td style="text-align: center">Something</td>
             <td style="text-align: right; width: 10em">
-              <div v-for="i in counters.apiCalls.active" :key="i" class="spinner"></div>&nbsp;
+              <div v-if="counters.apiCalls.active > 0" class="spinner"></div>{{counters.apiCalls.active > 1 ? ':' + counters.apiCalls.active : ''}}&nbsp;
               <!-- {{ "⏸️".repeat(counters.apiCalls.active) }} -->
               <span v-if="counters.apiCalls.error > 0">
                 <BPopup v-if="counters.apiCalls.error > 0" linktext="❌" class="TL">

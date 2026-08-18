@@ -51,7 +51,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         return
       }
       prospect.value = fetcher.resp
-      // console.dir(prospect.value)
+      // console.log(JSON.stringify(prospect.value, null, 2))
       if (registerRecent) {
         fetcher.callAPI('/recents', "GET").then(() => {
           if (fetcher.resp) {
@@ -76,5 +76,37 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     }
   }
 
-  return { isLoading, getProspect, clearRecents, prospect, meta, issue, setFavorite };
+  async function createProspect(data:any) {
+    const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'POST', data)
+    if (fetcher.resp != null) {
+      prospect.value = fetcher.resp
+
+      const userStore = appUserStore()
+      if (!userStore.user.recents) userStore.user.recents = []
+      userStore.user.recents.unshift({pid: prospect.value.id, name: prospect.value.name})
+    }
+    meta.value = fetcher.meta
+    issue.value = fetcher.issue
+  }
+  async function updateProspect(data:any) {
+    const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'PUT', data)
+    if (fetcher.resp != null) {
+      prospect.value = fetcher.resp
+
+      const userStore = appUserStore()
+      userStore.user.recents[0].name = prospect.value.name
+      // console.dir(userStore.user.faves)
+      userStore.user.faves.forEach((fave:any) => {
+        if (fave.pid == prospect.value.id) {
+          fave.name = prospect.value.name
+        }
+      })
+
+    }
+    meta.value = fetcher.meta
+    issue.value = fetcher.issue
+  }
+
+
+  return { isLoading, createProspect, updateProspect, getProspect, clearRecents, prospect, meta, issue, setFavorite };
 });
