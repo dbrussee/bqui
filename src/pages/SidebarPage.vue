@@ -42,7 +42,10 @@ function getUnreadMessageCounts() {
 <template>
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
-      ><FA icon='solid people-group_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
+      ><FA icon='building_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
+    </SidebarItem>
+    <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
+      ><FA icon='solid people-group_' />Census<span style='font-size: .8em;'></span>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
       ><FA icon='envelope_' />Messages: <span style="font-size: .8em;" v-html="getUnreadMessageCounts()"/></SidebarItem

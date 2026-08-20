@@ -185,7 +185,7 @@ input::placeholder {
 
 .sidebar {
   grid-area: sidebar;
-  background-color: var(--unused_bgcolor);
+  background-color: gainsboro;
   padding: 0;
   border-right: 1px solid #e2e8f0;
 }

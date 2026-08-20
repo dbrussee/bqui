@@ -80,8 +80,6 @@ const prospHandler = ref({
   }
 })
 
-const whichTab = ref("QUOTES")
-
 </script>
 <template>
   <div class="drop_menu">
@@ -118,14 +116,7 @@ const whichTab = ref("QUOTES")
   </div>
   <ProspectComponent v-if="prospectStore.prospect" />
 
-  <div class="drop_menu" style="margin-top: .7em;">
-    <FA clickable @click="whichTab='QUOTES'" :as="whichTab == 'QUOTES' ? 'tab-current' : 'tab'" icon="solid coins_">Quotes</FA>&nbsp;
-    <FA clickable @click="whichTab='CENSUS'" :as="whichTab == 'CENSUS' ? 'tab-current' : 'tab'" icon="solid people-group_">Census</FA>
-  </div>
-  <QuoteListComponent v-if="prospectStore.prospect && whichTab=='QUOTES'" width="calc(100vw - 200px - 2em)" height="calc(100vh - 17em)" style="margin-top: .5em;"/>
-  <div v-if="prospectStore.prospect && whichTab=='CENSUS'">
-    This is where the Census will display
-  </div>
+  <QuoteListComponent v-if="prospectStore.prospect" width="calc(100vw - 200px - 2em)" height="calc(100vh - 15em)" style="margin-top: .5em;"/>
 
   <dialog :id="prospHandler.id">
     <div class="titlebar">New Prospect</div>

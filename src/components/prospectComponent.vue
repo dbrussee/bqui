@@ -79,7 +79,7 @@ const prospectCSZ = (prosp:any) => {
     &nbsp;&nbsp;&nbsp;
     <FA tt="Set / Unset Favorite" :icon="isCurrentlyFavorite() ? 'solid heart_' : 'regular heart_'" clickable
       @click="fave(prospectStore.prospect.id, !isCurrentlyFavorite())"
-      :style="{color: isCurrentlyFavorite() ? 'crimson' : 'gray'}"/>
+      :color="isCurrentlyFavorite() ? 'darkred' : 'gray'"/>
     <p />
     <div style="display: flex; align-items: flex-start;">
     <table class="form-table">
