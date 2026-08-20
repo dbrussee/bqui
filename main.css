@@ -1,3 +1,15 @@
+/* Grid Layout Definition */
+.page-container {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: auto 1fr 2em;
+  grid-template-areas:
+    "header  header"
+    "sidebar main"
+    "footer  footer";
+  min-height: 100vh;
+}
+
 :root {
   --text-color: black;
   --current-color: black;
@@ -9,6 +21,8 @@
   --unused_bgcolor: snow;
   --hover_light: blue;
   --hover_dark: lightskyblue;
+  --action-button-color: #ffffff;
+  --action-button-bgcolor: #ff5a1f;
 }
 .current_style {
   color: var(--current-color);
@@ -26,6 +40,35 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+dialog {
+  padding: .5em;
+  border-radius: .3em;
+  box-shadow: .3em .3em .3em gray;
+
+  div.titlebar {
+    color: var(--form-prompt-color);
+    font-size: 1.2em;
+    font-style: normal;
+    padding-bottom: 0.2em;
+    /* margin-right: .5em; */
+    border-bottom: 1px solid var(--form-prompt-color);
+    margin-bottom: 0.2em;
+  }
+}
+dialog:modal {
+  margin: auto;
+}
+div.buttonbar {
+  padding-top: .3em;
+  border-top: 1px solid var(--form-prompt-color);
+  /* padding-right: .5em; */
+  margin-top: .3em;
+  text-align: right;
+  width: 100%;
+  button {
+    margin-left: 3px;
+  }
 }
 
 .material-symbols-outlined {
@@ -70,6 +113,16 @@ button.modern {
   /* border-radius: .2em; */
   &:hover {
     background-color: oklch(0.5 0.25 250);
+  }
+}
+button.action {
+  padding: .3rem;
+  color: white;
+  background-color: salmon;
+  border: none;
+  &:hover {
+    color: var(--action-button-color);
+    background-color: var(--action-button-bgcolor);
   }
 }
 pre {
@@ -121,17 +174,6 @@ input::placeholder {
 }
 
 
-/* Grid Layout Definition */
-.page-container {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  grid-template-rows: auto 1fr 2em;
-  grid-template-areas:
-    "header  header"
-    "sidebar main"
-    "footer  footer";
-  min-height: 100vh;
-}
 
 /* Assign elements to grid areas */
 .header {
@@ -232,7 +274,7 @@ table.form-table {
 }
 
 /* Responsive collapse for small screens */
-@media (max-width: .768px) {
+/* @media (max-width: 768px) {
   .page-container {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -241,4 +283,4 @@ table.form-table {
       "main"
       "footer";
   }
-}
+} */

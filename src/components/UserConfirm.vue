@@ -27,11 +27,6 @@ const props = defineProps({
     required: false,
     default: "Confirm",
   },
-  cancel_button_text: {
-    type: String,
-    required: false,
-    default: "",
-  },
   title: {
     type: String,
     required: false,
@@ -39,19 +34,6 @@ const props = defineProps({
   },
 });
 
-function clickButton(btn:any) {
-  if (btn.text == props.confirm_button_text) {
-    confirm();
-  } else {
-    cancel();
-  }
-}
-function confirm() {
-  emit("confirm");
-}
-function cancel() {
-  // document.getElementById(popid)?.close();
-}
 </script>
 <template>
   <BPopup
@@ -59,31 +41,21 @@ function cancel() {
     :class="$attrs.class"
     :as="props.as"
     :buttons="[
-      {text: props.confirm_button_text},
-      {text: props.cancel_button_text}
+      {text: props.confirm_button_text, action: () => emit('confirm')}
     ]"
-    @button-clicked="clickButton($event)"
     :linktext="props.linktext"
     ><slot>Are you sure?</slot></BPopup
   >
 </template>
 
 <style lang="css" scoped>
-.buttonbar {
-  padding-top: 0.3em;
-  padding-right: 0.5em;
-  /* border-top: 1px solid black; */
-  margin-top: 0.3em;
-  text-align: right;
-}
-[popover]:popover-open {
+/* [popover]:popover-open {
   position-area: left;
-}
-.info_title {
+} */
+/* .info_title {
   padding-bottom: 0.2em;
   margin-right: 0.5em;
   border-bottom: 1px solid black;
   margin-bottom: 0.2em;
-  /* margin-right: .5em; */
-}
+} */
 </style>

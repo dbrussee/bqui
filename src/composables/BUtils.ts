@@ -1,5 +1,23 @@
 //export function B() {
 export const B = {
+  effdat: (d: string | Date) => {
+    if (!d) return "";
+    const date = new Date(d);
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      year: "numeric",
+    });
+    let parts = null
+    try {
+      parts = formatter.formatToParts(date);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch(err) {
+      return d
+    }
+    const p = Object.fromEntries(parts.map((item) => [item.type, item.value]));
+    const finalString = `${p.month} ${p.year}`;
+    return finalString;
+  },
   ts: (d: string | Date) => {
     if (!d) return "";
     const date = new Date(d);

@@ -37,7 +37,6 @@ const loginpwd = ref("");
   <div v-if="userStore.issue?.severity == 'INFO'" style="color: sienna;">
     <FA style="color: sienna;" icon="solid circle-exclamation" /> {{ userStore.issue.message }}
   </div>
-
 </template>
 
 <style lang="css" scoped></style>

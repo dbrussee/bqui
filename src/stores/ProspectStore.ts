@@ -7,6 +7,7 @@ import { appUserStore } from "./AppUserStore";
 
 export const appProspectStore = defineStore("appProspectStore", () => {
   const prospect = ref<any>(null);
+  const quotes = ref<any[]>([])
   const meta = ref<any>({
     ip: "UNKNOWN",
     name: "UNKNOWN",
@@ -50,7 +51,8 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       if (fetcher.resp == null) {
         return
       }
-      prospect.value = fetcher.resp
+      prospect.value = fetcher.resp.prosp
+      quotes.value = fetcher.resp.quotes
       // console.log(JSON.stringify(prospect.value, null, 2))
       if (registerRecent) {
         fetcher.callAPI('/recents', "GET").then(() => {
@@ -66,7 +68,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
   async function setFavorite(pid: number, isFavorite: boolean = true) {
     const fetcher = await new BQAPIFetcher().callAPI(
-      `/user_favorite/${pid}`,
+      `/favorite/${pid}`,
       isFavorite ? "POST" : "DELETE",
     );
     if (fetcher.resp != null) {
@@ -79,7 +81,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   async function createProspect(data:any) {
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'POST', data)
     if (fetcher.resp != null) {
-      prospect.value = fetcher.resp
+      prospect.value = fetcher.resp.prosp
 
       const userStore = appUserStore()
       if (!userStore.user.recents) userStore.user.recents = []
@@ -91,7 +93,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   async function updateProspect(data:any) {
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'PUT', data)
     if (fetcher.resp != null) {
-      prospect.value = fetcher.resp
+      prospect.value = fetcher.resp.prosp
 
       const userStore = appUserStore()
       userStore.user.recents[0].name = prospect.value.name
@@ -108,5 +110,5 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
 
 
-  return { isLoading, createProspect, updateProspect, getProspect, clearRecents, prospect, meta, issue, setFavorite };
+  return { isLoading, createProspect, updateProspect, getProspect, clearRecents, prospect, quotes, meta, issue, setFavorite };
 });

@@ -31,7 +31,7 @@ const newMessage = ref({
     <button class="anchor" @click="reloadMessageList()"><FA icon="circle-down_"/>Reload</button>
     &nbsp;
     <BPopup ref="newMessagePopup" title="New Internal Message" class="B2R" manual
-      linkicon="square-plus_" linktext="New Message"
+      linkicon="square-plus_" linktext="New"
       :buttons="[
         {icon:'solid x', text:'Cancel', iconcolor: 'red', class:'anchor', action:() => true},
         {icon:'solid share', text:'Send', class:'modern', action:() => {

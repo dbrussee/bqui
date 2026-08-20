@@ -1,9 +1,10 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, useId } from "vue";
 import { appProspectStore } from "@/stores/ProspectStore";
 const prospectStore = appProspectStore();
-import ProspectComponent from "@/components/prospectComponent.vue";
+import ProspectComponent from "@/components/ProspectComponent.vue";
+import FA from "@/components/FA.vue";
 import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
 
@@ -13,6 +14,7 @@ const recentPopover = ref()
 const prospect_id = ref("");
 import BTable from "@/components/BTable.vue";
 import BPopup from "@/components/BPopup.vue";
+import QuoteListComponent from "@/components/QuoteListComponent.vue";
 
 const pickedFave = ref("");
 const pickedRecent = ref("");
@@ -46,35 +48,39 @@ const cfgRecents = {
     { id: "name", heading: "Name", width: "20em" },
   ],
 };
-const prospdata = ref({
-  id: -1,
-  grpnum: null,
-  name: "",
-  dba: null,
-  group_type: "",
-  agent_id: "",
-  addr1: "",
-  addr2: "",
-  city: "",
-  state_cd: "NC",
-  zip_cd: "",
-  county: null,
-  size_cd: "",
-  subs_estimate: 1,
-  created_ts: "",
-  created_by: "",
-  last_quoted_ts: null,
-  enrolled_ts: null,
-  contact: "",
-  phone: "",
-  email: "",
-  enroll_date: (() => {
-    const d = new Date()
-    d.setMonth(d.getMonth() + 3)
-    d.setDate(1)
-    return d.toLocaleDateString()
-  })()
+
+const prospHandler = ref({
+  id: useId(),
+  temp: {
+    id: -1, grpnum: null, name: "", dba: null, agent_id: "",
+    addr1: "", addr2: "", city: "", state_cd: "NC", zip_cd: "", county: null,
+    size_cd: "", group_type: "", subs_estimate: 1,
+    created_ts: "", created_by: "",
+    last_quoted_ts: null, enrolled_ts: null,
+    contact: "", phone: "", email: "",
+    enroll_date: (() => {
+      const d = new Date()
+      d.setMonth(d.getMonth() + 3)
+      d.setDate(1)
+      return d.toLocaleDateString()
+    })()
+  } as any,
+  edit: () => {
+    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
+    popup?.showModal()
+  },
+  save: () => {
+    prospectStore.createProspect(prospHandler.value.temp)
+    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
+    popup?.close()
+  },
+  abort: () => {
+    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
+    popup?.close()
+  }
 })
+
+const whichTab = ref("QUOTES")
 
 </script>
 <template>
@@ -84,12 +90,10 @@ const prospdata = ref({
       :buttons="[
         {
           text: (!userStore.user.recents || userStore.user.recents.length == 0 ? '' : 'Clear History'),
+          action: () => clearRecents(),
           confirm: `Are you sure you want to delete history?<p style='color:red;'>It cannot be undone!`
         }
-      ]"
-      @button-clicked="(btn) => {
-        if (btn.text == 'Clear History') clearRecents()
-      }">
+      ]">
       <BTable
         :rows="userStore.user.recents"
         :config="cfgRecents"
@@ -103,6 +107,7 @@ const prospdata = ref({
         @pick="(row: any) => pickFave(row.pid)"
       />
     </BPopup>&nbsp;
+    <FA clickable @click="prospHandler.edit()" icon="square-plus_" >New</FA>&nbsp;
     <form
       style="display: inline-block"
       @submit.prevent="prospectStore.getProspect(prospect_id, true)"
@@ -110,37 +115,44 @@ const prospdata = ref({
       &nbsp;<input v-model="prospect_id" size="8" placeholder="Prosp #" />
       <button type="submit">Load</button>
     </form>&nbsp;
-    <BPopup ref="newProspectPopup" title="New Prospect" class="CENTER" manual
-      linkicon="square-plus_" linktext="New"
-      :buttons="[
-        {icon:'solid x', text:'Cancel', class:'anchor', iconcolor: 'red', action:() => true},
-        {icon:'solid users', text:'Create Prospect', class:'modern', action:() => {
-          if (prospdata.name == '') return false
-          prospectStore.createProspect(prospdata)
-          return true
-        }}
-      ]"
-      >
-      <table class="form-table">
-        <tbody>
-          <tr><th>Group Name:</th><td><input style="width: 30em;" v-model="prospdata.name"></td></tr>
-          <tr><th>Contact:</th><td><input style="width: 30em;" v-model="prospdata.contact"></td></tr>
-          <tr><th>Email:</th><td><input style="width: 30em;" v-model="prospdata.email"></td></tr>
-          <tr><th>Phone:</th><td><input style="width: 12em;" v-model="prospdata.phone"></td></tr>
-          <tr><th>Subscribers:</th><td><input style="width: 5em;" v-model="prospdata.subs_estimate"> <span class="info">(estimate)</span></td></tr>
-          <tr><th>Address:</th><td><input style="width: 30em;" v-model="prospdata.addr1"></td></tr>
-          <tr><th></th><td><input style="width: 30em;" v-model="prospdata.addr2"></td></tr>
-          <tr><th></th><td>
-            <input style="width: 12em; margin-right: .3em;" v-model="prospdata.city">
-            <input style="width: 3em; margin-right: .3em;" v-model="prospdata.state_cd">
-            <input style="width: 6em;" v-model="prospdata.zip_cd">
-          </td></tr>
-          <tr><th>Enroll Date:</th><td><input style="width: 10em;" v-model="prospdata.enroll_date"></td></tr>
-        </tbody>
-      </table>
-    </BPopup>
-
   </div>
   <ProspectComponent v-if="prospectStore.prospect" />
+
+  <div class="drop_menu" style="margin-top: .7em;">
+    <FA clickable @click="whichTab='QUOTES'" :as="whichTab == 'QUOTES' ? 'tab-current' : 'tab'" icon="solid coins_">Quotes</FA>&nbsp;
+    <FA clickable @click="whichTab='CENSUS'" :as="whichTab == 'CENSUS' ? 'tab-current' : 'tab'" icon="solid people-group_">Census</FA>
+  </div>
+  <QuoteListComponent v-if="prospectStore.prospect && whichTab=='QUOTES'" width="calc(100vw - 200px - 2em)" height="calc(100vh - 17em)" style="margin-top: .5em;"/>
+  <div v-if="prospectStore.prospect && whichTab=='CENSUS'">
+    This is where the Census will display
+  </div>
+
+  <dialog :id="prospHandler.id">
+    <div class="titlebar">New Prospect</div>
+    <table class="form-table">
+      <tbody>
+        <tr><th>Group Name:</th><td><input style="width: 30em;" v-model="prospHandler.temp.name"></td></tr>
+        <tr><th>Contact:</th><td><input style="width: 30em;" v-model="prospHandler.temp.contact"></td></tr>
+        <tr><th>Email:</th><td><input style="width: 30em;" v-model="prospHandler.temp.email"></td></tr>
+        <tr><th>Phone:</th><td><input style="width: 12em;" v-model="prospHandler.temp.phone"></td></tr>
+        <tr><th>Subscribers:</th><td><input style="width: 5em;" v-model="prospHandler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
+        <tr><th>Address:</th><td><input style="width: 30em;" v-model="prospHandler.temp.addr1"></td></tr>
+        <tr><th></th><td><input style="width: 30em;" v-model="prospHandler.temp.addr2"></td></tr>
+        <tr><th></th><td>
+          <input style="width: 12em; margin-right: .3em;" v-model="prospHandler.temp.city">
+          <input style="width: 3em; margin-right: .3em;" v-model="prospHandler.temp.state_cd">
+          <input style="width: 6em;" v-model="prospHandler.temp.zip_cd">
+        </td></tr>
+        <tr><th>Enroll Date:</th><td><input style="width: 10em;" v-model="prospHandler.temp.enroll_date"></td></tr>
+        <tr><td colspan="2">
+          <div class="buttonbar">
+            <button @click="prospHandler.abort()" class="anchor" style="margin-right: .5em;"><FA icon="solid x" style="color:red;"/>Cancel</button>
+            <button @click="prospHandler.save()" class="action"><FA icon="solid users_"/>Create Prospect</button>
+          </div>
+        </td></tr>
+      </tbody>
+    </table>
+  </dialog>
+
 </template>
 <style lang="css" scoped></style>

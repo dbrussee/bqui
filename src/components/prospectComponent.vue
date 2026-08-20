@@ -1,12 +1,14 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { appProspectStore } from "../stores/ProspectStore";
+import { appProspectStore } from "../stores/ProspectStore.ts";
 const prospectStore = appProspectStore();
-import { appUserStore } from "../stores/AppUserStore";
+import { appUserStore } from "../stores/AppUserStore.ts";
 const userStore = appUserStore();
 import { B } from "@/composables/BUtils";
 import InfoBox from "./InfoBox.vue";
 import FA from "./FA.vue";
-import BPopup from "./BPopup.vue";
+// import BPopup from "./BPopup.vue";
+import { useId, ref } from "vue";
 
 const fave = (pid: number, isFavorite: boolean) => {
   prospectStore.setFavorite(pid, isFavorite);
@@ -22,6 +24,30 @@ const isCurrentlyFavorite = () => {
     }
   }
   return rslt;
+}
+const prospHandler = ref({
+  id: useId(),
+  temp: {} as any,
+  edit: () => {
+    prospHandler.value.temp = {...prospectStore.prospect}
+    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
+    popup?.showModal()
+  },
+  save: () => {
+    prospectStore.prospect = {...prospHandler.value.temp}
+    prospectStore.updateProspect(prospectStore.prospect)
+    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
+    popup?.close()
+  },
+  abort: () => {
+    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
+    popup?.close()
+  }
+})
+const prospectCSZ = (prosp:any) => {
+  let cnty = prosp.county
+  if (!cnty) cnty = "<span style='color:silver;'>No County</span>"
+  return `${prosp.city}, ${prosp.state_cd}&nbsp; ${prosp.zip_cd} <i style='font-size: .9em'>(${cnty})</i>`
 }
 
 </script>
@@ -51,49 +77,28 @@ const isCurrentlyFavorite = () => {
       </ul> </InfoBox
     >
     &nbsp;&nbsp;&nbsp;
-    [
-    <FA :icon="isCurrentlyFavorite() ? 'solid heart' : 'regular heart'"
-     @click="fave(prospectStore.prospect.id, !isCurrentlyFavorite())"
-     :style="{cursor: 'pointer', color: isCurrentlyFavorite() ? 'crimson' : 'gray'}" />
-
-    <BPopup ref="editProspectPopup" :title="'Edit Prospect ' + prospectStore.prospect.id" class="CENTER" manual
-      linkicon="edit" linktext=""
-      :buttons="[
-        {icon:'solid x', text:'Cancel', class:'anchor', iconcolor: 'red', action:() => {
-          prospectStore.getProspect(prospectStore.prospect.id)
-          return true
-        }},
-        {icon:'solid users', text:'Save Prospect', class:'modern', action:() => {
-          if (prospectStore.prospect.name == '') return false
-          prospectStore.updateProspect(prospectStore.prospect)
-          return true
-        }}
-      ]"
-      >
-      <table class="form-table">
-        <tbody>
-          <tr><th>Group Name:</th><td><input style="width: 30em;" v-model="prospectStore.prospect.name"></td></tr>
-          <tr><th>Contact:</th><td><input style="width: 30em;" v-model="prospectStore.prospect.contact"></td></tr>
-          <tr><th>Email:</th><td><input style="width: 30em;" v-model="prospectStore.prospect.email"></td></tr>
-          <tr><th>Phone:</th><td><input style="width: 12em;" v-model="prospectStore.prospect.phone"></td></tr>
-          <tr><th>Subscribers:</th><td><input style="width: 5em;" v-model="prospectStore.prospect.subs_estimate"> <span class="info">(estimate)</span></td></tr>
-          <tr><th>Address:</th><td><input style="width: 30em;" v-model="prospectStore.prospect.addr1"></td></tr>
-          <tr><th></th><td><input style="width: 30em;" v-model="prospectStore.prospect.addr2"></td></tr>
-          <tr><th></th><td>
-            <input style="width: 12em; margin-right: .3em;" v-model="prospectStore.prospect.city">
-            <input style="width: 3em; margin-right: .3em;" v-model="prospectStore.prospect.state_cd">
-            <input style="width: 6em;" v-model="prospectStore.prospect.zip_cd">
-          </td></tr>
-          <tr><th>Enroll Date:</th><td><input style="width: 10em;" v-model="prospectStore.prospect.enroll_date"></td></tr>
-        </tbody>
-      </table>
-    </BPopup>]
+    <FA tt="Set / Unset Favorite" :icon="isCurrentlyFavorite() ? 'solid heart_' : 'regular heart_'" clickable
+      @click="fave(prospectStore.prospect.id, !isCurrentlyFavorite())"
+      :style="{color: isCurrentlyFavorite() ? 'crimson' : 'gray'}"/>
     <p />
-    {{ prospectStore.prospect.name }}<br />
-    &nbsp;{{ prospectStore.prospect.addr1 }}<br />
-    <template v-if="prospectStore.prospect.addr2">&nbsp;{{ prospectStore.prospect.addr2 }}<br /></template>
-    &nbsp;{{ prospectStore.prospect.city }}, {{ prospectStore.prospect.state_cd }}&nbsp;
-    {{ prospectStore.prospect.zip_cd }} ({{ prospectStore.prospect.county ? prospectStore.prospect.county : 'No County' }})
+    <div style="display: flex; align-items: flex-start;">
+    <table class="form-table">
+      <tbody>
+        <tr><td><FA clickable @click="prospHandler.edit()" icon="edit_">{{ prospectStore.prospect.name }}</FA></td></tr>
+        <tr><td>{{ prospectStore.prospect.addr1 }}{{ prospectStore.prospect.addr2 ? ', ' + prospectStore.prospect.addr2 : '' }}</td></tr>
+        <tr><td v-html="prospectCSZ(prospectStore.prospect)"></td></tr>
+      </tbody>
+    </table>
+    <table class="form-table" style="margin-left: 2em;">
+      <tbody>
+        <tr><td>{{prospectStore.prospect.contact}}</td></tr>
+        <tr><td><a v-if="prospectStore.prospect.email" style="cursor: pointer"
+          :href="'mailto:' + encodeURI(`${prospectStore.prospect.contact} <${prospectStore.prospect.email}>`)">{{prospectStore.prospect.email}}</a></td></tr>
+        <tr><td>{{prospectStore.prospect.phone}}</td></tr>
+      </tbody>
+    </table>
+
+    </div>
   </div>
   <div v-else>
     <div v-if="prospectStore.isLoading">
@@ -106,4 +111,35 @@ const isCurrentlyFavorite = () => {
       <FA style="color: sienna;" icon="solid circle-exclamation_" />{{ prospectStore.issue.message }}
     </div>
   </div>
+
+  <dialog :id="prospHandler.id">
+    <form @submit.prevent="prospHandler.save()">
+    <div class="titlebar">
+      Edit Prospect {{ prospectStore.prospect.id }}
+    </div>
+    <table class="form-table">
+      <tbody>
+        <tr><th>Group Name:</th><td><input style="width: 30em;" v-model="prospHandler.temp.name"></td></tr>
+        <tr><th>Contact:</th><td><input style="width: 30em;" v-model="prospHandler.temp.contact"></td></tr>
+        <tr><th>Email:</th><td><input style="width: 30em;" v-model="prospHandler.temp.email"></td></tr>
+        <tr><th>Phone:</th><td><input style="width: 12em;" v-model="prospHandler.temp.phone"></td></tr>
+        <tr><th>Subscribers:</th><td><input style="width: 5em;" v-model="prospHandler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
+        <tr><th>Address:</th><td><input style="width: 30em;" v-model="prospHandler.temp.addr1"></td></tr>
+        <tr><th></th><td><input style="width: 30em;" v-model="prospHandler.temp.addr2"></td></tr>
+        <tr><th></th><td>
+          <input style="width: 12em; margin-right: .3em;" v-model="prospHandler.temp.city">
+          <input style="width: 3em; margin-right: .3em;" v-model="prospHandler.temp.state_cd">
+          <input style="width: 6em;" v-model="prospHandler.temp.zip_cd">
+        </td></tr>
+        <tr><th>Enroll Date:</th><td><input style="width: 10em;" v-model="prospHandler.temp.enroll_date"></td></tr>
+        <tr><td colspan="2">
+          <div class="buttonbar">
+            <button class="anchor" style="margin-right: .6em;" @click="prospHandler.abort()"><FA icon="solid x" style="color: red;" />Cancel</button>
+            <button type="submit" class="action"><FA icon="solid users_" /> Save Prospect</button>
+          </div>
+        </td></tr>
+      </tbody>
+    </table>
+    </form>
+  </dialog>
 </template>
