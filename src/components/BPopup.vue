@@ -25,6 +25,11 @@ const props = defineProps({
     required: false,
     default: ""
   },
+  iconcolor: {
+    type: String,
+    required: false,
+    default: ""
+  },
   linktext: {
     type: String,
     required: false,
@@ -110,9 +115,9 @@ function getIcon() {
   <div :popover="props.manual ? 'manual' : ''" :id="popid" :class="(props.manual ? 'manual ' : '') + $attrs.class" :style="{'max-width': props.width}">
     <div style="width: fit-content">
       <div v-if="props.title != ''" class="info_title">
-        <FA v-if="getIcon()" :icon="getIcon() + '_'"/><span v-html="props.title" />
+        <FA v-if="getIcon()" :color="props.iconcolor" :icon="getIcon() + '_'"/><span v-html="props.title" />
       </div>
-      <FA v-if="!props.title && getIcon()" :icon="getIcon() + '_'"/>
+      <FA v-if="!props.title && getIcon()" :color="props.iconcolor" :icon="getIcon() + '_'"/>
       <slot/>
       <div v-if="buttonsList.length > 0" class="buttonbar">
         <template v-for="(btn, i) in buttonsList" :key="i">

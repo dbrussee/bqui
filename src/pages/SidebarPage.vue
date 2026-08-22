@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import SidebarItem from "@/components/SidebarItem.vue";
 import { appMessageStore } from "@/stores/MessagesStore";
@@ -22,12 +23,12 @@ onRenderTriggered(() => {
 })
 
 function getProspectID():string {
-  if (!prospectStore.prospect) return " none"
+  if (!prospectStore.prospect) return " no prosp"
   if (prospectStore.isLoading) return " Loading..."
   if (prospectStore.prospect.id) return " ID " + prospectStore.prospect.id
   return ' unknown'
 }
-function getUnreadMessageCounts() {
+function getUnreadMessageCounts():string {
   if (messageStore.messages.length == 0) return "none"
   const unread = messageStore.unreadCount()
   if (unread > 0) {
@@ -35,7 +36,32 @@ function getUnreadMessageCounts() {
     if (unread == messageStore.messages.length) return unread_msg
     return `${unread_msg} / ${messageStore.messages.length}`
   }
-  return messageStore.messages.length
+  return messageStore.messages.length.toString()
+}
+function getCensusCount():string {
+  let msg = " Unknown"
+  if (!prospectStore.prospect) {
+    msg = " no prosp"
+  } else if (prospectStore.isLoading) {
+    msg = " Loading..."
+  } else if (prospectStore.prospect.census) {
+    if (prospectStore.prospect.census.length == 0) {
+      msg = " none"
+    } else {
+      let gtotal = 0
+      prospectStore.prospect.census.forEach((sub:any) => {
+        gtotal++
+        gtotal += sub.deps.length
+      })
+      if (gtotal == prospectStore.prospect.census.length) {
+        msg = ' ' + gtotal.toString()
+      } else {
+        msg = ` ${prospectStore.prospect.census.length} / ${gtotal}`
+      }
+    }
+  }
+  if (prospectStore.censusDirty) msg += " <i class='fa-solid fa-floppy-disk' style='color: red; font-size: 1.2em;' />"
+  return msg
 }
 </script>
 
@@ -45,7 +71,7 @@ function getUnreadMessageCounts() {
       ><FA icon='building_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
-      ><FA icon='solid people-group_' />Census<span style='font-size: .8em;'></span>
+      ><FA icon='solid people-group_' />Census: <span style='font-size: .8em;' v-html="getCensusCount()"></span>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
       ><FA icon='envelope_' />Messages: <span style="font-size: .8em;" v-html="getUnreadMessageCounts()"/></SidebarItem

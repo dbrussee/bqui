@@ -2,13 +2,13 @@
 <script setup lang="ts">
 import { B } from "@/composables/BUtils";
 // import BTable from "@/components/BTable.vue";
-import { ref } from "vue";
+import { ref, useId } from "vue";
 import { appMessageStore } from "../stores/MessagesStore";
 import FA from "@/components/FA.vue";
-import BPopup from "@/components/BPopup.vue";
+import UserConfirm from "@/components/UserConfirm.vue";
 const messageStore = appMessageStore();
 
-const newMessagePopup = ref()
+// const newMessagePopup = ref()
 const currentMessage = ref<any>(null)
 const showMessage = (index:number) => {
   currentMessage.value = messageStore.messages[index]
@@ -20,36 +20,43 @@ const reloadMessageList = () => {
   messageStore.getMessages()
 }
 
-const newMessage = ref({
-  sendto: "",
-  subject: "",
-  body: ""
+
+const msgHandler = ref({
+  id: useId(),
+  msg: { sendto: "", subject: "", body: "" } as any,
+  show: () => {
+    const popup = document.getElementById(msgHandler.value.id) as HTMLDialogElement
+    popup?.showModal()
+  },
+  send: () => {
+    if (msgHandler.value.msg.sendto == '') return false
+    if (msgHandler.value.msg.body == '') return false
+    messageStore.sendNewMessage(msgHandler.value.msg.sendto, msgHandler.value.msg.subject, msgHandler.value.msg.body)
+    msgHandler.value.msg = { sendto: '', subject: '', body: '' }
+    const popup = document.getElementById(msgHandler.value.id) as HTMLDialogElement
+    popup?.close()
+  },
+  delete: () => {
+    if (!currentMessage.value) return
+    messageStore.deleteMessage(currentMessage.value.id)
+    currentMessage.value = null
+  },
+  abort: () => {
+    const popup = document.getElementById(msgHandler.value.id) as HTMLDialogElement
+    popup?.close()
+  }
 })
+
 </script>
 <template>
   <div class="drop_menu">
-    <button class="anchor" @click="reloadMessageList()"><FA icon="circle-down_"/>Reload</button>
-    &nbsp;
-    <BPopup ref="newMessagePopup" title="New Internal Message" class="B2R" manual
-      linkicon="square-plus_" linktext="New"
-      :buttons="[
-        {icon:'solid x', text:'Cancel', iconcolor: 'red', class:'anchor', action:() => true},
-        {icon:'solid share', text:'Send', class:'modern', action:() => {
-          if (newMessage.sendto == '') return false
-          if (newMessage.body == '') return false
-          messageStore.sendNewMessage(newMessage.sendto, newMessage.subject, newMessage.body)
-          return true
-        }}
-      ]"
-      >
-      <table class="form-table">
-        <tbody>
-          <tr><th>Send To:</th><td><input v-model="newMessage.sendto"></td></tr>
-          <tr><th>Subject:</th><td><input style="width: 30em;" v-model="newMessage.subject"></td></tr>
-          <tr><th>Message:</th><td><textarea style="width: 30em; height: 6em;" v-model="newMessage.body"></textarea></td></tr>
-        </tbody>
-      </table>
-    </BPopup>
+    <button class="anchor" @click="reloadMessageList()"><FA icon="solid rotate-left_"/>Reload</button>&nbsp;&nbsp;
+    <FA icon="square-plus_" clickable @click="msgHandler.show()">New Message</FA>
+    <span style="float: right;" v-if="currentMessage">
+    <UserConfirm as="anchor" icon="trash-can" iconcolor="red" linktext="Delete" class="L" @confirm="msgHandler.delete()">
+      Delete this message?
+    </UserConfirm>&nbsp;
+    </span>
   </div>
   <div class="msgcontainer">
     <div class="msgitem" v-for="(message, index) in messageStore.messages" :key="index"
@@ -94,6 +101,23 @@ const newMessage = ref({
   </div>
 
 <!-- <BTable :config="gridConfig" :rows="messageStore.messages"></BTable> -->
+
+  <dialog :id="msgHandler.id">
+    <div class="titlebar">New Internal Message</div>
+    <table class="form-table">
+      <tbody>
+        <tr><th>Send To:</th><td><input v-model="msgHandler.msg.sendto"></td></tr>
+        <tr><th>Subject:</th><td><input style="width: 30em;" v-model="msgHandler.msg.subject"></td></tr>
+        <tr><th>Message:</th><td><textarea style="width: 30em; height: 6em;" v-model="msgHandler.msg.body"></textarea></td></tr>
+        <tr><td colspan="2">
+          <div class="buttonbar">
+            <button class="anchor" @click="msgHandler.abort()"><FA icon="solid x" iconcolor="red">Cancel</FA></button>&nbsp;
+            <button class="action" @click="msgHandler.send()"><FA icon="solid share_"/>Send Message</button>
+          </div>
+        </td></tr>
+      </tbody>
+    </table>
+  </dialog>
 </template>
 <style lang="css" scoped>
 div.msgcontainer {

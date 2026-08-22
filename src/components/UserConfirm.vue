@@ -1,4 +1,4 @@
-<!-- eslint-disable @typescript-eslint/no-explicit-any -->
+
 <script setup lang="ts">
 import { useId } from "vue";
 import BPopup from "./BPopup.vue";
@@ -13,6 +13,16 @@ const props = defineProps({
   linktext: {
     type: String,
     required: true,
+  },
+  icon: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  iconcolor: {
+    type: String,
+    required: false,
+    default: ''
   },
   as: {
     type: String,
@@ -43,6 +53,8 @@ const props = defineProps({
     :buttons="[
       {text: props.confirm_button_text, action: () => emit('confirm')}
     ]"
+    :linkicon="props.icon"
+    :iconcolor="props.iconcolor"
     :linktext="props.linktext"
     ><slot>Are you sure?</slot></BPopup
   >

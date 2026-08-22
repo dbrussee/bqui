@@ -35,7 +35,11 @@ const cfgQuotesList = ref({
 </script>
 
 <template>
-  <BTable :config="cfgQuotesList" :rows="prospStore.quotes"/>
+  <BTable
+    @pick="(row:any) => {
+      console.dir(row)
+    }"
+    :config="cfgQuotesList" :rows="prospStore.quotes"/>
 </template>
 
 <style lang="css" scoped>

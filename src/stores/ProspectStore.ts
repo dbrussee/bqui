@@ -2,6 +2,7 @@
 import { defineStore } from "pinia";
 import BQAPIFetcher from "@/components/BQAPI";
 import { ref } from "vue";
+import { B } from "@/composables/BUtils";
 
 import { appUserStore } from "./AppUserStore";
 
@@ -35,9 +36,16 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
   }
 
+  const censusHash = ref("Unused")
+  const censusDirty = ref(false)
+  async function setCensusDirty() {
+    const hash = await B.getHash(JSON.stringify(prospect.value.census))
+    censusDirty.value = censusHash.value != hash
+  }
   function getProspect(pid: string, registerRecent: boolean = false) {
     if (pid == "") return;
     prospect.value = {};
+    quotes.value.length = 0;
     issue.value = {}
     const fetcher = new BQAPIFetcher()
     isLoading.value = true
@@ -52,6 +60,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         return
       }
       prospect.value = fetcher.resp.prosp
+      B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
+        censusHash.value = hash
+        censusDirty.value = false
+      })
       quotes.value = fetcher.resp.quotes
       // console.log(JSON.stringify(prospect.value, null, 2))
       if (registerRecent) {
@@ -82,6 +94,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'POST', data)
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp.prosp
+      B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
+        censusHash.value = hash
+        censusDirty.value = false
+      })
 
       const userStore = appUserStore()
       if (!userStore.user.recents) userStore.user.recents = []
@@ -91,10 +107,14 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     issue.value = fetcher.issue
   }
   async function updateProspect(data:any) {
+    // console.log(JSON.stringify(data, null, 2))
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'PUT', data)
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp.prosp
-
+      B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
+        censusHash.value = hash
+        censusDirty.value = false
+      })
       const userStore = appUserStore()
       userStore.user.recents[0].name = prospect.value.name
       // console.dir(userStore.user.faves)
@@ -110,5 +130,5 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
 
 
-  return { isLoading, createProspect, updateProspect, getProspect, clearRecents, prospect, quotes, meta, issue, setFavorite };
+  return { isLoading, createProspect, updateProspect, getProspect, clearRecents, prospect, setCensusDirty, censusDirty, quotes, meta, issue, setFavorite };
 });

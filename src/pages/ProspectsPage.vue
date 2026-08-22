@@ -34,8 +34,9 @@ function clearRecents() {
   recentPopover.value?.close();
 }
 const cfgFaves = {
+  width: "25em",
   columns: [
-    { id: "pid", heading: "Prosp#", width: "4em", flags: "R" },
+    { id: "pid", heading: "Prosp", width: "4em", flags: "R" },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     { id: "name", heading: "Name", width: "20em", formatter: (row:any, td:HTMLTableCellElement) => {
       return row.name
@@ -43,8 +44,9 @@ const cfgFaves = {
   ],
 };
 const cfgRecents = {
+  width: "25em",
   columns: [
-    { id: "pid", heading: "Prosp#", width: "4em", flags: "R" },
+    { id: "pid", heading: "Prosp", width: "4em", flags: "R" },
     { id: "name", heading: "Name", width: "20em" },
   ],
 };
@@ -83,7 +85,7 @@ const prospHandler = ref({
 </script>
 <template>
   <div class="drop_menu">
-    <BPopup as="anchor" linkicon="solid list_" linktext="Recent" class="B2R"
+    <BPopup as="anchor" linkicon="solid list-ul_" linktext="Recent" class="B2R"
       ref="recentPopover"
       :buttons="[
         {
@@ -114,9 +116,9 @@ const prospHandler = ref({
       <button type="submit">Load</button>
     </form>&nbsp;
   </div>
-  <ProspectComponent v-if="prospectStore.prospect" />
+  <ProspectComponent />
 
-  <QuoteListComponent v-if="prospectStore.prospect" width="calc(100vw - 200px - 2em)" height="calc(100vh - 15em)" style="margin-top: .5em;"/>
+  <QuoteListComponent width="calc(100vw - 200px - 2em)" height="calc(100vh - 15em)" style="margin-top: .5em;"/>
 
   <dialog :id="prospHandler.id">
     <div class="titlebar">New Prospect</div>

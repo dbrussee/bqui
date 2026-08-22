@@ -8,7 +8,7 @@ interface IColumn {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formatter?: any;
 }
-const emit = defineEmits(["pick", "dblpick", "hdrclick"]);
+const emit = defineEmits(["pick", "dblpickx", "hdrclick"]);
 const props = defineProps({
   heading: {
     type: String,
@@ -59,7 +59,9 @@ const renderCell = (row:any, el:HTMLTableCellElement, col:any) => {
   // renderCell is called twice... first time to render, 2nd to clean up. Need to ignore 2nd call
   if (!el) return
   if (col.formatter) {
-    el.innerHTML = col.formatter(row, el)
+    let val = col.formatter(row, el)
+    if (val === undefined) val = getCellValue(row, col)
+    el.innerHTML = val
   } else {
     el.innerHTML = getCellValue(row, col)
   }
@@ -149,5 +151,8 @@ tbody tr td {
   padding: 0.1rem 0.2rem;
   vertical-align: top;
   cursor: pointer;
+}
+tbody tr:hover {
+  background-color: lightcyan;
 }
 </style>

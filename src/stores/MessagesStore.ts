@@ -32,6 +32,15 @@ export const appMessageStore = defineStore('appMessageStore', () => {
     meta.value = fetcher.meta
     issue.value = fetcher.issue
   }
+  async function deleteMessage(id:number) {
+    const fetcher = await new BQAPIFetcher().callAPI(`/message/${id}`, 'DELETE')
+    messages.value.length = 0
+    if (fetcher.resp != null) {
+      messages.value.push(...(fetcher.resp as any[]))
+    }
+    meta.value = fetcher.meta
+    issue.value = fetcher.issue
+  }
 
   async function getMessages() {
     messages.value.length = 0
@@ -64,5 +73,5 @@ export const appMessageStore = defineStore('appMessageStore', () => {
     issue.value = fetcher.issue
   }
 
-  return { getMessages, acknowledge, unreadCount, sendNewMessage, messages, meta, issue }
+  return { getMessages, acknowledge, unreadCount, sendNewMessage, deleteMessage, messages, meta, issue }
 })

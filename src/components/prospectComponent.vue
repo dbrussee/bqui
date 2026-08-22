@@ -52,10 +52,30 @@ const prospectCSZ = (prosp:any) => {
 
 </script>
 
-<style scoped></style>
+<style scoped>
+.prospect_info {
+  position: relative;
+  min-height: 4.7em;
+  /* background-color: pink; */
+}
+</style>
 
 <template>
-  <div v-if="prospectStore.prospect.id">
+  <div class="prospect_info">
+  <div v-if="prospectStore.issue?.severity == 'FATAL'">
+    <FA color="red" icon="solid bug_">{{ prospectStore.issue.message }}</FA>
+  </div>
+  <div v-if="prospectStore.issue?.severity == 'INFO'">
+    <FA color="sienna" icon="solid circle-exclamation_">{{ prospectStore.issue.message }}</FA>
+  </div>
+
+  <div v-if="prospectStore.isLoading">
+    Loading...
+  </div>
+  <div v-if="!prospectStore.issue && !prospectStore.isLoading && !prospectStore.prospect" class="prospect_info">
+    &nbsp;<FA icon="solid circle" color="sienna">No prospect loaded</FA>
+  </div>
+  <div v-if="!prospectStore.issue && !prospectStore.isLoading && prospectStore.prospect" class="prospect_info">
     Prospect ID: {{ prospectStore.prospect.id }}
     <InfoBox class="R2B" title="Prospect Details">
       <ul>
@@ -80,11 +100,10 @@ const prospectCSZ = (prosp:any) => {
     <FA tt="Set / Unset Favorite" :icon="isCurrentlyFavorite() ? 'solid heart_' : 'regular heart_'" clickable
       @click="fave(prospectStore.prospect.id, !isCurrentlyFavorite())"
       :color="isCurrentlyFavorite() ? 'darkred' : 'gray'"/>
-    <p />
     <div style="display: flex; align-items: flex-start;">
     <table class="form-table">
       <tbody>
-        <tr><td><FA clickable @click="prospHandler.edit()" icon="edit_">{{ prospectStore.prospect.name }}</FA></td></tr>
+        <tr><td><FA v-if="prospectStore.prospect" clickable @click="prospHandler.edit()" icon="edit_">{{ prospectStore.prospect ? prospectStore.prospect.name : '&nbsp;' }}</FA></td></tr>
         <tr><td>{{ prospectStore.prospect.addr1 }}{{ prospectStore.prospect.addr2 ? ', ' + prospectStore.prospect.addr2 : '' }}</td></tr>
         <tr><td v-html="prospectCSZ(prospectStore.prospect)"></td></tr>
       </tbody>
@@ -99,20 +118,10 @@ const prospectCSZ = (prosp:any) => {
     </table>
 
     </div>
-  </div>
-  <div v-else>
-    <div v-if="prospectStore.isLoading">
-      Loading...
-    </div>
-    <div v-if="prospectStore.issue?.severity == 'FATAL'" style="color: maroon;">
-      <FA style="color: red;" icon="solid bug_" />{{ prospectStore.issue.message }}
-    </div>
-    <div v-if="prospectStore.issue?.severity == 'INFO'" style="color: sienna;">
-      <FA style="color: sienna;" icon="solid circle-exclamation_" />{{ prospectStore.issue.message }}
     </div>
   </div>
 
-  <dialog :id="prospHandler.id">
+  <dialog v-if="prospectStore.prospect" :id="prospHandler.id">
     <form @submit.prevent="prospHandler.save()">
     <div class="titlebar">
       Edit Prospect {{ prospectStore.prospect.id }}
@@ -135,7 +144,7 @@ const prospectCSZ = (prosp:any) => {
         <tr><td colspan="2">
           <div class="buttonbar">
             <button class="anchor" style="margin-right: .6em;" @click="prospHandler.abort()"><FA icon="solid x" style="color: red;" />Cancel</button>
-            <button type="submit" class="action"><FA icon="solid users_" /> Save Prospect</button>
+            <button type="submit" class="action"><FA icon="floppy-disk_" /> Save Prospect</button>
           </div>
         </td></tr>
       </tbody>

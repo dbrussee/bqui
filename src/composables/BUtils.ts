@@ -1,5 +1,21 @@
-//export function B() {
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const B = {
+  ifNull: (test: any, value: any, ifNull: string): string => {
+    if (test) return value
+    return ifNull
+  },
+  getHash: async (message:string) => {
+    // Encode string as UTF-8 Uint8Array
+    const msgBuffer = new TextEncoder().encode(message);
+    let hashHex = ""
+    // Hash the message
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
+    // Convert ArrayBuffer to Array
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    // Convert bytes to hex string
+    hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex.toString();
+  },
   effdat: (d: string | Date) => {
     if (!d) return "";
     const date = new Date(d);
