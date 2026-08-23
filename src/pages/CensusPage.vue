@@ -80,7 +80,7 @@ const cfgCensus = ref({
 // }
 
 const newSub = ():void => {
-  const sub = {relation:"SUB", subid:null, fstnam:'', lstnam:'', midnam:'',
+  const sub = {relation:"SUB", fstnam:'', lstnam:'', midnam:'',
     sex:'M', dob:'', med:false, den:false, vis:false, cobra: false, deps:[]
   } as any
   prospStore.prospect.census.unshift(sub)
@@ -99,7 +99,7 @@ const newDep = (subnum:number):void => {
   } else {
     sex = sub.sex == 'M' ? 'F' : 'M'
   }
-  const data = {relation:relation, subid:null, fstnam:'', lstnam:sub.lstnam, midnam:'',
+  const data = {relation:relation, fstnam:'', lstnam:sub.lstnam, midnam:'',
     sex:sex, dob:'', med:sub.med, den:sub.den, vis:sub.vis, cobra: false
   } as any
   sub.deps.push(data)
@@ -132,6 +132,50 @@ const setDepBoolean = (subnum:number, depnum:number, opt:string):void => {
   if (sub) {
     const dep = sub.deps[depnum] as any
     if (dep) dep[opt] = !dep[opt]
+  }
+  prospStore.setCensusDirty()
+}
+const setRelation = (subnum:number, depnum:number, e:Event) => {
+  const sel = e.target as HTMLSelectElement
+  const relation = sel.value
+  const sub = prospStore.prospect.census[subnum] as any
+  if (sub) {
+    if (depnum < 0) {
+      sub.relation = relation
+    } else {
+      const dep = sub.deps[depnum] as any
+      if (relation == "CHD") {
+        dep.relation = relation
+      } else if (relation == 'SUB') {
+        // Make a dependent a Subscriber
+        // {'Joe', deps[
+        //   'Jane',
+        //   'Jimmy'
+        // ]
+        // ...
+        // {'Jane', deps [
+        //   'Joe',
+        //   'Jimmy'
+        // ]}
+        // Clone the sub
+        const oldSub = JSON.stringify(sub)
+        const oldDeps = JSON.stringify(sub.deps)
+        const newSub = JSON.parse(JSON.stringify(sub.deps[depnum]))
+        newSub.deps = JSON.parse(oldDeps)
+        newSub.relation = 'SUB'
+
+        newSub.deps[depnum] = JSON.parse(oldSub)
+        delete newSub.deps[depnum].deps
+        newSub.deps[depnum].relation = dep.relation
+
+        prospStore.prospect.census.splice(subnum, 1, newSub)
+      } else { // SPS or DOM ... set all others to CHD and then set new value
+        sub.deps.forEach((dep:any)=> {
+          dep.relation = 'CHD'
+        })
+        dep.relation = relation
+      }
+    }
   }
   prospStore.setCensusDirty()
 }
@@ -183,7 +227,7 @@ const updateCensusDirty = () => {
       <tbody>
         <template v-for="(sub, rn) in prospStore.prospect.census" :key="sub">
           <tr :class="{seperator: Number(rn) > 0}">
-            <td><button>{{ sub.relation }}</button></td>
+            <td>&nbsp;</td>
             <td><input v-model="sub.lstnam" class="lstnam"/></td>
             <td><input v-model="sub.fstnam" class="fstnam"/></td>
             <td><input maxlength="1" v-model="sub.midnam" class="midnam"/></td>
@@ -204,7 +248,12 @@ const updateCensusDirty = () => {
             </td>
           </tr>
           <tr v-for="(dep, dn) in sub.deps" :key="dep">
-            <td><button>{{ dep.relation }}</button></td>
+            <td><select style="width: 3.5em;" @change="setRelation(rn as number, dn as number, $event)">
+                <option :selected="dep.relation == 'SUB'" value="SUB">SUB - Subscriber</option>
+                <option :selected="dep.relation == 'SPS'" value="SPS">SPS - Spouse</option>
+                <option :selected="dep.relation == 'DOM'" value="DOM">DOM - Domestic Partner</option>
+                <option :selected="dep.relation == 'CHD'" value="CHD">CHD - Child</option>
+            </select></td>
             <td><input v-model="dep.lstnam" class="lstnam"/></td>
             <td><input v-model="dep.fstnam" class="fstnam"/></td>
             <td><input maxlength="1" v-model="dep.midnam" class="midnam"/></td>
@@ -212,11 +261,11 @@ const updateCensusDirty = () => {
             <td style="text-align: center;"><button @click="(e:Event) => setSex(Number(rn), Number(dn))" class="sex">{{ dep.sex }}</button></td>
             <td style="text-align: center;">
               <button v-if="sub.med" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'med')"><FA :icon="dep.med ? 'square-check' : 'square'"/></button>
-              <button v-else><FA icon="solid ban" color="lightpink"/></button>
+              <button v-else><FA icon="solid ban" color="gainsboro"/></button>
               <button v-if="sub.den" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'den')"><FA :icon="dep.den ? 'square-check' : 'square'"/></button>
-              <button v-else><FA icon="solid ban" color="lightpink"/></button>
+              <button v-else><FA icon="solid ban" color="gainsboro"/></button>
               <button v-if="sub.vis" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'vis')"><FA :icon="dep.vis ? 'square-check' : 'square'"/></button>
-              <button v-else><FA icon="solid ban" color="lightpink"/></button>
+              <button v-else><FA icon="solid ban" color="gainsboro"/></button>
             </td>
             <!-- <td class="den"><button v-if="sub.den" @click="(sub) => setDepBoolean(rn, dn, 'den')"><FA :icon="dep.den ? 'square-check' : 'square'"/></button></td>
             <td class="vis"><button v-if="sub.vis" @click="(sub) => setDepBoolean(rn, dn, 'vis')"><FA :icon="dep.vis ? 'square-check' : 'square'"/></button></td> -->
@@ -235,6 +284,12 @@ const updateCensusDirty = () => {
 </template>
 
 <style scoped>
+select {
+  font-family: 'Courier New', Courier, monospace;
+  option {
+    font-family: 'Courier New', Courier, monospace;
+  }
+}
 button {
   background-color: transparent;
   border: none;

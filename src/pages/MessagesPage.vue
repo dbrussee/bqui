@@ -126,8 +126,8 @@ div.msgcontainer {
   width: 15em;
   height: calc(100vh - 9em);
   overflow-y: auto;
-  background-color: linen;
-  border-right: 1px solid gainsboro;
+  border-right: 3px solid gainsboro;
+  padding-right: 3px;
 }
 div.msgitem {
   padding: .3em;

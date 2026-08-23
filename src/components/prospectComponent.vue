@@ -83,7 +83,8 @@ const prospectCSZ = (prosp:any) => {
         <li>Subscribers:
           <ul>
             <li>Estimate: {{ prospectStore.prospect.subs_estimate }}</li>
-            <li>Census: <span style='color: red;'>None</span></li>
+            <li v-if="!prospectStore.prospect.census || prospectStore.prospect.census.length == 0">Census: <span style='color: red;'>None</span></li>
+            <li v-else>Census: {{ prospectStore.prospect.census.length }}</li>
           </ul>
         </li>
         <li>Size Code: {{ prospectStore.prospect.size_cd }}</li>

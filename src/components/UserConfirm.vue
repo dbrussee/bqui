@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import { useId } from "vue";
 import BPopup from "./BPopup.vue";
