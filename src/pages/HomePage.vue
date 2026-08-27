@@ -6,6 +6,7 @@ import SettingsPage from './SettingsPage.vue'
 import LoginPage from './LoginPage.vue'
 import { appPageStore } from '@/stores/PageStore';
 import ProspectsPage from './ProspectsPage.vue'
+import ProposalsPage from './ProposalsPage.vue';
 import MessagesPage from './MessagesPage.vue'
 const pageStore = appPageStore()
 
@@ -21,6 +22,7 @@ const counters = countersStore();
     <CensusPage v-if="pageStore.page == 'CENSUS'" />
     <MessagesPage v-if="pageStore.page == 'MSGS'" />
     <SettingsPage v-if="pageStore.page == 'SETTINGS'" />
+    <ProposalsPage v-if="pageStore.page == 'PROPOSALS'" />
   </div>
   <div v-else>
     <LoginPage v-if="counters.apiCalls.active == 0" />

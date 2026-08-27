@@ -9,7 +9,7 @@ import { appPageStore } from "@/stores/PageStore";
 const pageStore = appPageStore();
 import { appProspectStore } from "@/stores/ProspectStore";
 import { onRenderTriggered } from "vue";
-import FA from "@/components/FA.vue";
+import BIcon from "@/components/B/BIcon.vue";
 const prospectStore = appProspectStore();
 
 onRenderTriggered(() => {
@@ -27,6 +27,9 @@ function getProspectID():string {
   if (prospectStore.isLoading) return " Loading..."
   if (prospectStore.prospect.id) return " ID " + prospectStore.prospect.id
   return ' unknown'
+}
+function getProposalsCount():string {
+  return "none"
 }
 function getUnreadMessageCounts():string {
   if (messageStore.messages.length == 0) return "none"
@@ -68,17 +71,20 @@ function getCensusCount():string {
 <template>
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
-      ><FA icon='building_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
+      ><BIcon as="icon" icon='building_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
-      ><FA icon='solid people-group_' />Census: <span style='font-size: .8em;' v-html="getCensusCount()"></span>
+      ><BIcon as="icon" icon='solid people-group_' />Census: <span style='font-size: .8em;' v-html="getCensusCount()"></span>
+    </SidebarItem>
+    <SidebarItem @click="pageStore.page = 'PROPOSALS'" :current="pageStore.page == 'PROPOSALS'"
+      ><BIcon as="icon" icon='file-pdf_' />Proposals: <span style='font-size: .8em;' v-html="getProposalsCount()"></span>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
-      ><FA icon='envelope_' />Messages: <span style="font-size: .8em;" v-html="getUnreadMessageCounts()"/></SidebarItem
-    >
+      ><BIcon as="icon" icon='envelope_' />Messages: <span style="font-size: .8em;" v-html="getUnreadMessageCounts()"/>
+    </SidebarItem>
     <SidebarItem @click="pageStore.page = 'SETTINGS'" :current="pageStore.page == 'SETTINGS'"
-      ><FA icon='solid gear_' />Settings</SidebarItem
-    >
+      ><BIcon as="icon" icon='circle-user_' />Profile
+    </SidebarItem>
   </div>
   <data v-else>
     <SidebarItem>Login</SidebarItem>

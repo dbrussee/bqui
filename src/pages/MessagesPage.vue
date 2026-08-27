@@ -1,14 +1,13 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { B } from "@/composables/BUtils";
-// import BTable from "@/components/BTable.vue";
 import { ref, useId } from "vue";
 import { appMessageStore } from "../stores/MessagesStore";
-import FA from "@/components/FA.vue";
-import UserConfirm from "@/components/UserConfirm.vue";
+import BIcon from "@/components/B/BIcon.vue";
+import BConfirm from "@/components/B/BConfirm.vue";
+import BButton from "@/components/B/BButton.vue";
 const messageStore = appMessageStore();
 
-// const newMessagePopup = ref()
 const currentMessage = ref<any>(null)
 const showMessage = (index:number) => {
   currentMessage.value = messageStore.messages[index]
@@ -50,26 +49,27 @@ const msgHandler = ref({
 </script>
 <template>
   <div class="drop_menu">
-    <button class="anchor" @click="reloadMessageList()"><FA icon="solid rotate-left_"/>Reload</button>&nbsp;&nbsp;
-    <FA icon="square-plus_" clickable @click="msgHandler.show()">New Message</FA>
+    <BIcon as="anchor" icon="solid rotate-left_" @click="reloadMessageList()">Reload</BIcon>&nbsp;&nbsp;
+    <BIcon as="anchor" icon="square-plus_" @click="msgHandler.show()">New Message</BIcon>
     <span style="float: right;" v-if="currentMessage">
-    <UserConfirm as="anchor" icon="trash-can" iconcolor="red" linktext="Delete" class="L" @confirm="msgHandler.delete()">
-      Delete this message?
-    </UserConfirm>&nbsp;
+      <BConfirm class="anchor" pos="L" icon="#red trash-can_" @confirm="msgHandler.delete()">Delete Message
+        <template #message>
+          Delete this message?
+          <p style='color:red'>This cannot be undone</p>
+        </template>
+      </BConfirm>&nbsp;
     </span>
   </div>
   <div class="msgcontainer">
     <div class="msgitem" v-for="(message, index) in messageStore.messages" :key="index"
       :class="{current_style: currentMessage && currentMessage.id == message.id}"
       @click="showMessage(index)">
-      <FA
-        :icon="message.readat ? 'envelope-open_' : 'envelope_'"
-        :style="{color: message.readat ? 'green' : 'maroon'}" />{{ message.subject }}
+      <BIcon :icon="message.readat ? '#green envelope-open_' : '#red solid envelope_'">{{ message.subject }}</BIcon>
     </div>
   </div>
   <div v-if="currentMessage" class="message">
     <div style="font-size: .9em; padding-bottom: .3em;">
-      <b style="margin-bottom: .3em;"><i>{{ currentMessage.subject }}</i></b>
+      <span class="message_subject">&lt; {{ currentMessage.subject }} &gt;</span>
       <table class="form-table" style="margin-left: 1em;">
         <tbody>
           <!-- <tr>
@@ -81,12 +81,12 @@ const msgHandler = ref({
             <td>{{ currentMessage.sender.id }}
                 ({{ (currentMessage.sender.fstnam + ' ' + currentMessage.sender.lstnam).trim() }})</td>
           </tr>
-          <tr v-if="currentMessage.sentat">
-            <th>Sent:</th>
-            <td>{{ B.ts(currentMessage.sentat) }}</td>
+          <tr v-if="currentMessage.deliveredat">
+            <th>Delivered:</th>
+            <td>{{ B.ts(currentMessage.deliveredat) }}</td>
           </tr>
           <tr>
-            <th>Read:</th>
+            <th>Opened:</th>
             <td>{{ currentMessage.readat ? B.ts(currentMessage.readat) : "Unread" }}</td>
           </tr>
         </tbody>
@@ -111,8 +111,8 @@ const msgHandler = ref({
         <tr><th>Message:</th><td><textarea style="width: 30em; height: 6em;" v-model="msgHandler.msg.body"></textarea></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
-            <button class="anchor" @click="msgHandler.abort()"><FA icon="solid x" iconcolor="red">Cancel</FA></button>&nbsp;
-            <button class="action" @click="msgHandler.send()"><FA icon="solid share_"/>Send Message</button>
+            <BButton class="anchor" @click="msgHandler.abort()" icon="#red solid x">Cancel</BButton>&nbsp;
+            <BButton class="action" @click="msgHandler.send()" icon="solid share_">Send Message</BButton>
           </div>
         </td></tr>
       </tbody>
@@ -120,9 +120,15 @@ const msgHandler = ref({
   </dialog>
 </template>
 <style lang="css" scoped>
+.message_subject {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: var(--form-prompt-color);
+  font-style: italic;
+}
 div.msgcontainer {
   display: inline-block;
-  margin-top: .3em;
+  /* margin-top: .3em; */
   width: 15em;
   height: calc(100vh - 9em);
   overflow-y: auto;
@@ -138,11 +144,14 @@ div.msgitem {
   &:hover {
     border-left-color: dodgerblue;
   }
+  &:nth-child(1) {
+    border-top: 1px solid black;
+  }
 }
 div.message {
   display: inline-block;
   padding-left: .3em;
-  margin-top: .3em;
+  /* margin-top: .3em; */
   width: calc(100% - 15.5em);
   height: calc(100vh - 9em);
   overflow-y: auto;

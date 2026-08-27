@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const B = {
-  ifNull: (test: any, value: any, ifNull: string): string => {
-    if (test) return value
-    return ifNull
+  ifNull: (value: any, ifNull: string): string => {
+    if (value == undefined) return ifNull
+    if (value == null) return ifNull
+    if (!value) return ifNull
+    return value
   },
   getHash: async (message:string) => {
     // Encode string as UTF-8 Uint8Array

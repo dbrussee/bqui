@@ -2,8 +2,9 @@
 <script setup lang="ts">
 // import BTable from '@/components/BTable.vue';
 import { ref } from 'vue';
-import FA from '@/components/FA.vue';
 import { appProspectStore } from '@/stores/ProspectStore';
+import BIcon from '@/components/B/BIcon.vue';
+import BButton from '@/components/B/BButton.vue';
 const prospStore = appProspectStore()
 
 const deduceTHStyle = (col:any) => {
@@ -30,33 +31,16 @@ const deduceJustification = (style: Record<string, string>, col:any) => {
 const cfgCensus = ref({
   height: "calc(100vh - 8em)",
   columns: [
-    { id: "relation", heading: "", width: "3em", formatter: (row:any, td:HTMLTableCellElement) => {
-      if (row.relation == 'SUB') {
-        td.style.textAlign = "left"
-      } else {
-        td.style.textAlign = "right"
-      }
-    }},
+    { id: "relation", heading: "", width: "3em" },
     { id: "lstnam", heading: " Last Name" },
     { id: "fstnam", heading: " First Name" },
     { id: "midnam", heading: "Mid", width: "2em", flags: "C" },
     { id: "dob", heading: "DOB", width: "6em", flags: "C" },
     { id: "sex", heading: "Sex", width: "2em", flags: "C" },
     { id: "plans", heading:"Med Den Vis", width: "6.5em", flags: "C" },
-    // { id: "med", heading: "MED", width: "3em", flags: "C" },
-    // { id: "den", heading: "DEN", width: "3em", flags: "C" },
-    // { id: "vis", heading: "VIS", width: "3em", flags: "C" },
-    { id: "cobra", heading: "COBRA", width: "4em", flags: "C", formatter: (row:any) => {
-      if (row.cobra != undefined) return row.cobra
-      return null
-    }},
-    { id: "dis", heading: "Dis", width: "3em", flags: "C", formatter: (row:any) => {
-      if (row.dis != undefined) return row.dis
-      return null
-    }},
-    { id:"acts", heading: "", width: "4.5em", formatter: () => {
-      return null
-    }}
+    { id: "cobra", heading: "COBRA", width: "4em", flags: "C" },
+    { id: "dis", heading: "Dis", width: "3em", flags: "C" },
+    { id:"acts", heading: "", width: "4.5em" }
   ],
 })
 
@@ -201,9 +185,14 @@ const updateCensusDirty = () => {
 
 <template>
   <div class="drop_menu">
-    <FA clickable icon="solid rotate-left_" @click="prospStore.getProspect(prospStore.prospect.id)">Reload</FA>&nbsp;&nbsp;
-    <FA clickable icon="square-plus_" @click="newSub()">New Subscriber</FA>&nbsp;
-    <span style='float: right;'><FA :clickable="prospStore.censusDirty" :color="prospStore.censusDirty ? '' : 'gainsboro'" :icon="prospStore.censusDirty ? 'solid floppy-disk_' : 'floppy-disk_'" :iconcolor="prospStore.censusDirty ? 'red' : ''" @click="prospStore.updateProspect(prospStore.prospect)">Save Changes</FA>&nbsp;</span>
+    <BIcon as="anchor" icon="solid rotate-left_" @click="prospStore.getProspect(prospStore.prospect.id)">Reload</BIcon>&nbsp;&nbsp;
+    <BIcon as="anchor" icon="square-plus_" @click="newSub()">New Subscriber</BIcon>&nbsp;
+    <span style='float: right;'>
+      <BIcon :as="prospStore.censusDirty ? 'anchor' : 'clickable'"
+        :color="prospStore.censusDirty ? '' : 'gainsboro'"
+        :icon="prospStore.censusDirty ? '#red solid floppy-disk_' : 'floppy-disk_'"
+        @click="prospStore.updateProspect(prospStore.prospect)">Save Changes</BIcon>&nbsp;
+    </span>
   </div>
   <div style="display: flex; justify-content: center;">
   <div class="b-table-container"
@@ -232,46 +221,42 @@ const updateCensusDirty = () => {
             <td><input v-model="sub.fstnam" class="fstnam"/></td>
             <td><input maxlength="1" v-model="sub.midnam" class="midnam"/></td>
             <td><input v-model="sub.dob" class="dob" placeholder="m/d/yyyy"/></td>
-            <td style="text-align: center;"><button @click="(e:Event) => setSex(Number(rn), -1)" class="sex">{{ sub.sex }}</button></td>
+            <td style="text-align: center;"><button @click="(e:Event) => setSex(Number(rn), -1)" class="clear sex mono">{{ sub.sex }}</button></td>
             <td style="text-align: center;">
-              <button @click="(sub) => setSubBoolean(Number(rn), 'med')"><FA :icon="sub.med ? 'square-check' : 'square'"/></button>
-              <button @click="(sub) => setSubBoolean(Number(rn), 'den')"><FA :icon="sub.den ? 'square-check' : 'square'"/></button>
-              <button @click="(sub) => setSubBoolean(Number(rn), 'vis')"><FA :icon="sub.vis ? 'square-check' : 'square'"/></button>
+              <BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'med')" :icon="sub.med ? 'square-check' : 'square'" />
+              <BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'den')" :icon="sub.den ? 'square-check' : 'square'" />
+              <BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'vis')" :icon="sub.vis ? 'square-check' : 'square'" />
             </td>
-            <!-- <td class="den"><button @click="(sub) => setSubBoolean(rn, 'den')"><FA :icon="sub.den ? 'square-check' : 'square'"/></button></td>
-            <td class="vis"><button @click="(sub) => setSubBoolean(rn, 'vis')"><FA :icon="sub.vis ? 'square-check' : 'square'"/></button></td> -->
-            <td class="cobra"><button @click="(sub) => setSubBoolean(Number(rn), 'cobra')"><FA :icon="sub.cobra ? 'square-check' : 'square'"/></button></td>
+            <td class="cobra"><BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'cobra')" :icon="sub.cobra ? 'square-check' : 'square'" /></td>
             <td class="dis">&nbsp;</td>
             <td>
-              <button @click="delSub(Number(rn))"><FA clickable color="red" icon="trash-can"/></button>
-              <button @click="newDep(Number(rn))"><FA clickable color="black" icon="solid user-plus"/></button>
+              <BButton class="clear" @click="delSub(Number(rn))" icon="#red trash-can" />
+              <BButton class="clear" @click="newDep(Number(rn))" icon="#black solid user-plus" />
             </td>
           </tr>
           <tr v-for="(dep, dn) in sub.deps" :key="dep">
-            <td><select style="width: 3.5em;" @change="setRelation(rn as number, dn as number, $event)">
-                <option :selected="dep.relation == 'SUB'" value="SUB">SUB - Subscriber</option>
-                <option :selected="dep.relation == 'SPS'" value="SPS">SPS - Spouse</option>
-                <option :selected="dep.relation == 'DOM'" value="DOM">DOM - Domestic Partner</option>
-                <option :selected="dep.relation == 'CHD'" value="CHD">CHD - Child</option>
+            <td><select class="mono" style="width: 3.5em;" @change="setRelation(rn as number, dn as number, $event)">
+                <option class="mono" :selected="dep.relation == 'SUB'" value="SUB">SUB - Subscriber</option>
+                <option class="mono" :selected="dep.relation == 'SPS'" value="SPS">SPS - Spouse</option>
+                <option class="mono" :selected="dep.relation == 'DOM'" value="DOM">DOM - Domestic Partner</option>
+                <option class="mono" :selected="dep.relation == 'CHD'" value="CHD">CHD - Child</option>
             </select></td>
             <td><input v-model="dep.lstnam" class="lstnam"/></td>
             <td><input v-model="dep.fstnam" class="fstnam"/></td>
             <td><input maxlength="1" v-model="dep.midnam" class="midnam"/></td>
             <td><input v-model="dep.dob" class="dob" placeholder="m/d/yyyy"/></td>
-            <td style="text-align: center;"><button @click="(e:Event) => setSex(Number(rn), Number(dn))" class="sex">{{ dep.sex }}</button></td>
+            <td style="text-align: center;"><BButton class="clear sex" @click="(e:Event) => setSex(Number(rn), Number(dn))">{{ dep.sex }}</BButton></td>
             <td style="text-align: center;">
-              <button v-if="sub.med" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'med')"><FA :icon="dep.med ? 'square-check' : 'square'"/></button>
-              <button v-else><FA icon="solid ban" color="gainsboro"/></button>
-              <button v-if="sub.den" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'den')"><FA :icon="dep.den ? 'square-check' : 'square'"/></button>
-              <button v-else><FA icon="solid ban" color="gainsboro"/></button>
-              <button v-if="sub.vis" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'vis')"><FA :icon="dep.vis ? 'square-check' : 'square'"/></button>
-              <button v-else><FA icon="solid ban" color="gainsboro"/></button>
+              <BButton class="clear" v-if="sub.med" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'med')" :icon="dep.med ? 'square-check' : 'square'"/>
+              <BButton class="clear" v-else icon="#gainsboro solid ban"/>
+              <BButton class="clear" v-if="sub.den" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'den')" :icon="dep.den ? 'square-check' : 'square'"/>
+              <BButton class="clear" v-else icon="#gainsboro solid ban"/>
+              <BButton class="clear" v-if="sub.vis" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'vis')" :icon="dep.vis ? 'square-check' : 'square'"/>
+              <BButton class="clear" v-else icon="#gainsboro solid ban"/>
             </td>
-            <!-- <td class="den"><button v-if="sub.den" @click="(sub) => setDepBoolean(rn, dn, 'den')"><FA :icon="dep.den ? 'square-check' : 'square'"/></button></td>
-            <td class="vis"><button v-if="sub.vis" @click="(sub) => setDepBoolean(rn, dn, 'vis')"><FA :icon="dep.vis ? 'square-check' : 'square'"/></button></td> -->
             <td class="cobra">&nbsp;</td>
-            <td class="dis"><button v-if="dep.relation == 'CHD'" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'dis')"><FA :icon="dep.dis ? 'square-check' : 'square'"/></button></td>
-            <td><button @click="delDep(Number(rn), Number(dn))"><FA clickable color="red" icon="trash-can"/></button></td>
+            <td class="dis"><BButton class="clear" v-if="dep.relation == 'CHD'" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'dis')" :icon="dep.dis ? 'square-check' : 'square'"/></td>
+            <td><BButton class="clear" @click="delDep(Number(rn), Number(dn))" icon="#red trash-can"/></td>
           </tr>
       </template>
       </tbody>
@@ -284,21 +269,6 @@ const updateCensusDirty = () => {
 </template>
 
 <style scoped>
-select {
-  font-family: 'Courier New', Courier, monospace;
-  option {
-    font-family: 'Courier New', Courier, monospace;
-  }
-}
-button {
-  background-color: transparent;
-  border: none;
-  border-radius: .2em;
-  font-size: 1em;
-  &:focus {
-    outline: 2px solid blue;
-  }
-}
 input {
   padding-left: 2px;
   padding-right: 2px;

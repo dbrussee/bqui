@@ -4,52 +4,8 @@ import { ref, useId } from "vue";
 import { appProspectStore } from "@/stores/ProspectStore";
 const prospectStore = appProspectStore();
 import ProspectComponent from "@/components/ProspectComponent.vue";
-import FA from "@/components/FA.vue";
-import { appUserStore } from "../stores/AppUserStore";
-const userStore = appUserStore();
-
-const favesPopover = ref()
-const recentPopover = ref()
-
-const prospect_id = ref("");
-import BTable from "@/components/BTable.vue";
-import BPopup from "@/components/BPopup.vue";
 import QuoteListComponent from "@/components/QuoteListComponent.vue";
-
-const pickedFave = ref("");
-const pickedRecent = ref("");
-function pickFave(pid: string) {
-  prospectStore.getProspect(pid, true);
-  pickedFave.value = "";
-  favesPopover.value?.close();
-}
-function pickRecent(pid: string) {
-  prospectStore.getProspect(pid, true);
-  pickedRecent.value = "";
-  recentPopover.value?.close();
-}
-function clearRecents() {
-  prospectStore.clearRecents();
-  pickedRecent.value = "";
-  recentPopover.value?.close();
-}
-const cfgFaves = {
-  width: "25em",
-  columns: [
-    { id: "pid", heading: "Prosp", width: "4em", flags: "R" },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    { id: "name", heading: "Name", width: "20em", formatter: (row:any, td:HTMLTableCellElement) => {
-      return row.name
-    } },
-  ],
-};
-const cfgRecents = {
-  width: "25em",
-  columns: [
-    { id: "pid", heading: "Prosp", width: "4em", flags: "R" },
-    { id: "name", heading: "Name", width: "20em" },
-  ],
-};
+import BButton from "@/components/B/BButton.vue";
 
 const prospHandler = ref({
   id: useId(),
@@ -85,40 +41,12 @@ const prospHandler = ref({
 </script>
 <template>
   <div class="drop_menu">
-    <BPopup as="anchor" linkicon="solid list-ul_" linktext="Recent" class="B2R"
-      ref="recentPopover"
-      :buttons="[
-        {
-          text: (!userStore.user.recents || userStore.user.recents.length == 0 ? '' : 'Clear History'),
-          action: () => clearRecents(),
-          confirm: `Are you sure you want to delete history?<p style='color:red;'>It cannot be undone!`
-        }
-      ]">
-      <BTable
-        :rows="userStore.user.recents"
-        :config="cfgRecents"
-        @pick="(row: any) => pickRecent(row.pid)"
-      />
-    </BPopup>&nbsp;
-    <BPopup as="anchor" linkicon="regular heart_" linktext="Favorites" ref="favesPopover" class="B2R">
-      <BTable
-        :rows="userStore.user.faves"
-        :config="cfgFaves"
-        @pick="(row: any) => pickFave(row.pid)"
-      />
-    </BPopup>&nbsp;
-    <FA clickable @click="prospHandler.edit()" icon="square-plus_" >New</FA>&nbsp;
-    <form
-      style="display: inline-block"
-      @submit.prevent="prospectStore.getProspect(prospect_id, true)"
-    >
-      &nbsp;<input v-model="prospect_id" size="8" placeholder="Prosp #" />
-      <button type="submit">Load</button>
-    </form>&nbsp;
-  </div>
+    <BButton @click="prospHandler.edit()" class="action" icon="square-plus_">New Prospect&hellip;</BButton>
+</div>
   <ProspectComponent />
-
-  <QuoteListComponent width="calc(100vw - 200px - 2em)" height="calc(100vh - 15em)" style="margin-top: .5em;"/>
+  <div style="margin-top: .5em;">
+    <QuoteListComponent />
+  </div>
 
   <dialog :id="prospHandler.id">
     <div class="titlebar">New Prospect</div>
@@ -139,8 +67,8 @@ const prospHandler = ref({
         <tr><th>Enroll Date:</th><td><input style="width: 10em;" v-model="prospHandler.temp.enroll_date"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
-            <button @click="prospHandler.abort()" class="anchor" style="margin-right: .5em;"><FA icon="solid x" style="color:red;"/>Cancel</button>
-            <button @click="prospHandler.save()" class="action"><FA icon="solid users_"/>Create Prospect</button>
+            <BButton class="anchor" icon="#red solid x" @click="prospHandler.abort()">Cancel</BButton>&nbsp;
+            <BButton class="action" icon="square-plus_" @click="prospHandler.save()">Create Prospect</BButton>
           </div>
         </td></tr>
       </tbody>

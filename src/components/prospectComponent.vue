@@ -5,10 +5,10 @@ const prospectStore = appProspectStore();
 import { appUserStore } from "../stores/AppUserStore.ts";
 const userStore = appUserStore();
 import { B } from "@/composables/BUtils";
-import InfoBox from "./InfoBox.vue";
-import FA from "./FA.vue";
-// import BPopup from "./BPopup.vue";
 import { useId, ref } from "vue";
+import BIcon from "./B/BIcon.vue";
+import BButton from "./B/BButton.vue";
+import BInfo from "./B/BInfo.vue";
 
 const fave = (pid: number, isFavorite: boolean) => {
   prospectStore.setFavorite(pid, isFavorite);
@@ -63,21 +63,21 @@ const prospectCSZ = (prosp:any) => {
 <template>
   <div class="prospect_info">
   <div v-if="prospectStore.issue?.severity == 'FATAL'">
-    <FA color="red" icon="solid bug_">{{ prospectStore.issue.message }}</FA>
+    <BIcon icon="#red solid bug_">{{ prospectStore.issue.message }}</BIcon>
   </div>
   <div v-if="prospectStore.issue?.severity == 'INFO'">
-    <FA color="sienna" icon="solid circle-exclamation_">{{ prospectStore.issue.message }}</FA>
+    <BIcon icon="#sienna solid circle-exclamation_">{{ prospectStore.issue.message }}</BIcon>
   </div>
 
   <div v-if="prospectStore.isLoading">
     Loading...
   </div>
   <div v-if="!prospectStore.issue && !prospectStore.isLoading && !prospectStore.prospect" class="prospect_info">
-    &nbsp;<FA icon="solid circle" color="sienna">No prospect loaded</FA>
+    &nbsp;<BIcon icon="#sienna solid circle">No prospect loaded</BIcon>
   </div>
   <div v-if="!prospectStore.issue && !prospectStore.isLoading && prospectStore.prospect" class="prospect_info">
     Prospect ID: {{ prospectStore.prospect.id }}
-    <InfoBox class="R2B" title="Prospect Details">
+    <BInfo pos="R2B" heading="Prospect Details">
       <ul>
         <li>Agent of Record: {{ prospectStore.prospect.agent_id }}</li>
         <li>Subscribers:
@@ -95,16 +95,19 @@ const prospectCSZ = (prosp:any) => {
         </ul></li>
         <li v-if="prospectStore.prospect.last_quoted_ts">Last Quoted: {{ B.ts(prospectStore.prospect.last_quoted_ts) }}</li>
         <li v-if="prospectStore.prospect.enrolled_ts">Enrolled: {{ B.ts(prospectStore.prospect.enrolled_ts) + " as " + prospectStore.prospect.grpnum }}</li>
-      </ul> </InfoBox
+      </ul> </BInfo
     >
     &nbsp;&nbsp;&nbsp;
-    <FA tt="Set / Unset Favorite" :icon="isCurrentlyFavorite() ? 'solid heart_' : 'regular heart_'" clickable
-      @click="fave(prospectStore.prospect.id, !isCurrentlyFavorite())"
-      :color="isCurrentlyFavorite() ? 'darkred' : 'gray'"/>
+    <BIcon tt="Toggle Bookmark" :icon="isCurrentlyFavorite() ? '#darkred solid bookmark_' : '#gray regular bookmark_'"
+      @click="fave(prospectStore.prospect.id, !isCurrentlyFavorite())" />
     <div style="display: flex; align-items: flex-start;">
     <table class="form-table">
       <tbody>
-        <tr><td><FA v-if="prospectStore.prospect" clickable @click="prospHandler.edit()" icon="edit_">{{ prospectStore.prospect ? prospectStore.prospect.name : '&nbsp;' }}</FA></td></tr>
+        <tr><td>
+          <BIcon v-if="prospectStore.prospect" as="anchor"
+            @click="prospHandler.edit()"
+            icon="edit_">{{ prospectStore.prospect ? prospectStore.prospect.name : '&nbsp;' }}</BIcon>
+        </td></tr>
         <tr><td>{{ prospectStore.prospect.addr1 }}{{ prospectStore.prospect.addr2 ? ', ' + prospectStore.prospect.addr2 : '' }}</td></tr>
         <tr><td v-html="prospectCSZ(prospectStore.prospect)"></td></tr>
       </tbody>
@@ -117,7 +120,26 @@ const prospectCSZ = (prosp:any) => {
         <tr><td>{{prospectStore.prospect.phone}}</td></tr>
       </tbody>
     </table>
+    <table class="form-table" style="margin-left: 2em;">
+      <tbody>
+        <tr><th>Created:</th><td>{{ B.ts(prospectStore.prospect.created_ts) }}</td></tr>
+        <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.ts(prospectStore.prospect.last_quote?.crttms), 'No quotes') }}
+          <BInfo v-if="prospectStore.prospect.last_quote" pos="L" heading="Last Quote Details">
+            <ul>
+              <li>Quote ID: {{ prospectStore.prospect.last_quote.id }}</li>
+              <li>Created: {{ B.ts(prospectStore.prospect.last_quote.crttms) }}</li>
+              <li>By: {{ prospectStore.prospect.last_quote.crtusr }}</li>
+              <li v-if="prospectStore.prospect.last_quote.med_plan">MED Plan: {{ prospectStore.prospect.last_quote.med_plan }}</li>
+              <li v-if="prospectStore.prospect.last_quote.dru_plan">DRU Plan: {{ prospectStore.prospect.last_quote.dru_plan }}</li>
+              <li v-if="prospectStore.prospect.last_quote.den_plan">DEN Plan: {{ prospectStore.prospect.last_quote.den_plan }}</li>
+              <li v-if="prospectStore.prospect.last_quote.vis_plan">VIS Plan: {{ prospectStore.prospect.last_quote.vis_plan }}</li>
+            </ul>
+          </BInfo>
 
+        </td></tr>
+        <tr><th>Enrolled:</th><td>{{ B.ifNull(B.ts(prospectStore.prospect.enolled_ts), 'Not enrolled') }}</td></tr>
+      </tbody>
+    </table>
     </div>
     </div>
   </div>
@@ -144,8 +166,8 @@ const prospectCSZ = (prosp:any) => {
         <tr><th>Enroll Date:</th><td><input style="width: 10em;" v-model="prospHandler.temp.enroll_date"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
-            <button class="anchor" style="margin-right: .6em;" @click="prospHandler.abort()"><FA icon="solid x" style="color: red;" />Cancel</button>
-            <button type="submit" class="action"><FA icon="floppy-disk_" /> Save Prospect</button>
+            <BButton class="anchor" style="margin-right: .6em;" @click="prospHandler.abort()" icon="#red solid x">Cancel</BButton>
+            <BButton type="submit" class="action" icon="floppy-disk_"> Save Prospect</BButton>
           </div>
         </td></tr>
       </tbody>

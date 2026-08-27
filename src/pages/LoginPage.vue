@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import FA from "@/components/FA.vue";
 import { appUserStore } from "../stores/AppUserStore";
+import BIcon from "@/components/B/BIcon.vue";
 const userStore = appUserStore();
 
 const loginuid = ref("");
 const loginpwd = ref("");
+
+
 </script>
 
 <template>
@@ -32,10 +34,10 @@ const loginpwd = ref("");
     Loading...
   </div>
   <div v-if="userStore.issue?.severity == 'FATAL'" style="color: maroon;">
-    <FA style="color: red;" icon="solid bug" /> {{ userStore.issue.message }}
+    <BIcon icon="#red solid bug" /> {{ userStore.issue.message }}
   </div>
   <div v-if="userStore.issue?.severity == 'INFO'" style="color: sienna;">
-    <FA style="color: sienna;" icon="solid circle-exclamation" /> {{ userStore.issue.message }}
+    <BIcon icon="#sienna solid circle-exclamation" /> {{ userStore.issue.message }}
   </div>
 </template>
 

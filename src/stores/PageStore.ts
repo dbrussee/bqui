@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const appPageStore = defineStore('appPageStore', () => {
-  type PageCode = 'PROSPECTS' | 'MSGS' | 'SETTINGS' | 'CENSUS'
+  type PageCode = 'PROSPECTS' | 'MSGS' | 'SETTINGS' | 'CENSUS' | 'PROPOSALS'
   const page = ref<PageCode>("PROSPECTS")
 
   return { page }

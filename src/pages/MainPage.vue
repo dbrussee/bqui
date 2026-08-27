@@ -6,24 +6,20 @@ import { countersStore } from "../stores/CountersStore";
 const counters = countersStore();
 import { appStore } from "@/stores/AppStore.ts";
 const app = appStore()
-import BTable from "@/components/BTable.vue";
-import UserConfirm from "@/components/UserConfirm.vue";
-import BPopup from "@/components/BPopup.vue";
-import InfoBox from "@/components/InfoBox.vue";
+import BTable from "@/components/B/BTable.vue";
+import BPopup from "@/components/B/BPopup.vue";
+import BConfirm from "@/components/B/BConfirm.vue";
+import BInfo from "@/components/B/BInfo.vue";
 
 const errsGrid = {
   height: "15em",
   columns: [
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { id: "ts", heading: "Time", width: "5.5em", flags: "R", formatter: (row:any) => {
-      return row.ts.split(" ")[3]
-    } },
+
+    { id: "ts", heading: "Time", width: "5.5em", flags: "R" },
     { id: "method", heading: "Mth", width: "3em", flags: "C" },
     { id: "path", heading: "Path", width: "14em" },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { id: "msg", heading: "Message", width: "25em", formatter: (row:any) => {
-      return row.msg //+ "<div style='font-size:.8em;'>" + row.stack.replace("\n","<br/>") + "</div>"
-    }},
+
+    { id: "msg", heading: "Message", width: "25em" },
   ],
 };
 
@@ -44,12 +40,12 @@ const errsGrid = {
           <tr>
             <td style="text-align: left; width: 10em">
               v{{app.version()}}
-              <InfoBox class="T2R" :title="'Application Ver ' + app.version()">
+              <BInfo pos="T2R" :heading="'Application Ver ' + app.version()">
                 <ul>
                   <li>Ver: {{ app.versionDescription() }}</li>
                   <li>{{app.vers.release.getTime() < new Date().getTime() ? 'Released: ' : 'Scheduled Release: '}}{{app.vers.release.toLocaleDateString('en-US')}}</li>
                 </ul>
-              </InfoBox></td>
+              </BInfo></td>
             <td style="text-align: center">Something</td>
             <td style="text-align: right; width: 10em">
               <div v-if="counters.apiCalls.active > 0" class="spinner"></div>{{counters.apiCalls.active > 1 ? ':' + counters.apiCalls.active : ''}}&nbsp;
@@ -57,17 +53,15 @@ const errsGrid = {
               <span v-if="counters.apiCalls.error > 0">
                 <BPopup v-if="counters.apiCalls.error > 0" linktext="❌" class="TL">
                   Last Errors:
-                  <UserConfirm as="anchor" @confirm="counters.lastError.length = 0; counters.apiCalls.error = 0" title="Clear Errors" linktext="Clear errors?"></UserConfirm>
-                  <BTable :rows="counters.lastError" :config="errsGrid" />
+                  <BConfirm class="anchor" icon="#red solid x"
+                    @confirm="counters.lastError.length = 0; counters.apiCalls.error = 0">Clear Errors?</BConfirm>
+                  <BTable :rows="counters.lastError" :config="errsGrid">
+                    <template #column_ts="{row}">
+                      {{ row.ts.split(" ")[3] }}
+                    </template>
+                  </BTable>
                 </BPopup>
-              <!-- ❌: {{ counters.apiCalls.error }}
-              <InfoBox v-if="counters.lastError.length > 0">
-                Last Errors:
-                <UserConfirm @confirm="counters.lastError.length = 0; counters.apiCalls.error = 0" title="Clear Errors">Clear errors?</UserConfirm>
-                <BTable :rows="counters.lastError" :config="errsGrid" />
-              </InfoBox> -->
               </span>
-              <!-- <span v-if="counters.apiCalls.error > 0"> ❌: {{ counters.apiCalls.error }} </span> -->
             </td>
           </tr>
         </tbody>

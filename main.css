@@ -41,20 +41,20 @@
   margin: 0;
   padding: 0;
 }
+div.titlebar {
+  color: var(--form-prompt-color);
+  font-size: 1.2em;
+  font-style: normal;
+  padding-bottom: 0.2em;
+  /* margin-right: .5em; */
+  border-bottom: 1px solid var(--form-prompt-color);
+  margin-bottom: 0.2em;
+}
 dialog {
   padding: .5em;
   border-radius: .3em;
   box-shadow: .3em .3em .3em gray;
 
-  div.titlebar {
-    color: var(--form-prompt-color);
-    font-size: 1.2em;
-    font-style: normal;
-    padding-bottom: 0.2em;
-    /* margin-right: .5em; */
-    border-bottom: 1px solid var(--form-prompt-color);
-    margin-bottom: 0.2em;
-  }
 }
 dialog:modal {
   margin: auto;
@@ -85,6 +85,9 @@ div.buttonbar {
 
 ul {
   padding-left: 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: .1em; /* Adjust this value for more or less space */
 }
 
 ul li {
@@ -101,6 +104,14 @@ p {
   margin-top: .2rem;
 }
 
+select {
+  position: relative;
+  top: -.15em;
+}
+.mono {
+  font-family: Consolas, "Andale Mono", "Lucida Console", "Courier New", monospace;
+}
+
 button {
   padding: 0.05rem .3rem;
   cursor: pointer;
@@ -113,6 +124,15 @@ button.modern {
   /* border-radius: .2em; */
   &:hover {
     background-color: oklch(0.5 0.25 250);
+  }
+}
+button.clear {
+  background-color: transparent;
+  border: none;
+  border-radius: .2em;
+  font-size: 1em;
+  &:focus {
+    outline: 2px solid blue;
   }
 }
 button.action {
@@ -271,6 +291,85 @@ table.form-table {
   &:hover {
     text-decoration: underline;
   }
+}
+button.anchor:disabled {
+  color: silver;
+  cursor: default;
+}
+
+i.gapleft {
+  margin-left: .2em;
+}
+i.gapright {
+  margin-right: .2em;
+}
+
+div[popover] {
+  text-align: left;
+  font-size: 11pt;
+  line-height: 1.3;
+}
+div[popover]:popover-open {
+  /* 1. Reset default popover centering styles */
+  margin: 0;
+  inset: auto;
+  padding: .4em;
+  border: 1px solid black;
+  border-radius: 0.5rem;
+  position-area: bottom;
+  box-shadow: 3px 3px 3px gray;
+}
+div.B[popover]:popover-open {
+  position-area: bottom;
+}
+div.B2R[popover]:popover-open {
+  position-area: bottom span-right;
+}
+div.B2L[popover]:popover-open {
+  position-area: bottom span-left;
+}
+div.T[popover]:popover-open {
+  position-area: top;
+}
+div.T2R[popover]:popover-open {
+  position-area: top span-right;
+}
+div.T2L[popover]:popover-open {
+  position-area: top span-left;
+}
+div.L[popover]:popover-open {
+  position-area: left span-all;
+}
+div.L2B[popover]:popover-open {
+  position-area: left span-bottom;
+}
+div.L2T[popover]:popover-open {
+  position-area: left span-top;
+}
+div.R[popover]:popover-open {
+  position-area: right span-all;
+}
+div.R2B[popover]:popover-open {
+  position-area: right span-bottom;
+}
+div.R2T[popover]:popover-open {
+  position-area: right span-top;
+}
+div.TL[popover]:popover-open {
+  position-area: top left ;
+}
+div.TR[popover]:popover-open {
+  position-area: top right;
+}
+div.BL[popover]:popover-open {
+  position-area: bottom left;
+}
+div.BR[popover]:popover-open {
+  position-area: bottom right;
+}
+
+div[popover]::backdrop {
+  background-color: rgba(0, 0, 0, 0.15);
 }
 
 /* Responsive collapse for small screens */
