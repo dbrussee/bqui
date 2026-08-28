@@ -40,7 +40,7 @@ const cfgCensus = ref({
     { id: "sex", heading: "Sex", width: "2em", flags: "C" },
     { id: "plans", heading:"Med Den Vis", width: "6.5em", flags: "C" },
     { id: "cobra", heading: "COBRA", width: "4em", flags: "C" },
-    { id: "dis", heading: "Dis", width: "3em", flags: "C" },
+    { id: "dis", heading: "Dis", width: "2em", flags: "C" },
     { id:"acts", heading: "", width: "4.5em" }
   ],
 })
@@ -191,7 +191,7 @@ const updateCensusDirty = () => {
         Any changes you have made will be lost. Are you sure?
       </template>
     </BConfirm>&nbsp;
-    <BButton class="action" icon="square-plus_" @click="newSub()">New Subscriber</BButton>&nbsp;
+    <BButton class="modern" icon="solid user-plus_" @click="newSub()">Add Subscriber</BButton>&nbsp;
     <span style='float: right;'>
       <BIcon :as="prospStore.censusDirty ? 'anchor' : 'clickable'"
         :color="prospStore.censusDirty ? '' : 'gainsboro'"
@@ -229,7 +229,7 @@ const updateCensusDirty = () => {
             <td style="text-align: center;"><button @click="(e:Event) => setSex(Number(rn), -1)" class="clear sex mono">{{ sub.sex }}</button></td>
             <td style="text-align: center;">
               <BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'med')" :icon="sub.med ? 'square-check' : 'square'" />
-              <BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'den')" :icon="sub.den ? 'square-check' : 'square'" />
+              <BButton class="clear gapleft gapright" @click="(sub) => setSubBoolean(Number(rn), 'den')" :icon="sub.den ? 'square-check' : 'square'" />
               <BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'vis')" :icon="sub.vis ? 'square-check' : 'square'" />
             </td>
             <td class="cobra"><BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'cobra')" :icon="sub.cobra ? 'square-check' : 'square'" /></td>
@@ -254,8 +254,8 @@ const updateCensusDirty = () => {
             <td style="text-align: center;">
               <BButton class="clear" v-if="sub.med" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'med')" :icon="dep.med ? 'square-check' : 'square'"/>
               <BButton class="clear" v-else icon="#gainsboro solid ban"/>
-              <BButton class="clear" v-if="sub.den" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'den')" :icon="dep.den ? 'square-check' : 'square'"/>
-              <BButton class="clear" v-else icon="#gainsboro solid ban"/>
+              <BButton class="clear gapleft gapright" v-if="sub.den" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'den')" :icon="dep.den ? 'square-check' : 'square'"/>
+              <BButton class="clear gapleft gapright" v-else icon="#gainsboro solid ban"/>
               <BButton class="clear" v-if="sub.vis" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'vis')" :icon="dep.vis ? 'square-check' : 'square'"/>
               <BButton class="clear" v-else icon="#gainsboro solid ban"/>
             </td>

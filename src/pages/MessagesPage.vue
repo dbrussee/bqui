@@ -83,11 +83,11 @@ const msgHandler = ref({
           </tr>
           <tr v-if="currentMessage.deliveredat">
             <th>Delivered:</th>
-            <td>{{ B.ts(currentMessage.deliveredat) }}</td>
+            <td>{{ B.format.ts(currentMessage.deliveredat) }}</td>
           </tr>
           <tr>
             <th>Opened:</th>
-            <td>{{ currentMessage.readat ? B.ts(currentMessage.readat) : "Unread" }}</td>
+            <td>{{ currentMessage.readat ? B.format.ts(currentMessage.readat) : "Unread" }}</td>
           </tr>
         </tbody>
       </table>

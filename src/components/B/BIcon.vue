@@ -59,6 +59,7 @@ const getClasses_fa = () => {
   // icon='_name' -> <i class='fa-regular fa-name gapleft'/>
   let vers = "fa-regular"
   const classes = new Set()
+  classes.add("fa")
   iconcolor.value = ""
   let parts:string[] = []
   try {

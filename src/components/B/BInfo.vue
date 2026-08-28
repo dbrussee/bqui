@@ -49,14 +49,15 @@ const props = defineProps({
 })
 
 const getIcon = ():string => {
-  if (props.as == "info") return "#sienna lightbulb"
+  if (props.as == "info" && props.disabled) return "lightbulb"
+  if (props.as == "info" && !props.disabled) return "#sienna lightbulb"
   return "solid question"
 }
 
 </script>
 
 <template>
-  <button tabindex="-1" onmousedown="event.preventDefault()" :popovertarget="popid" :disabled="props.disabled" class="anchor">
+  <button tabindex="-1" onmousedown="event.preventDefault()" :popovertarget="popid" :disabled="props.disabled" :class="['anchor', $attrs.class]">
     <BIcon :icon="getIcon()">{{props.text}}</BIcon>
   </button>
   <div :id="popid" popover :class="props.pos" :style="{width:props.width,minWidth:props.width,maxWidth:props.width}">

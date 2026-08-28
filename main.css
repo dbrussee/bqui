@@ -113,9 +113,12 @@ select {
 }
 
 button {
-  padding: 0.05rem .3rem;
+  font-size: 1em;
+  padding: 0.05em .3em;
   cursor: pointer;
+  border: 1px solid gray;
   border-radius: .2em;
+  box-shadow: none;
   &:disabled {
     background-color: #e0e0e0 !important;
     color: #a0a0a0 !important;
@@ -123,17 +126,29 @@ button {
     opacity: 0.6 !important;
   }
 }
+button.gapright {
+  margin-right: .4em;
+}
+button.gapleft {
+  margin-left: .4em;
+}
+i.fa {
+  font-size: .93em;
+}
 button.modern {
-  padding: .3rem;
+  font-size: 1em  !important;
+  padding: 0.05em .3em !important;
   color: oklch(0.99 0 0);
   background-color: oklch(0.6 0.25 250);
-  border: none;
+  border-color: oklch(0.6 0.25 250);
+  /* border: none; */
   /* border-radius: .2em; */
   &:hover {
     background-color: oklch(0.5 0.25 250);
   }
 }
 button.clear {
+  padding: 0 !important;
   background-color: transparent;
   border: none;
   border-radius: .2em;
@@ -143,10 +158,12 @@ button.clear {
   }
 }
 button.action {
-  padding: .3rem;
+  font-size: 1em !important;
+  padding: 0.05em .3em !important;
   color: white;
   background-color: salmon;
-  border: none;
+  border-color: salmon;
+  /* border: none; */
   &:hover {
     color: var(--action-button-color);
     background-color: var(--action-button-bgcolor);
@@ -196,8 +213,12 @@ div.drop_menu {
   padding-right: .5em;
   text-align: left;
 }
-input::placeholder {
-  color: silver;
+input {
+  font-size: 1em;
+
+  &::placeholder {
+    color: silver;
+  }
 }
 
 

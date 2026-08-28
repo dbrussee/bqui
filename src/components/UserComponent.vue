@@ -19,7 +19,7 @@ const userStore = appUserStore();
         <li>Last Name: {{ userStore.user.lstnam }}</li>
         <li>Status: {{ userStore.user.status }}</li>
         <li>Email: {{ userStore.user.email }}</li>
-        <li>Logged in: {{ B.ts(userStore.user.lst_login) }}</li>
+        <li>Logged in: {{ B.format.ts(userStore.user.lst_login) }}</li>
       </ul>
     </BInfo>
 

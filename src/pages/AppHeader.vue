@@ -150,7 +150,7 @@ const searchHandler = ref({
       @dblpick="(row) => searchHandler.load(row)"
     />
     <div class="buttonbar">
-      <BButton class="anchor" icon="#red solid x" @click="searchHandler.abort()">Cancel</BButton>
+      <BButton class="anchor gapright" icon="#red solid x" @click="searchHandler.abort()">Cancel</BButton>
       <BButton :disabled="!cfgSearchResults.pickedRow" class="modern" icon="solid check" @click="searchHandler.load(cfgSearchResults.pickedRow)">Load</BButton>
     </div>
   </dialog>

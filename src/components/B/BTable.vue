@@ -132,6 +132,17 @@ div.b-table-heading {
   font-style: italic;
   color: var(--heading-color);
 }
+.flex-row-container {
+  display: flex;         /* Forces children onto the same line */
+  flex-direction: row;   /* Sets horizontal alignment (default) */
+  flex-wrap: nowrap;     /* Prevents items from breaking to a new line */
+  gap: 1rem;             /* Adds clean spacing between your components */
+  width: 100%;           /* Ensures the container spans full width */
+}
+
+.flex-item {
+  flex: 1;               /* Forces all components to share width equally */
+}
 div.b-table-footer {
   width: 100%;
   /* height: 1.5em; */

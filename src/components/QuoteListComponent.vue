@@ -7,7 +7,8 @@ import BTable from './B/BTable.vue';
 import { B } from '@/composables/BUtils.ts';
 import BPopup from './B/BPopup.vue';
 import BButton from './B/BButton.vue';
-import BActionlist from './B/BActionlist.vue';
+// import BActionlist from './B/BActionlist.vue';
+import BInfo from './B/BInfo.vue';
 
 // Watch for changes to the prospect.
 // Because the value is in a store, we need to use
@@ -24,7 +25,8 @@ const cfgQuotesList = ref({
   pickedRow: null as any,
   columns: [
     { id: "id", heading: "Quote", width: "5em", flags: "R" },
-    { id: "effdat", heading: "Effective", width: "6em", flags: "C" },
+    { id: "effdat", heading: "Effective", width: "5em", flags: "C" },
+    { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
     { id: "rlob", heading: "Product", width: "8em", cellclass: "mono" },
     { id: "descr", heading: "Description" },
     { id: "status", heading: "Status", width: "8em", cellclass: "mono" },
@@ -56,17 +58,17 @@ const handleQuoteRowClicked = (row:any, col:any, cn:number) => {
         handleQuoteRowClicked(row, col, cn)
       }"
       :config="cfgQuotesList" :rows="prospStore.quotes">
-    <template #column_effdat="{row}">{{ B.effdat(row.effdat) }}</template>
+    <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
     <template #buttons>
-      <BPopup as="button" class="action" linkicon="square-plus_" linktext="New Quote&hellip;" pos="T2R">
+      <BPopup as="button" class="action gapright" linkicon="square-plus_" linktext="New Quote&hellip;" pos="T2R">
         Placeholder for New Quote dialog
       </BPopup>&nbsp;
-      <BActionlist :disabled="!cfgQuotesList.pickedRow" class="anchor" heading="Quote Actions" pos="T2R" icon="solid bars" text="Actions"
+      <!-- <BActionlist :disabled="!cfgQuotesList.pickedRow" class="anchor" heading="Quote Actions" pos="T2R" icon="solid bars" text="Actions"
         :actions="[
           { icon: 'lightbulb', text: 'Quote Info', info: {heading:`Quote ID ${cfgQuotesList.pickedRow?.id} Info`,
             body:
               `<ul>
-                <li>Created: ${B.ts(cfgQuotesList.pickedRow?.crttms)}</li>
+                <li>Created: ${B.format.ts(cfgQuotesList.pickedRow?.crttms)}</li>
                 <li>By: ${cfgQuotesList.pickedRow?.crtusr}</li>
                 <li>Plans
                 <ul>
@@ -78,24 +80,22 @@ const handleQuoteRowClicked = (row:any, col:any, cn:number) => {
               </ul>`}
           },
         ]"
-      />
+      /> -->
+      <BInfo :disabled="!cfgQuotesList.pickedRow" pos="T2R" class="gapright" :heading="'Quote ID ' + cfgQuotesList.pickedRow?.id + ' Info'">
+        <ul>
+          <li>Quote ID: {{ cfgQuotesList.pickedRow?.id }} ({{ cfgQuotesList.pickedRow?.qtype }} {{ cfgQuotesList.pickedRow?.funding }} {{ cfgQuotesList.pickedRow?.rlob }})</li>
+          <li>Created: {{ B.format.ts(cfgQuotesList.pickedRow?.crttms) }}</li>
+          <li>By: {{ cfgQuotesList.pickedRow?.crtusr }}</li>
+          <li v-if="cfgQuotesList.pickedRow?.med_plan">MED Plan: {{ cfgQuotesList.pickedRow?.med_plan }}</li>
+          <li v-if="cfgQuotesList.pickedRow?.dru_plan">DRU Plan: {{ cfgQuotesList.pickedRow?.dru_plan }}</li>
+          <li v-if="cfgQuotesList.pickedRow?.den_plan">DEN Plan: {{ cfgQuotesList.pickedRow?.den_plan }}</li>
+          <li v-if="cfgQuotesList.pickedRow?.vis_plan">VIS Plan: {{ cfgQuotesList.pickedRow?.vis_plan }}</li>
+        </ul>
+      </BInfo>
       |
-      <BButton :disabled="!cfgQuotesList.pickedRow" class="anchor" icon="lightbulb">Beef</BButton>
       <BButton gapleft :disabled="!cfgQuotesList.pickedRow" class="anchor" icon="_file-pdf">Generate</BButton>
     </template>
   </BTable>
-
-            <!-- <ul>
-              <li>Quote ID: {{ prospectStore.prospect.last_quote.id }}</li>
-              <li>Created: {{ B.ts(prospectStore.prospect.last_quote.crttms) }}</li>
-              <li>By: {{ prospectStore.prospect.last_quote.crtusr }}</li>
-              <li v-if="prospectStore.prospect.last_quote.med_plan">MED Plan: {{ prospectStore.prospect.last_quote.med_plan }}</li>
-              <li v-if="prospectStore.prospect.last_quote.dru_plan">DRU Plan: {{ prospectStore.prospect.last_quote.dru_plan }}</li>
-              <li v-if="prospectStore.prospect.last_quote.den_plan">DEN Plan: {{ prospectStore.prospect.last_quote.den_plan }}</li>
-              <li v-if="prospectStore.prospect.last_quote.vis_plan">VIS Plan: {{ prospectStore.prospect.last_quote.vis_plan }}</li>
-            </ul> -->
-
-
 </template>
 
 <style lang="css" scoped>

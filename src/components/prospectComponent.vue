@@ -91,10 +91,10 @@ const prospectCSZ = (prosp:any) => {
         <li>Type: {{ prospectStore.prospect.group_type }}</li>
         <li>Created<ul>
           <li>By: {{ prospectStore.prospect.created_by }}</li>
-          <li>On: {{ B.ts(prospectStore.prospect.created_ts) }}</li>
+          <li>On: {{ B.format.ts(prospectStore.prospect.created_ts) }}</li>
         </ul></li>
-        <li v-if="prospectStore.prospect.last_quoted_ts">Last Quoted: {{ B.ts(prospectStore.prospect.last_quoted_ts) }}</li>
-        <li v-if="prospectStore.prospect.enrolled_ts">Enrolled: {{ B.ts(prospectStore.prospect.enrolled_ts) + " as " + prospectStore.prospect.grpnum }}</li>
+        <li v-if="prospectStore.prospect.last_quoted_ts">Last Quoted: {{ B.format.ts(prospectStore.prospect.last_quoted_ts) }}</li>
+        <li v-if="prospectStore.prospect.enrolled_ts">Enrolled: {{ B.format.ts(prospectStore.prospect.enrolled_ts) + " as " + prospectStore.prospect.grpnum }}</li>
       </ul> </BInfo
     >
     &nbsp;&nbsp;&nbsp;
@@ -122,12 +122,12 @@ const prospectCSZ = (prosp:any) => {
     </table>
     <table class="form-table" style="margin-left: 2em;">
       <tbody>
-        <tr><th>Created:</th><td>{{ B.ts(prospectStore.prospect.created_ts) }}</td></tr>
-        <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.ts(prospectStore.prospect.last_quote?.crttms), 'No quotes') }}
+        <tr><th>Created:</th><td>{{ B.format.ts(prospectStore.prospect.created_ts) }}</td></tr>
+        <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.format.ts(prospectStore.prospect.last_quote?.crttms), 'No quotes') }}
           <BInfo v-if="prospectStore.prospect.last_quote" pos="L" heading="Last Quote Details">
             <ul>
-              <li>Quote ID: {{ prospectStore.prospect.last_quote.id }}</li>
-              <li>Created: {{ B.ts(prospectStore.prospect.last_quote.crttms) }}</li>
+              <li>Quote ID: {{ prospectStore.prospect.last_quote.id }} ({{ prospectStore.prospect.last_quote.qtype }} {{ prospectStore.prospect.last_quote.funding }} {{ prospectStore.prospect.last_quote.rlob }})</li>
+              <li>Created: {{ B.format.ts(prospectStore.prospect.last_quote.crttms) }}</li>
               <li>By: {{ prospectStore.prospect.last_quote.crtusr }}</li>
               <li v-if="prospectStore.prospect.last_quote.med_plan">MED Plan: {{ prospectStore.prospect.last_quote.med_plan }}</li>
               <li v-if="prospectStore.prospect.last_quote.dru_plan">DRU Plan: {{ prospectStore.prospect.last_quote.dru_plan }}</li>
@@ -137,7 +137,7 @@ const prospectCSZ = (prosp:any) => {
           </BInfo>
 
         </td></tr>
-        <tr><th>Enrolled:</th><td>{{ B.ifNull(B.ts(prospectStore.prospect.enolled_ts), 'Not enrolled') }}</td></tr>
+        <tr><th>Enrolled:</th><td>{{ B.ifNull(B.format.ts(prospectStore.prospect.enolled_ts), 'Not enrolled') }}</td></tr>
       </tbody>
     </table>
     </div>
