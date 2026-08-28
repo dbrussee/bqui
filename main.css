@@ -115,6 +115,13 @@ select {
 button {
   padding: 0.05rem .3rem;
   cursor: pointer;
+  border-radius: .2em;
+  &:disabled {
+    background-color: #e0e0e0 !important;
+    color: #a0a0a0 !important;
+    cursor: default !important;
+    opacity: 0.6 !important;
+  }
 }
 button.modern {
   padding: .3rem;
@@ -292,10 +299,10 @@ table.form-table {
     text-decoration: underline;
   }
 }
-button.anchor:disabled {
+/* button.anchor:disabled {
   color: silver;
   cursor: default;
-}
+} */
 
 i.gapleft {
   margin-left: .2em;

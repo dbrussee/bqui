@@ -71,7 +71,7 @@ function getCensusCount():string {
 <template>
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
-      ><BIcon as="icon" icon='building_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
+      ><BIcon as="icon" icon='solid shop_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
       ><BIcon as="icon" icon='solid people-group_' />Census: <span style='font-size: .8em;' v-html="getCensusCount()"></span>

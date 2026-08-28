@@ -5,6 +5,14 @@ import BIcon from './BIcon.vue'
 const popid = ref(useId())
 
 const props = defineProps({
+  as: { // For confirm popover
+    type: String,
+    required: false,
+    default: 'info',
+    validator(value: string) {
+      return ['info','help'].includes(value)
+    }
+  },
   text: {
     type: String,
     required: false,
@@ -40,15 +48,20 @@ const props = defineProps({
   },
 })
 
+const getIcon = ():string => {
+  if (props.as == "info") return "#sienna lightbulb"
+  return "solid question"
+}
+
 </script>
 
 <template>
   <button tabindex="-1" onmousedown="event.preventDefault()" :popovertarget="popid" :disabled="props.disabled" class="anchor">
-    <BIcon icon="#sienna lightbulb">{{props.text}}</BIcon>
+    <BIcon :icon="getIcon()">{{props.text}}</BIcon>
   </button>
   <div :id="popid" popover :class="props.pos" :style="{width:props.width,minWidth:props.width,maxWidth:props.width}">
     <div v-if="props.heading != ''" class="titlebar" v-html="props.heading" />
-    <div class="info"><slot/></div>
+    <div :class="props.as == 'info' ? 'info' : ''"><slot/></div>
   </div>
 </template>
 

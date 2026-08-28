@@ -11,6 +11,11 @@ defineOptions({
 const emit = defineEmits(["confirm"])
 
 const props = defineProps({
+  bypass: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
   icon: {
     type: String,
     required: false,
@@ -84,7 +89,10 @@ const doBlur = ():void => {
 </script>
 
 <template>
-  <button :popovertarget="popid" :disabled="props.disabled" :class="attrs.class" :style="attrs.style" @click="doBlur()">
+  <button v-if="props.bypass" :disabled="props.disabled" :class="attrs.class" :style="attrs.style" @click="doBlur(); emit('confirm')">
+    <BIcon :icon="props.icon" :source="props.source"><slot/></BIcon>
+  </button>
+  <button v-if="!props.bypass" :popovertarget="popid" :disabled="props.disabled" :class="attrs.class" :style="attrs.style" @click="doBlur()">
     <BIcon :icon="props.icon" :source="props.source"><slot/></BIcon>
   </button>
   <div :id="popid" popover :class="props.pos" :style="{width:props.width,minWidth:props.width,maxWidth:props.width}">

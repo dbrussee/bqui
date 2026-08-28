@@ -8,6 +8,7 @@ import { appUserStore } from "./AppUserStore";
 
 export const appProspectStore = defineStore("appProspectStore", () => {
   const prospect = ref<any>(null);
+  const searchResults = ref<any[]>([])
   const quotes = ref<any[]>([])
   const meta = ref<any>({
     ip: "UNKNOWN",
@@ -42,6 +43,18 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     const hash = await B.getHash(JSON.stringify(prospect.value.census))
     censusDirty.value = censusHash.value != hash
   }
+
+  async function searchProspects(query:string) {
+    if (query == "") return
+    searchResults.value.length = 0
+    const fetcher = await new BQAPIFetcher().callAPI(`/search/prospects`, 'POST', query)
+    if (fetcher.resp != null) {
+      searchResults.value = [...fetcher.resp]
+    }
+    meta.value = fetcher.meta
+    issue.value = fetcher.issue
+  }
+
   function getProspect(pid: string, registerRecent: boolean = false) {
     if (pid == "") return;
     prospect.value = {};
@@ -123,12 +136,16 @@ export const appProspectStore = defineStore("appProspectStore", () => {
           fave.name = prospect.value.name
         }
       })
-
     }
     meta.value = fetcher.meta
     issue.value = fetcher.issue
   }
 
 
-  return { isLoading, createProspect, updateProspect, getProspect, clearRecents, prospect, setCensusDirty, censusDirty, quotes, meta, issue, setFavorite };
+  return {
+    isLoading, meta, issue,
+    censusDirty,
+    quotes,
+    prospect, createProspect, updateProspect, getProspect, searchProspects, searchResults,
+    clearRecents, setFavorite, setCensusDirty };
 });

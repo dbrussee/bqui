@@ -10,6 +10,7 @@ const prospectStore = appProspectStore();
 import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
 import UserComponent from '@/components/UserComponent.vue';
+import BIcon from '@/components/B/BIcon.vue';
 
 
 const favesPopover = ref()
@@ -33,35 +34,52 @@ function clearRecents() {
   pickedRecent.value = "";
   recentPopover.value?.close();
 }
-const cfgFaves = {
+const cfgFaves = ref({
   width: "25em",
   columns: [
     { id: "pid", heading: "Prosp", width: "4em", flags: "R" },
 
     { id: "name", heading: "Name", width: "20em" },
   ],
-};
-const cfgRecents = {
+})
+const cfgRecents = ref({
   width: "25em",
   columns: [
     { id: "pid", heading: "Prosp", width: "4em", flags: "R" },
     { id: "name", heading: "Name", width: "20em" },
   ],
-};
+})
+const cfgSearchResults = ref({
+  width: "45em",
+  height: "15em",
+  pickedRow: null as any,
+  columns: [
+    { id: "id", heading: "Prosp", width: "4em", flags: "R" },
+    { id: "name", heading: "Name" },
+  ],
+})
+
 
 const searchHandler = ref({
   id: useId(),
   temp: {
-    searchtext: ''
+    query: ''
   } as any,
-  edit: () => {
+  show: () => {
+    cfgSearchResults.value.pickedRow = null
     const popup = document.getElementById(searchHandler.value.id) as HTMLDialogElement
     popup?.showModal()
   },
-  save: () => {
-    prospectStore.createProspect(searchHandler.value.temp)
-    const popup = document.getElementById(searchHandler.value.id) as HTMLDialogElement
-    popup?.close()
+  load: (row:any) => {
+    prospectStore.getProspect(row.id, true)
+    searchHandler.value.abort()
+  },
+  pick: (row:any) => {
+    cfgSearchResults.value.pickedRow = row
+  },
+  search: () => {
+    cfgSearchResults.value.pickedRow = null
+    prospectStore.searchProspects(searchHandler.value.temp.query)
   },
   abort: () => {
     const popup = document.getElementById(searchHandler.value.id) as HTMLDialogElement
@@ -110,7 +128,7 @@ const searchHandler = ref({
           &nbsp;<input v-model="prospect_id" size="8" placeholder="Prosp #" />
           <button type="submit">Load</button>
         </form>&nbsp;
-
+        <BButton class="modern" icon="solid magnifying-glass_" @click="searchHandler.show()">Search&hellip;</BButton>
       </span>
 
     </div>
@@ -119,30 +137,22 @@ const searchHandler = ref({
   </div>
 
   <dialog :id="searchHandler.id">
-    <div class="titlebar">New Prospect</div>
-    <table class="form-table">
+    <form @submit.prevent="searchHandler.search()">
+    <table class="form-table centerme">
       <tbody>
-        <tr><th>Group Name:</th><td><input style="width: 30em;" v-model="searchHandler.temp.name"></td></tr>
-        <tr><th>Contact:</th><td><input style="width: 30em;" v-model="searchHandler.temp.contact"></td></tr>
-        <tr><th>Email:</th><td><input style="width: 30em;" v-model="searchHandler.temp.email"></td></tr>
-        <tr><th>Phone:</th><td><input style="width: 12em;" v-model="searchHandler.temp.phone"></td></tr>
-        <tr><th>Subscribers:</th><td><input style="width: 5em;" v-model="searchHandler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
-        <tr><th>Address:</th><td><input style="width: 30em;" v-model="searchHandler.temp.addr1"></td></tr>
-        <tr><th></th><td><input style="width: 30em;" v-model="searchHandler.temp.addr2"></td></tr>
-        <tr><th></th><td>
-          <input style="width: 12em; margin-right: .3em;" v-model="searchHandler.temp.city">
-          <input style="width: 3em; margin-right: .3em;" v-model="searchHandler.temp.state_cd">
-          <input style="width: 6em;" v-model="searchHandler.temp.zip_cd">
-        </td></tr>
-        <tr><th>Enroll Date:</th><td><input style="width: 10em;" v-model="searchHandler.temp.enroll_date"></td></tr>
-        <tr><td colspan="2">
-          <div class="buttonbar">
-            <BButton class="anchor" icon="#red solid x" @click="searchHandler.abort()">Cancel</BButton>&nbsp;
-            <BButton class="action" icon="square-plus_" @click="searchHandler.save()">Create Prospect</BButton>
-          </div>
-        </td></tr>
+        <tr><th><BIcon icon="solid magnfying-glass"/>Search Text:</th>
+            <td><input style="width: 30em;" v-model="searchHandler.temp.query"><BButton>Search</BButton></td></tr>
       </tbody>
     </table>
+    </form>
+    <BTable nofooter :config="cfgSearchResults" :rows="prospectStore.searchResults"
+      @pick="(row) => searchHandler.pick(row)"
+      @dblpick="(row) => searchHandler.load(row)"
+    />
+    <div class="buttonbar">
+      <BButton class="anchor" icon="#red solid x" @click="searchHandler.abort()">Cancel</BButton>
+      <BButton :disabled="!cfgSearchResults.pickedRow" class="modern" icon="solid check" @click="searchHandler.load(cfgSearchResults.pickedRow)">Load</BButton>
+    </div>
   </dialog>
 
 </template>

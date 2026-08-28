@@ -5,6 +5,7 @@ import { ref } from 'vue';
 import { appProspectStore } from '@/stores/ProspectStore';
 import BIcon from '@/components/B/BIcon.vue';
 import BButton from '@/components/B/BButton.vue';
+import BConfirm from '@/components/B/BConfirm.vue';
 const prospStore = appProspectStore()
 
 const deduceTHStyle = (col:any) => {
@@ -185,8 +186,12 @@ const updateCensusDirty = () => {
 
 <template>
   <div class="drop_menu">
-    <BIcon as="anchor" icon="solid rotate-left_" @click="prospStore.getProspect(prospStore.prospect.id)">Reload</BIcon>&nbsp;&nbsp;
-    <BIcon as="anchor" icon="square-plus_" @click="newSub()">New Subscriber</BIcon>&nbsp;
+    <BConfirm :bypass="!prospStore.censusDirty" class="anchor" width="20em" @confirm="prospStore.getProspect(prospStore.prospect.id)" icon="solid rotate-left_">Reload
+      <template #message>
+        Any changes you have made will be lost. Are you sure?
+      </template>
+    </BConfirm>&nbsp;
+    <BButton class="action" icon="square-plus_" @click="newSub()">New Subscriber</BButton>&nbsp;
     <span style='float: right;'>
       <BIcon :as="prospStore.censusDirty ? 'anchor' : 'clickable'"
         :color="prospStore.censusDirty ? '' : 'gainsboro'"

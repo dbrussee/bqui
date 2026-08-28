@@ -22,11 +22,16 @@ const props = defineProps({
       return ['fa', 'mat'].includes(value)
     }
   },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false
+  }
 })
 </script>
 
 <template>
-  <button @click="emit('click')" :style="{marginLeft: props.gapleft ? '.4em' : ''}">
+  <button :disabled="props.disabled" @click="emit('click')" :style="{marginLeft: props.gapleft ? '.4em' : ''}">
     <BIcon as="icon" :icon="props.icon" :source="props.source"><slot/></BIcon>
   </button>
 </template>

@@ -44,7 +44,7 @@ export default class BQAPIFetcher {
       const response = await fetch(targetUrl, {
         method: method,
         credentials: 'include',
-        body: method == 'GET' ? null : JSON.stringify(body),
+        body: method == 'GET' ? null : typeof body == 'object' ? JSON.stringify(body) : body,
       })
       if (!response.ok) {
         this.status = 'ERROR'

@@ -76,6 +76,11 @@ const handleClick = (row:any, col:any, cn:any) => {
     emit('pick', row, col, cn as number)
   }
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const handleDblClick = (row:any, col:any, cn:any) => {
+  emit('pick', row, col, cn as number)
+  emit('dblpick', row, col, cn as number)
+}
 </script>
 
 <template>
@@ -99,7 +104,10 @@ const handleClick = (row:any, col:any, cn:any) => {
       </thead>
       <tbody>
         <tr v-for="(row,rn) in props.rows" :key="row" :class="{picked : props.config.pickedRow == row}">
-          <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)" @click.stop="handleClick(row, col, cn)">
+          <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
+              @click.stop="handleClick(row, col, cn)"
+              @dblclick.stop="handleDblClick(row, col, cn)"
+            >
             <slot :name="'column_' + col.id" :row="row" :rn="rn">
               {{ getCellValueInSlot(row, col) }}
             </slot>

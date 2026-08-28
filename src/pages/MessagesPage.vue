@@ -49,10 +49,10 @@ const msgHandler = ref({
 </script>
 <template>
   <div class="drop_menu">
-    <BIcon as="anchor" icon="solid rotate-left_" @click="reloadMessageList()">Reload</BIcon>&nbsp;&nbsp;
-    <BIcon as="anchor" icon="square-plus_" @click="msgHandler.show()">New Message</BIcon>
+    <BButton class="anchor" icon="solid rotate-left_" @click="reloadMessageList()">Reload</BButton>&nbsp;&nbsp;
+    <BButton class="action" icon="square-plus_" @click="msgHandler.show()">New Message</BButton>
     <span style="float: right;" v-if="currentMessage">
-      <BConfirm class="anchor" pos="L" icon="#red trash-can_" @confirm="msgHandler.delete()">Delete Message
+      <BConfirm class="anchor" pos="B2L" icon="#red trash-can_" @confirm="msgHandler.delete()">Delete Message
         <template #message>
           Delete this message?
           <p style='color:red'>This cannot be undone</p>
@@ -112,7 +112,7 @@ const msgHandler = ref({
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton class="anchor" @click="msgHandler.abort()" icon="#red solid x">Cancel</BButton>&nbsp;
-            <BButton class="action" @click="msgHandler.send()" icon="solid share_">Send Message</BButton>
+            <BButton class="modern" @click="msgHandler.send()" icon="solid share_">Send Message</BButton>
           </div>
         </td></tr>
       </tbody>
