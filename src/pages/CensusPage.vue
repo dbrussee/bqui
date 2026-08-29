@@ -30,7 +30,7 @@ const deduceJustification = (style: Record<string, string>, col:any) => {
 
 
 const cfgCensus = ref({
-  height: "calc(100vh - 8em)",
+  height: "calc(100vh - 9em)",
   columns: [
     { id: "relation", heading: "", width: "3em" },
     { id: "lstnam", heading: " Last Name" },
@@ -186,7 +186,7 @@ const updateCensusDirty = () => {
 
 <template>
   <div class="drop_menu">
-    <BConfirm :bypass="!prospStore.censusDirty" class="anchor" width="20em" @confirm="prospStore.getProspect(prospStore.prospect.id)" icon="solid rotate-left_">Reload
+    <BConfirm :bypass="!prospStore.censusDirty" class="anchor" width="20em" @confirm="prospStore.getCensus()" icon="solid rotate-left_">Reload
       <template #message>
         Any changes you have made will be lost. Are you sure?
       </template>
@@ -196,7 +196,7 @@ const updateCensusDirty = () => {
       <BIcon :as="prospStore.censusDirty ? 'anchor' : 'clickable'"
         :color="prospStore.censusDirty ? '' : 'gainsboro'"
         :icon="prospStore.censusDirty ? '#red solid floppy-disk_' : 'floppy-disk_'"
-        @click="prospStore.updateProspect(prospStore.prospect)">Save Changes</BIcon>&nbsp;
+        @click="prospStore.updateCensus(prospStore.prospect.census)">Save Changes</BIcon>&nbsp;
     </span>
   </div>
   <div style="display: flex; justify-content: center;">
@@ -240,7 +240,7 @@ const updateCensusDirty = () => {
             </td>
           </tr>
           <tr v-for="(dep, dn) in sub.deps" :key="dep">
-            <td><select class="mono" style="width: 3.5em;" @change="setRelation(rn as number, dn as number, $event)">
+            <td><select class="mono" style="width: 2em;" @change="setRelation(rn as number, dn as number, $event)">
                 <option class="mono" :selected="dep.relation == 'SUB'" value="SUB">SUB - Subscriber</option>
                 <option class="mono" :selected="dep.relation == 'SPS'" value="SPS">SPS - Spouse</option>
                 <option class="mono" :selected="dep.relation == 'DOM'" value="DOM">DOM - Domestic Partner</option>
@@ -274,6 +274,9 @@ const updateCensusDirty = () => {
 </template>
 
 <style scoped>
+select {
+  border: none;
+}
 input {
   padding-left: 2px;
   padding-right: 2px;
@@ -348,7 +351,7 @@ tbody tr td {
   /* border-bottom: 1px solid transparent; */
   padding: 0.1rem 0.2rem;
   vertical-align: top;
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 /* tbody tr:hover {
   background-color: lightcyan;

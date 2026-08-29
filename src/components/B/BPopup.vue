@@ -69,24 +69,6 @@ const props = defineProps({
   },
 })
 
-
-// const buttonsList = computed(() => {
-//   const buttonsList:any[] = []
-//   props.buttons.forEach((itm:any) => {
-//     const btn = {...itm}
-//     if (!btn.code) btn.code = btn.text
-//     if (!btn.icon) btn.icon = ""
-//     if (!btn.class) btn.class = ""
-//     if (!btn.confirm) btn.confirm = ""
-//     if (!btn.action) btn.action = null
-//     if (!btn.color) btn.color = ""
-//     if (!btn.iconcolor) btn.iconcolor = btn.color
-//     if (!btn.pos) btn.pos = "B"
-//     if (btn.text != '') buttonsList.push(btn)
-//   })
-//   return buttonsList
-// })
-
 function open():void {
   document.getElementById(popid)?.showPopover();
 }
@@ -103,16 +85,6 @@ defineExpose({
   open, close, isOpen
 })
 
-// function clickButton(btn:any):void {
-//   if (btn.action) {
-//     const rslt = btn.action()
-//     // if action method returns false... popup remains open
-//     if (rslt == null || rslt) close()
-//   } else {
-//     // No action provided on the button?
-//     emit('buttonClicked', btn)
-//   }
-// }
 function getIcon() {
   if (props.as == 'help') return "circle-question"
   if (props.as == 'info') return "lightbulb"
@@ -124,23 +96,14 @@ function getIcon() {
 
 <template>
   <button v-if="getIcon()" :disabled="props.disabled" :popovertarget="popid" :style="attrs.style" :class="attrs.class"><BIcon as="icon" :icon="getIcon()"/></button>
-  <button v-else :popovertarget="popid" :disabled="props.disabled" :style="attrs.style" :class="[attrs.class, {dull:true, anchor:props.as=='anchor', icon:props.as=='icon', button_as_text:props.as=='text'}]"><BIcon as="icon" v-if="props.linkicon" :icon="props.linkicon"/><span v-html="props.linktext"/></button>
-  <div popover :id="popid" :class="[props.pos, $attrs.class]" :style="{'max-width': props.width}">
+  <button v-else :popovertarget="popid" :disabled="props.disabled" :style="attrs.style" :class="[attrs.class, {anchor:props.as=='anchor', icon:props.as=='icon', button_as_text:props.as=='text'}]"><BIcon as="icon" v-if="props.linkicon" :icon="props.linkicon"/>{{ props.linktext }}</button>
+  <div popover="auto" :id="popid" :class="props.pos" :style="{'max-width': props.width}">
     <div style="width: fit-content">
       <div v-if="props.heading != ''" class="info_title">
         <BIcon v-if="getIcon()" :color="props.iconcolor" :icon="getIcon() + '_'"/><span v-html="props.heading" />
       </div>
       <BIcon v-if="!props.heading && getIcon()" as="icon" :color="props.iconcolor" :icon="getIcon() + '_'"/>
       <slot/>
-      <!-- <div v-if="buttonsList.length > 0" class="buttonbar">
-        <template v-for="(btn, i) in buttonsList" :key="i">
-          <button v-if="btn.confirm == ''" :style="{color:btn.color}" :class="btn.class" @click="clickButton(btn)"><BIcon :style="{'margin-right': '.3em', color:btn.iconcolor}" v-if="btn.icon != ''" :icon="btn.icon"/>{{ btn.text }}</button>
-          <BIcon v-if="btn.confirm != ''" as="confirm" class="anchor" :icon="`#${btn.color} ${btn.icon}`" :pos="btn.pos" @confirm="clickButton(btn)">{{ btn.text }}
-            <template #confirm>{{ btn.confirm }}</template>
-          </BIcon>
-        </template>
-
-      </div> -->
     </div>
   </div>
 

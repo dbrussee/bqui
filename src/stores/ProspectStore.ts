@@ -141,11 +141,40 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     issue.value = fetcher.issue
   }
 
+  async function getCensus() {
+    const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'GET')
+    if (fetcher.resp != null) {
+      prospect.value.census = 0
+      prospect.value.census = [...fetcher.resp[0].census]
+      B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
+        censusHash.value = hash
+        censusDirty.value = false
+      })
+    }
+    meta.value = fetcher.meta
+    issue.value = fetcher.issue
+  }
+  async function updateCensus(data:any) {
+    // console.log(JSON.stringify(data, null, 2))
+    const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'PUT', data)
+    if (fetcher.resp != null) {
+      prospect.value.census = 0
+      prospect.value.census = [...fetcher.resp[0].census]
+      B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
+        censusHash.value = hash
+        censusDirty.value = false
+      })
+    }
+    meta.value = fetcher.meta
+    issue.value = fetcher.issue
+  }
+
 
   return {
     isLoading, meta, issue,
     censusDirty,
     quotes,
+    getCensus, updateCensus,
     prospect, createProspect, updateProspect, getProspect, searchProspects, searchResults,
     clearRecents, setFavorite, setCensusDirty };
 });

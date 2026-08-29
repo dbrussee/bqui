@@ -103,27 +103,63 @@ body {
 p {
   margin-top: .2rem;
 }
-
 select {
-  position: relative;
-  top: -.15em;
+  /* Step 1: Clear Safari enhancements */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /* Step 2: Harmonize the layout structure */
+  box-sizing: border-box;
+
+  /* Step 3: Handle long text safely */
+
+  /* Step 4: Re-add a reliable cross-browser arrow graphic */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://w3.org" width="292.4" height="292.4" viewBox="0 0 292.4 292.4"><path fill="%23333" d="M287 69.4a17.6 17.6 0 0 0-13-5.4H18.4c-5 0-9.3 1.8-12.9 5.4A17.6 17.6 0 0 0 0 82.2c0 5 1.8 9.3 5.4 12.9l128 127.9c3.6 3.6 7.8 5.4 12.8 5.4s9.2-1.8 12.8-5.4L287 95c3.5-3.5 5.4-7.8 5.4-12.8 0-5-1.9-9.2-5.5-12.8z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px top 50%;
+  background-size: 10px auto;
+
+  border-radius: .2em;
+  /* border: 1px solid black; */
+  background-color: #ffffff;
+
+  font-size: 1em;
+  cursor: pointer;
+
+  /* position: relative; */
+  /* top: -.15em; */
 }
+
 .mono {
   font-family: Consolas, "Andale Mono", "Lucida Console", "Courier New", monospace;
 }
+i.fa {
+  font-size: 1em;
+}
 
 button {
-  font-size: 1em;
-  padding: 0.05em .3em;
+  font-size: 1rem;
+  padding: 0.1rem .3rem;
   cursor: pointer;
   border: 1px solid gray;
-  border-radius: .2em;
-  box-shadow: none;
+  border-radius: .2rem;
+  /* box-shadow: none; */
   &:disabled {
-    background-color: #e0e0e0 !important;
-    color: #a0a0a0 !important;
-    cursor: default !important;
-    opacity: 0.6 !important;
+    color: #a0a0a0;
+    cursor: default;
+    &:hover {
+      color: #a0a0a0;
+      cursor: default !important;
+      & * {
+        color: #a0a0a0;
+        cursor: default !important;
+      }
+    }
+    & * {
+      color: #a0a0a0;
+      cursor: default !important;
+    }
   }
 }
 button.gapright {
@@ -132,13 +168,11 @@ button.gapright {
 button.gapleft {
   margin-left: .4em;
 }
-i.fa {
-  font-size: .93em;
-}
 button.modern {
-  font-size: 1em  !important;
-  padding: 0.05em .3em !important;
+  /* font-size: 1em  !important; */
+  /* padding: 0.05em .3em !important; */
   color: oklch(0.99 0 0);
+  border: 1px solid oklch(0.6 0.25 250);
   background-color: oklch(0.6 0.25 250);
   border-color: oklch(0.6 0.25 250);
   /* border: none; */
@@ -151,18 +185,19 @@ button.clear {
   padding: 0 !important;
   background-color: transparent;
   border: none;
-  border-radius: .2em;
-  font-size: 1em;
+  /* border-radius: .2em; */
+  /* font-size: 1em; */
   &:focus {
     outline: 2px solid blue;
   }
 }
 button.action {
-  font-size: 1em !important;
-  padding: 0.05em .3em !important;
+  /* font-size: 1em !important; */
+  /* padding: 0.05em .3em !important; */
   color: white;
   background-color: salmon;
-  border-color: salmon;
+  border: 1px solid salmon;
+  /* border-color: salmon; */
   /* border: none; */
   &:hover {
     color: var(--action-button-color);

@@ -20,7 +20,7 @@ watch(() => prospStore.prospect, () => {
 )
 
 const cfgQuotesList = ref({
-  height: "calc(100vh - 14.5em)",
+  height: "calc(100vh - 15em)",
   width: "calc(100vw - 200px - 2em)",
   pickedRow: null as any,
   columns: [
