@@ -4,6 +4,8 @@ import { B } from "@/composables/BUtils.ts";
 import BConfirm from "./B/BConfirm.vue";
 import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
+import { appProspectStore } from "@/stores/ProspectStore";
+const prospStore = appProspectStore();
 
 
 </script>
@@ -26,7 +28,10 @@ const userStore = appUserStore();
     {{ userStore.user.id }} ({{ userStore.user.fstnam }} {{ userStore.user.lstnam }}) &nbsp;
     <BConfirm pos="B2L" @confirm="userStore.logout()">
       Logout&hellip;
-      <template #message>Log out user '{{ userStore.user.id }}'</template>
+      <template #message>
+        Log out user '{{ userStore.user.id }}'
+        <p v-if="prospStore.censusDirty" style="color:red">You will lose unsaved census changes!</p>
+      </template>
     </BConfirm>
   </span>
 

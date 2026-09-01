@@ -10,6 +10,7 @@ import BTable from "@/components/B/BTable.vue";
 import BPopup from "@/components/B/BPopup.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
 import BInfo from "@/components/B/BInfo.vue";
+import BIcon from "@/components/B/BIcon.vue";
 
 const errsGrid = {
   height: "15em",
@@ -51,15 +52,17 @@ const errsGrid = {
               <div v-if="counters.apiCalls.active > 0" class="spinner"></div>{{counters.apiCalls.active > 1 ? ':' + counters.apiCalls.active : ''}}&nbsp;
               <!-- {{ "⏸️".repeat(counters.apiCalls.active) }} -->
               <span v-if="counters.apiCalls.error > 0">
-                <BPopup v-if="counters.apiCalls.error > 0" linktext="❌" class="TL">
-                  Last Errors:
-                  <BConfirm class="anchor" icon="#red solid x"
-                    @confirm="counters.lastError.length = 0; counters.apiCalls.error = 0">Clear Errors?</BConfirm>
-                  <BTable :rows="counters.lastError" :config="errsGrid">
-                    <template #column_ts="{row}">
-                      {{ row.ts.split(" ")[3] }}
-                    </template>
-                  </BTable>
+                <BPopup v-if="counters.apiCalls.error > 0" class="clear" pos="TL"><BIcon icon="#red solid bugs"/>
+                  <template #body>
+                    Last Errors:
+                    <BConfirm class="anchor" icon="#red solid x"
+                      @confirm="counters.lastError.length = 0; counters.apiCalls.error = 0">Clear Errors?</BConfirm>
+                    <BTable :rows="counters.lastError" :config="errsGrid">
+                      <template #column_ts="{row}">
+                        {{ row.ts.split(" ")[3] }}
+                      </template>
+                    </BTable>
+                  </template>
                 </BPopup>
               </span>
             </td>

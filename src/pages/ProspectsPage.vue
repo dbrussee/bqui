@@ -42,9 +42,9 @@ const prospHandler = ref({
 <template>
   <div class="drop_menu">
     <BButton @click="prospHandler.edit()" class="action" icon="square-plus_">New Prospect&hellip;</BButton>
-</div>
+  </div>
   <ProspectComponent />
-  <div style="margin-top: .5em;">
+  <div style="margin-top: .5em;" v-if="prospectStore.prospect">
     <QuoteListComponent />
   </div>
 
@@ -52,19 +52,19 @@ const prospHandler = ref({
     <div class="titlebar">New Prospect</div>
     <table class="form-table">
       <tbody>
-        <tr><th>Group Name:</th><td><input style="width: 30em;" v-model="prospHandler.temp.name"></td></tr>
-        <tr><th>Contact:</th><td><input style="width: 30em;" v-model="prospHandler.temp.contact"></td></tr>
-        <tr><th>Email:</th><td><input style="width: 30em;" v-model="prospHandler.temp.email"></td></tr>
-        <tr><th>Phone:</th><td><input style="width: 12em;" v-model="prospHandler.temp.phone"></td></tr>
-        <tr><th>Subscribers:</th><td><input style="width: 5em;" v-model="prospHandler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
-        <tr><th>Address:</th><td><input style="width: 30em;" v-model="prospHandler.temp.addr1"></td></tr>
-        <tr><th></th><td><input style="width: 30em;" v-model="prospHandler.temp.addr2"></td></tr>
+        <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="prospHandler.temp.name"></td></tr>
+        <tr><th>Contact:</th><td><input name="grpcontact" style="width: 30em;" v-model="prospHandler.temp.contact"></td></tr>
+        <tr><th>Email:</th><td><input name="grpemail" style="width: 30em;" v-model="prospHandler.temp.email"></td></tr>
+        <tr><th>Phone:</th><td><input name="grpphone" style="width: 12em;" v-model="prospHandler.temp.phone"></td></tr>
+        <tr><th>Subscribers:</th><td><input name="estimate" style="width: 5em;" v-model="prospHandler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
+        <tr><th>Address:</th><td><input name="grpaddr1" style="width: 30em;" v-model="prospHandler.temp.addr1"></td></tr>
+        <tr><th></th><td><input name="grpaddr2" style="width: 30em;" v-model="prospHandler.temp.addr2"></td></tr>
         <tr><th></th><td>
-          <input style="width: 12em; margin-right: .3em;" v-model="prospHandler.temp.city">
-          <input style="width: 3em; margin-right: .3em;" v-model="prospHandler.temp.state_cd">
-          <input style="width: 6em;" v-model="prospHandler.temp.zip_cd">
+          <input name="grpcity" style="width: 12em; margin-right: .3em;" v-model="prospHandler.temp.city">
+          <input name="grpstate" style="width: 3em; margin-right: .3em;" v-model="prospHandler.temp.state_cd">
+          <input name="grpzip" style="width: 6em;" v-model="prospHandler.temp.zip_cd">
         </td></tr>
-        <tr><th>Enroll Date:</th><td><input style="width: 10em;" v-model="prospHandler.temp.enroll_date"></td></tr>
+        <tr><th>Enroll Date:</th><td><input name="enrollDate" style="width: 10em;" v-model="prospHandler.temp.enroll_date"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton class="anchor" icon="#red solid x" @click="prospHandler.abort()">Cancel</BButton>&nbsp;

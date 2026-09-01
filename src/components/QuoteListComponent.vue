@@ -9,6 +9,7 @@ import BPopup from './B/BPopup.vue';
 import BButton from './B/BButton.vue';
 // import BActionlist from './B/BActionlist.vue';
 import BInfo from './B/BInfo.vue';
+import BIcon from './B/BIcon.vue';
 
 // Watch for changes to the prospect.
 // Because the value is in a store, we need to use
@@ -26,12 +27,22 @@ const cfgQuotesList = ref({
   columns: [
     { id: "id", heading: "Quote", width: "5em", flags: "R" },
     { id: "effdat", heading: "Effective", width: "5em", flags: "C" },
-    { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
-    { id: "rlob", heading: "Product", width: "8em", cellclass: "mono" },
-    { id: "descr", heading: "Description" },
+    { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
+    { id: "funding", heading: "Fund", width: "3em", flags: "C" },
+    { id: "nonstd", heading: "NS", width: "3em", flags: "C" },
     { id: "status", heading: "Status", width: "8em", cellclass: "mono" },
+    { id: "descr", heading: "Description" },
   ]
 })
+
+const productIcon = (qtype:string):string => {
+  console.log("Product Icon", qtype)
+  if (qtype == 'MED') return '#black solid truck-medical_'
+  if (qtype == 'DEN') return '#black solid tooth_'
+  if (qtype == 'VIS') return '#black solid glasses_'
+  if (qtype == 'WEL') return '#black solid spa_'
+  return '#red solid question'
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const handleQuoteRowClicked = (row:any, col:any, cn:number) => {
@@ -59,37 +70,26 @@ const handleQuoteRowClicked = (row:any, col:any, cn:number) => {
       }"
       :config="cfgQuotesList" :rows="prospStore.quotes">
     <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
+    <template #column_product="{row}"><BIcon :icon="productIcon(row.qtype)"/>{{ row.rlob }}<sup v-if="row.nonstd=='Y'" style="color:red">NS</sup></template>
     <template #buttons>
-      <BPopup as="button" class="action gapright" linkicon="square-plus_" linktext="New Quote&hellip;" pos="T2R">
-        Placeholder for New Quote dialog
-      </BPopup>&nbsp;
-      <!-- <BActionlist :disabled="!cfgQuotesList.pickedRow" class="anchor" heading="Quote Actions" pos="T2R" icon="solid bars" text="Actions"
-        :actions="[
-          { icon: 'lightbulb', text: 'Quote Info', info: {heading:`Quote ID ${cfgQuotesList.pickedRow?.id} Info`,
-            body:
-              `<ul>
-                <li>Created: ${B.format.ts(cfgQuotesList.pickedRow?.crttms)}</li>
-                <li>By: ${cfgQuotesList.pickedRow?.crtusr}</li>
-                <li>Plans
-                <ul>
-                  <li>MED: ${B.ifNull(cfgQuotesList.pickedRow?.med_plan, '')}</li>
-                  <li>DRU: ${B.ifNull(cfgQuotesList.pickedRow?.dru_plan, '')}</li>
-                  <li>DEN: ${B.ifNull(cfgQuotesList.pickedRow?.den_plan, '')}</li>
-                  <li>VIS: ${B.ifNull(cfgQuotesList.pickedRow?.vis_plan, '')}</li>
-                </ul></li>
-              </ul>`}
-          },
-        ]"
-      /> -->
+      <BPopup class="action gapright" icon="solid bars_" pos="T2R" heading="Select Quote Type">New Quote&hellip;
+        <template #body>
+          <p><BButton class="anchor" icon="#black solid truck-medical_">Medical</BButton></p>
+          <p><BButton class="anchor" icon="#black solid tooth_">Dental</BButton></p>
+          <p><BButton class="anchor" icon="#black solid glasses_">Vision</BButton></p>
+          <p><BButton class="anchor" icon="#black solid spa_">Wellness</BButton></p>
+        </template>
+      </BPopup>
       <BInfo :disabled="!cfgQuotesList.pickedRow" pos="T2R" class="gapright" :heading="'Quote ID ' + cfgQuotesList.pickedRow?.id + ' Info'">
         <ul>
           <li>Quote ID: {{ cfgQuotesList.pickedRow?.id }} ({{ cfgQuotesList.pickedRow?.qtype }} {{ cfgQuotesList.pickedRow?.funding }} {{ cfgQuotesList.pickedRow?.rlob }})</li>
-          <li>Created: {{ B.format.ts(cfgQuotesList.pickedRow?.crttms) }}</li>
-          <li>By: {{ cfgQuotesList.pickedRow?.crtusr }}</li>
+          <li>Effective: {{ B.format.effdat(cfgQuotesList.pickedRow?.effdat) }}</li>
           <li v-if="cfgQuotesList.pickedRow?.med_plan">MED Plan: {{ cfgQuotesList.pickedRow?.med_plan }}</li>
           <li v-if="cfgQuotesList.pickedRow?.dru_plan">DRU Plan: {{ cfgQuotesList.pickedRow?.dru_plan }}</li>
           <li v-if="cfgQuotesList.pickedRow?.den_plan">DEN Plan: {{ cfgQuotesList.pickedRow?.den_plan }}</li>
           <li v-if="cfgQuotesList.pickedRow?.vis_plan">VIS Plan: {{ cfgQuotesList.pickedRow?.vis_plan }}</li>
+          <li>Created: {{ B.format.ts(cfgQuotesList.pickedRow?.crttms) }}</li>
+          <li>By: {{ cfgQuotesList.pickedRow?.crtusr }}</li>
         </ul>
       </BInfo>
       |

@@ -3,10 +3,10 @@
 // import BTable from '@/components/BTable.vue';
 import { ref } from 'vue';
 import { appProspectStore } from '@/stores/ProspectStore';
+const prospStore = appProspectStore()
 import BIcon from '@/components/B/BIcon.vue';
 import BButton from '@/components/B/BButton.vue';
 import BConfirm from '@/components/B/BConfirm.vue';
-const prospStore = appProspectStore()
 
 const deduceTHStyle = (col:any) => {
   const style = {} as Record<string, string>;
@@ -64,12 +64,25 @@ const cfgCensus = ref({
 //   }
 // }
 
+const setFocus = (subnum:number, depnum:number):void => {
+  console.log("Sub:", subnum, "Dep:", depnum)
+  window.setTimeout(() => {
+    const tbl = document.querySelector("table.CENSUS_TABLE") as HTMLTableElement
+    const row = tbl.rows[subnum + 1 + depnum + 1] as HTMLTableRowElement
+    const cell = row.cells[1]
+    const tbox = cell?.querySelector("input") as HTMLInputElement
+    tbox.focus()
+    tbox.select()
+  })
+}
+
 const newSub = ():void => {
   const sub = {relation:"SUB", fstnam:'', lstnam:'', midnam:'',
     sex:'M', dob:'', med:false, den:false, vis:false, cobra: false, deps:[]
   } as any
   prospStore.prospect.census.unshift(sub)
   prospStore.setCensusDirty()
+  setFocus(0, -1)
 }
 const delSub = (subnum:number):void => {
   prospStore.prospect.census.splice(subnum, 1)
@@ -89,6 +102,7 @@ const newDep = (subnum:number):void => {
   } as any
   sub.deps.push(data)
   prospStore.setCensusDirty()
+  setFocus(subnum, sub.deps.length - 1)
 }
 const delDep = (subnum:number, depnum:number):void => {
   prospStore.prospect.census[subnum]?.deps.splice(depnum, 1)
@@ -210,7 +224,7 @@ const updateCensusDirty = () => {
     }"
   >
     <form @submit.prevent="" @keyup="updateCensusDirty()">
-    <table style="margin: auto;">
+    <table style="margin: auto;" class="CENSUS_TABLE">
       <thead>
         <tr>
           <th v-for="col in cfgCensus.columns" :key="col.id" :style="deduceTHStyle(col)">
@@ -270,7 +284,6 @@ const updateCensusDirty = () => {
   </div>
 </div>
 
-  <!-- <BTable :config="cfgCensus" :rows="sample"/> -->
 </template>
 
 <style scoped>

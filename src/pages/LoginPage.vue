@@ -16,11 +16,11 @@ const loginpwd = ref("");
       <tbody>
         <tr>
           <th>Username:</th>
-          <td><input autofocus type="text" v-model="loginuid" /></td>
+          <td><input name="loginName" autofocus type="text" v-model="loginuid" /></td>
         </tr>
         <tr>
           <th>Password:</th>
-          <td><input type="password" autocomplete="" v-model="loginpwd" /></td>
+          <td><input name="loginPass" type="password" autocomplete="" v-model="loginpwd" /></td>
         </tr>
         <tr>
           <td colspan="2" style="text-align: right">

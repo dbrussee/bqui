@@ -122,12 +122,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   async function updateProspect(data:any) {
     // console.log(JSON.stringify(data, null, 2))
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'PUT', data)
+    const curCensus = JSON.parse(JSON.stringify(prospect.value.census)) // Clone the current census
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp.prosp
-      B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
-        censusHash.value = hash
-        censusDirty.value = false
-      })
+      prospect.value.census = [...curCensus]
       const userStore = appUserStore()
       userStore.user.recents[0].name = prospect.value.name
       // console.dir(userStore.user.faves)

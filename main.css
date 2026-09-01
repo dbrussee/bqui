@@ -48,7 +48,7 @@ div.titlebar {
   padding-bottom: 0.2em;
   /* margin-right: .5em; */
   border-bottom: 1px solid var(--form-prompt-color);
-  margin-bottom: 0.2em;
+  margin-bottom: 0.4em;
 }
 dialog {
   padding: .5em;
@@ -60,7 +60,7 @@ dialog:modal {
   margin: auto;
 }
 div.buttonbar {
-  padding-top: .3em;
+  padding-top: .5em;
   border-top: 1px solid var(--form-prompt-color);
   /* padding-right: .5em; */
   margin-top: .3em;
@@ -130,6 +130,13 @@ select {
   /* position: relative; */
   /* top: -.15em; */
 }
+.pill-red {
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  font-size: .8em;
+  padding: .1em;
+}
 
 .mono {
   font-family: Consolas, "Andale Mono", "Lucida Console", "Courier New", monospace;
@@ -146,6 +153,7 @@ button {
   border-radius: .2rem;
   /* box-shadow: none; */
   &:disabled {
+    background-color: gainsboro !important;
     color: #a0a0a0;
     cursor: default;
     &:hover {
@@ -203,6 +211,9 @@ button.action {
     color: var(--action-button-color);
     background-color: var(--action-button-bgcolor);
   }
+  &:focus {
+    outline: 2px solid blue;
+  }
 }
 pre {
   white-space: pre-wrap;       /* Triggers natural word wrapping */
@@ -210,30 +221,14 @@ pre {
 }
 
 sup {
-    font-size: 50%;
+    font-size: 80%;
     line-height: 0;
     position: relative;
-    vertical-align: baseline;
-    top: -0.25em;
+    /* vertical-align: baseline; */
+    top: 0.1em;
     left: .2em;
 }
 
-[popover]:popover-open {
-  /* 1. Reset default popover centering styles */
-  margin: 0;
-  inset: unset;
-  padding-left: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-top: 0.5rem;
-  border: 1px solid black;
-  border-radius: 0.5rem;
-
-  /* 2. Position the popover relative to its trigger */
-  position-area: bottom span-right;
-}
-[popover]::backdrop {
-  background-color: rgba(0, 0, 0, 0.15);
-}
 
 div.drop_menu {
   /* background-color: var(--current-bgcolor); */
@@ -309,7 +304,13 @@ table.form-table {
       height: 5em;
       width: 25em;
     }
+    button {
+      position: relative;
+      top: -.2em !important;
+    }
     input, textarea {
+      position: relative;
+      top: -.2em !important;
       outline: none;
       border: 1px solid gray;
       margin-bottom: .2em;
@@ -344,7 +345,7 @@ table.form-table {
   color: blue;
   cursor: pointer;
   padding: 0;
-  font-size: inherit;
+  /* font-size: inherit; */
 
   &:focus,
   &:active {
@@ -355,10 +356,10 @@ table.form-table {
     text-decoration: underline;
   }
 }
-/* button.anchor:disabled {
+button.anchor:disabled {
   color: silver;
   cursor: default;
-} */
+}
 
 i.gapleft {
   margin-left: .2em;
@@ -367,9 +368,14 @@ i.gapright {
   margin-right: .2em;
 }
 
+[popover]::backdrop {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+
 div[popover] {
   text-align: left;
-  font-size: 11pt;
+  font-size: 1rem !important;
   line-height: 1.3;
 }
 div[popover]:popover-open {

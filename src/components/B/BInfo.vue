@@ -5,14 +5,6 @@ import BIcon from './BIcon.vue'
 const popid = ref(useId())
 
 const props = defineProps({
-  as: { // For confirm popover
-    type: String,
-    required: false,
-    default: 'info',
-    validator(value: string) {
-      return ['info','help'].includes(value)
-    }
-  },
   text: {
     type: String,
     required: false,
@@ -49,9 +41,8 @@ const props = defineProps({
 })
 
 const getIcon = ():string => {
-  if (props.as == "info" && props.disabled) return "lightbulb"
-  if (props.as == "info" && !props.disabled) return "#sienna lightbulb"
-  return "solid question"
+  if (props.disabled) return "lightbulb"
+  return "#sienna lightbulb"
 }
 
 </script>
@@ -62,7 +53,7 @@ const getIcon = ():string => {
   </button>
   <div :id="popid" popover :class="props.pos" :style="{width:props.width,minWidth:props.width,maxWidth:props.width}">
     <div v-if="props.heading != ''" class="titlebar" v-html="props.heading" />
-    <div :class="props.as == 'info' ? 'info' : ''"><slot/></div>
+    <div class="info"><slot/></div>
   </div>
 </template>
 
