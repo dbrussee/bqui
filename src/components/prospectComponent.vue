@@ -120,8 +120,12 @@ const prospectCSZ = (prosp:any) => {
           <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.format.ts(prospectStore.prospect.last_quote?.crttms), 'No quotes') }}
             <BInfo v-if="prospectStore.prospect.last_quote" pos="L" heading="Last Quote Details">
               <ul>
-                <li>Quote ID: {{ prospectStore.prospect.last_quote.id }} ({{ prospectStore.prospect.last_quote.qtype }} {{ prospectStore.prospect.last_quote.funding }} {{ prospectStore.prospect.last_quote.rlob }})</li>
+                <li>{{ prospectStore.prospect.last_quote.qtype }} Quote ID: {{ prospectStore.prospect.last_quote.id }}
+                  ({{ prospectStore.prospect.last_quote.funding }} {{ prospectStore.prospect.last_quote.rlob }})<sup
+                    v-if="prospectStore.prospect.last_quote.nonstd == 'Y'" style="color:red">NS</sup>
+                </li>
                 <li>Effective: {{ B.format.effdat(prospectStore.prospect.last_quote.effdat) }}</li>
+                <li>Staus: {{ B.format.effdat(prospectStore.prospect.last_quote.status) }}</li>
                 <li v-if="prospectStore.prospect.last_quote.med_plan">MED Plan: {{ prospectStore.prospect.last_quote.med_plan }}</li>
                 <li v-if="prospectStore.prospect.last_quote.dru_plan">DRU Plan: {{ prospectStore.prospect.last_quote.dru_plan }}</li>
                 <li v-if="prospectStore.prospect.last_quote.den_plan">DEN Plan: {{ prospectStore.prospect.last_quote.den_plan }}</li>
@@ -170,7 +174,7 @@ const prospectCSZ = (prosp:any) => {
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton class="anchor" style="margin-right: .6em;" @click="prospHandler.abort()" icon="#red solid x">Cancel</BButton>
-            <BButton type="submit" class="action" icon="floppy-disk_"> Save Prospect</BButton>
+            <BButton type="submit" class="action" icon="floppy-disk_"> Save Changes</BButton>
           </div>
         </td></tr>
       </tbody>

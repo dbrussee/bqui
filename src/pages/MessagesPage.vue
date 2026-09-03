@@ -49,8 +49,8 @@ const msgHandler = ref({
 </script>
 <template>
   <div class="drop_menu">
-    <BButton class="anchor" icon="solid rotate-left_" @click="reloadMessageList()">Reload</BButton>&nbsp;&nbsp;
-    <BButton class="action" icon="square-plus_" @click="msgHandler.show()">New Message</BButton>
+    <BButton class="anchor" icon="solid rotate-left_" @click="reloadMessageList()">Refresh List</BButton>&nbsp;&nbsp;
+    <BButton class="action" icon="square-plus_" @click="msgHandler.show()">New Message&hellip;</BButton>
     <span style="float: right;" v-if="currentMessage">
       <BConfirm class="anchor" pos="B2L" icon="#red trash-can_" @confirm="msgHandler.delete()">Delete Message
         <template #message>
@@ -61,6 +61,7 @@ const msgHandler = ref({
     </span>
   </div>
   <div class="msgcontainer">
+    <div v-if="messageStore.messages.length == 0" style="width: 100%; text-align: center; color: silver">No Messages</div>
     <div class="msgitem" v-for="(message, index) in messageStore.messages" :key="index"
       :class="{current_style: currentMessage && currentMessage.id == message.id}"
       @click="showMessage(index)">

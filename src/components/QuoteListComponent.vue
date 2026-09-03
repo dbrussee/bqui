@@ -29,7 +29,7 @@ const cfgQuotesList = ref({
     { id: "effdat", heading: "Effective", width: "5em", flags: "C" },
     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
     { id: "funding", heading: "Fund", width: "3em", flags: "C" },
-    { id: "nonstd", heading: "NS", width: "3em", flags: "C" },
+    // { id: "nonstd", heading: "NS", width: "3em", flags: "C" },
     { id: "status", heading: "Status", width: "8em", cellclass: "mono" },
     { id: "descr", heading: "Description" },
   ]
@@ -37,7 +37,7 @@ const cfgQuotesList = ref({
 
 const productIcon = (qtype:string):string => {
   console.log("Product Icon", qtype)
-  if (qtype == 'MED') return '#black solid truck-medical_'
+  if (qtype == 'MED') return '#black solid stethoscope_'
   if (qtype == 'DEN') return '#black solid tooth_'
   if (qtype == 'VIS') return '#black solid glasses_'
   if (qtype == 'WEL') return '#black solid spa_'
@@ -74,16 +74,20 @@ const handleQuoteRowClicked = (row:any, col:any, cn:number) => {
     <template #buttons>
       <BPopup class="action gapright" icon="solid bars_" pos="T2R" heading="Select Quote Type">New Quote&hellip;
         <template #body>
-          <p><BButton class="anchor" icon="#black solid truck-medical_">Medical</BButton></p>
+          <p><BButton class="anchor" icon="#black solid stethoscope_">Medical &amp; Drug</BButton></p>
           <p><BButton class="anchor" icon="#black solid tooth_">Dental</BButton></p>
           <p><BButton class="anchor" icon="#black solid glasses_">Vision</BButton></p>
           <p><BButton class="anchor" icon="#black solid spa_">Wellness</BButton></p>
         </template>
       </BPopup>
-      <BInfo :disabled="!cfgQuotesList.pickedRow" pos="T2R" class="gapright" :heading="'Quote ID ' + cfgQuotesList.pickedRow?.id + ' Info'">
+      <BInfo :disabled="!cfgQuotesList.pickedRow" pos="T2R" class="gapright" :heading="'Selected Quote Details'">
         <ul>
-          <li>Quote ID: {{ cfgQuotesList.pickedRow?.id }} ({{ cfgQuotesList.pickedRow?.qtype }} {{ cfgQuotesList.pickedRow?.funding }} {{ cfgQuotesList.pickedRow?.rlob }})</li>
+          <li>{{ cfgQuotesList.pickedRow?.qtype }} Quote ID: {{ cfgQuotesList.pickedRow?.id }}
+            ({{ cfgQuotesList.pickedRow?.funding }} {{ cfgQuotesList.pickedRow?.rlob }})<sup
+              v-if="cfgQuotesList.pickedRow?.nonstd == 'Y'" style="color:red">NS</sup>
+          </li>
           <li>Effective: {{ B.format.effdat(cfgQuotesList.pickedRow?.effdat) }}</li>
+          <li>Status: {{ B.format.effdat(cfgQuotesList.pickedRow?.status) }}</li>
           <li v-if="cfgQuotesList.pickedRow?.med_plan">MED Plan: {{ cfgQuotesList.pickedRow?.med_plan }}</li>
           <li v-if="cfgQuotesList.pickedRow?.dru_plan">DRU Plan: {{ cfgQuotesList.pickedRow?.dru_plan }}</li>
           <li v-if="cfgQuotesList.pickedRow?.den_plan">DEN Plan: {{ cfgQuotesList.pickedRow?.den_plan }}</li>

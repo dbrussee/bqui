@@ -236,8 +236,8 @@ const updateCensusDirty = () => {
         <template v-for="(sub, rn) in prospStore.prospect.census" :key="sub">
           <tr :class="{seperator: Number(rn) > 0}">
             <td>&nbsp;</td>
-            <td><input v-model="sub.lstnam" class="lstnam"/></td>
-            <td><input v-model="sub.fstnam" class="fstnam"/></td>
+            <td><input v-model="sub.lstnam" class="lstnam" placeholder="Last name"/></td>
+            <td><input v-model="sub.fstnam" class="fstnam" placeholder="First name"/></td>
             <td><input maxlength="1" v-model="sub.midnam" class="midnam"/></td>
             <td><input v-model="sub.dob" class="dob" placeholder="m/d/yyyy"/></td>
             <td style="text-align: center;"><button @click="(e:Event) => setSex(Number(rn), -1)" class="clear sex mono">{{ sub.sex }}</button></td>
@@ -249,7 +249,7 @@ const updateCensusDirty = () => {
             <td class="cobra"><BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'cobra')" :icon="sub.cobra ? 'square-check' : 'square'" /></td>
             <td class="dis">&nbsp;</td>
             <td>
-              <BButton class="clear" @click="delSub(Number(rn))" icon="#red trash-can" />
+              <BButton class="clear" @click="delSub(Number(rn))" icon="#maroon trash-can" />
               <BButton class="clear" @click="newDep(Number(rn))" icon="#black solid user-plus" />
             </td>
           </tr>
@@ -260,8 +260,8 @@ const updateCensusDirty = () => {
                 <option class="mono" :selected="dep.relation == 'DOM'" value="DOM">DOM - Domestic Partner</option>
                 <option class="mono" :selected="dep.relation == 'CHD'" value="CHD">CHD - Child</option>
             </select></td>
-            <td><input v-model="dep.lstnam" class="lstnam"/></td>
-            <td><input v-model="dep.fstnam" class="fstnam"/></td>
+            <td><input v-model="dep.lstnam" class="lstnam dep" placeholder="Last name"/></td>
+            <td><input v-model="dep.fstnam" class="fstnam dep" placeholder="First name"/></td>
             <td><input maxlength="1" v-model="dep.midnam" class="midnam"/></td>
             <td><input v-model="dep.dob" class="dob" placeholder="m/d/yyyy"/></td>
             <td style="text-align: center;"><BButton class="clear sex" @click="(e:Event) => setSex(Number(rn), Number(dn))">{{ dep.sex }}</BButton></td>
@@ -275,7 +275,7 @@ const updateCensusDirty = () => {
             </td>
             <td class="cobra">&nbsp;</td>
             <td class="dis"><BButton class="clear" v-if="dep.relation == 'CHD'" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'dis')" :icon="dep.dis ? 'square-check' : 'square'"/></td>
-            <td><BButton class="clear" @click="delDep(Number(rn), Number(dn))" icon="#red trash-can"/></td>
+            <td><BButton class="clear" @click="delDep(Number(rn), Number(dn))" icon="#maroon trash-can"/></td>
           </tr>
       </template>
       </tbody>
@@ -297,6 +297,10 @@ input {
   /* border-bottom: 1px solid gray; */
   /* outline: transparent; */
   font-size: 1em;
+
+  &::placeholder {
+    color: lightpink;
+  }
 }
 input.fstnam,
 input.lstnam {
@@ -305,6 +309,10 @@ input.lstnam {
 input.midnam {
   width: 2em;
   text-align: center;
+}
+input.dep {
+  width: 7.5em;
+  margin-left: .5em;
 }
 button.sex {
   width: 1.8em;

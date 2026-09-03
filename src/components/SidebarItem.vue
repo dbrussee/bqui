@@ -25,7 +25,8 @@ const props = defineProps({
     border-left: 3px solid transparent;
 
     &:hover {
-      border-left-color: dodgerblue;
+      /* border-left-color: dodgerblue; */
+      background-color: lightcyan;
     }
   }
 </style>
