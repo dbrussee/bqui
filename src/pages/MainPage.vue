@@ -11,6 +11,7 @@ import BPopup from "@/components/B/BPopup.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
 import BInfo from "@/components/B/BInfo.vue";
 import BIcon from "@/components/B/BIcon.vue";
+import UserComponent from "@/components/UserComponent.vue";
 
 const errsGrid = {
   height: "15em",
@@ -47,7 +48,9 @@ const errsGrid = {
                   <li>{{app.vers.release.getTime() < new Date().getTime() ? 'Released: ' : 'Scheduled Release: '}}{{app.vers.release.toLocaleDateString('en-US')}}</li>
                 </ul>
               </BInfo></td>
-            <td style="text-align: center">Something</td>
+            <td style="text-align: center">
+              <UserComponent />
+            </td>
             <td style="text-align: right; width: 10em">
               <div v-if="counters.apiCalls.active > 0" class="spinner"></div>{{counters.apiCalls.active > 1 ? ':' + counters.apiCalls.active : ''}}&nbsp;
               <!-- {{ "⏸️".repeat(counters.apiCalls.active) }} -->

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 interface IColumn {
   id: string
   flags?: string
@@ -14,6 +14,11 @@ const props = defineProps({
     type: Object as () => any,
     required: true,
   },
+  heading: {
+    type: String,
+    required: false,
+    default: ""
+  },
   nofooter: {
     type: Boolean,
     required: false,
@@ -26,6 +31,8 @@ const props = defineProps({
     default: () => [],
   },
 })
+
+const tdRef = ref(null)
 
 const deduceTDStyle = (col: IColumn) => {
   const style = {} as Record<string, string>
@@ -85,8 +92,8 @@ const handleDblClick = (row:any, col:any, cn:any) => {
 
 <template>
   <div style="width: fit-content">
-  <div v-if="props.config.heading && props.config.heading != ''" class="b-table-heading">
-    {{ props.config.heading }}
+  <div v-if="props.heading != ''" class="b-table-heading">
+    {{ props.heading }}
   </div>
   <div class="b-table-container"
     :style="{
@@ -107,8 +114,9 @@ const handleDblClick = (row:any, col:any, cn:any) => {
           <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
               @click.stop="handleClick(row, col, cn)"
               @dblclick.stop="handleDblClick(row, col, cn)"
+              ref="tdRef"
             >
-            <slot :name="'column_' + col.id" :row="row" :rn="rn">
+            <slot :name="'column_' + col.id" :row="row" :rn="rn" :td="tdRef">
               {{ getCellValueInSlot(row, col) }}
             </slot>
           </td>
@@ -128,7 +136,7 @@ div.b-table-container {
   overscroll-behavior: none;
 }
 div.b-table-heading {
-  padding: 0.2rem 0.5rem;
+  padding-bottom: 0.2rem;
   font-style: italic;
   color: var(--heading-color);
 }

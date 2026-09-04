@@ -1,5 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const B = {
+  codeToText: {
+    quoteStatus: (code: string) => {
+      switch (code) {
+        case "QUOTED": return "Quoted";
+        case "READY": return "Ready";
+        case "RATEREQ": return "Rates Requested";
+        case "INPROG": return "In Progress";
+        default: return code;
+      }
+    },
+    nonstd: (code: string) => {
+      switch (code) {
+        case "N": return "Standard";
+        case "Y": return "Non-Std";
+        case "C": return "Custom";
+        default: return code;
+      }
+    },
+    qtype: (code: string) => {
+      switch (code) {
+        case "MED": return "Medical";
+        case "DEN": return "Dental";
+        case "VIS": return "Vision";
+        case "WEL": return "Wellness";
+        default: return code;
+      }
+    }
+  },
   ifNull: (value: any, ifNull: string): string => {
     if (value == undefined) return ifNull
     if (value == null) return ifNull

@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { countersStore } from '../stores/CountersStore'
 import { B } from '@/composables/BUtils'
+import { useToast } from '../composables/useToast'
+
 export default class BQAPIFetcher {
   private static readonly BASE_URL = 'http://localhost:8080/bqapi/v2.1'
   private status: 'FETCHED' | 'FETCHING' | 'UNUSED' | 'ERROR' = 'UNUSED'
@@ -48,6 +50,9 @@ export default class BQAPIFetcher {
       })
       if (!response.ok) {
         this.status = 'ERROR'
+        useToast().addToast(`HTTP error! status: ${response.status} for ${method} ${endpoint}`, "error")
+        counters.apiCalls.active--
+        counters.apiCalls.error++
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
@@ -71,6 +76,7 @@ export default class BQAPIFetcher {
           codeLoc += "(" + this.issue.line + ")"
           const stack = "..." + this.issue.stackTrace.join('\n...')
           const msg = `${codeLoc} : ${this.issue.message}\t${stack}`
+          // useToast().addToast(`Fatal Error! ${codeLoc}`, "error")
           throw new Error(msg)
         }
       }
@@ -85,6 +91,7 @@ export default class BQAPIFetcher {
       const msg = msg_list[0]
       const stack = msg_list.length > 1 ? msg_list[1] : ''
       counters.lastError.unshift({path: endpoint, method: method, msg: msg, stack: stack, ts: B.format.ts(new Date)})
+      useToast().addToast(`System error! Message: ${msg}`, "error")
       this.status = 'ERROR'
 
       try {
@@ -95,6 +102,7 @@ export default class BQAPIFetcher {
           body: JSON.stringify(this),
         })
         if (!response.ok) {
+          useToast().addToast(`HTTP error! status: ${response.status}`, "error")
           throw new Error(`HTTP error! status: ${response.status}`)
         }
       } catch (innerError) {

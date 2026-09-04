@@ -1,0 +1,11 @@
+  codeToText: {
+    quoteStatus: (code: string) => {
+      switch (code) {
+        case "QUOTED": return "Quoted";
+        case "READY": return "Ready";
+        case "RATEREQ": return "Rates Requested";
+        case "INPROG": return "In Progress";
+        default: return code;
+      }
+    }
+  },

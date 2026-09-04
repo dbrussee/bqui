@@ -2,29 +2,12 @@
 <script setup lang="ts">
 import { appProspectStore } from "../stores/ProspectStore.ts";
 const prospectStore = appProspectStore();
-import { appUserStore } from "../stores/AppUserStore.ts";
-const userStore = appUserStore();
 import { B } from "@/composables/BUtils";
 import { useId, ref } from "vue";
 import BIcon from "./B/BIcon.vue";
 import BButton from "./B/BButton.vue";
 import BInfo from "./B/BInfo.vue";
 
-const fave = (pid: number, isFavorite: boolean) => {
-  prospectStore.setFavorite(pid, isFavorite);
-};
-
-const isCurrentlyFavorite = () => {
-  if (!userStore.user || !userStore.user.faves || !prospectStore.prospect) return false;
-  let rslt = false;
-  for (let i = 0; i < userStore.user.faves.length; i++) {
-    if (userStore.user.faves[i].pid == prospectStore.prospect.id) {
-      rslt = true;
-      break;
-    }
-  }
-  return rslt;
-}
 const prospHandler = ref({
   id: useId(),
   temp: {} as any,
@@ -55,7 +38,7 @@ const prospectCSZ = (prosp:any) => {
 <style scoped>
 .prospect_info {
   position: relative;
-  min-height: 4.7em;
+  min-height: 3.7em;
   /* background-color: pink; */
 }
 </style>
@@ -73,27 +56,6 @@ const prospectCSZ = (prosp:any) => {
     Loading...
   </div>
   <div v-if="!prospectStore.issue?.severity && !prospectStore.isLoading && prospectStore.prospect" class="prospect_info AAA">
-    Prospect ID: {{ prospectStore.prospect.id }}
-    <BInfo pos="R2B" heading="Prospect Details">
-      <ul>
-        <li>Agent of Record: {{ prospectStore.prospect.agent_id }}</li>
-        <li>Subscribers Estimate: {{ prospectStore.prospect.subs_estimate }}
-          <ul>
-            <li v-if="!prospectStore.prospect.census || prospectStore.prospect.census.length == 0">Census: <span style='color: red;'>None</span></li>
-            <li v-else>Census: {{ prospectStore.prospect.census.length }}</li>
-          </ul>
-        </li>
-        <li>Size Code: {{ prospectStore.prospect.size_cd }}, Type: {{ prospectStore.prospect.group_type }}</li>
-        <li>Created By: {{ prospectStore.prospect.created_by }}<ul>
-          <li>On: {{ B.format.ts(prospectStore.prospect.created_ts) }}</li>
-        </ul></li>
-        <li v-if="prospectStore.prospect.last_quoted_ts">Last Quoted: {{ B.format.ts(prospectStore.prospect.last_quoted_ts) }}</li>
-        <li v-if="prospectStore.prospect.enrolled_ts">Enrolled: {{ B.format.ts(prospectStore.prospect.enrolled_ts) + " as " + prospectStore.prospect.grpnum }}</li>
-      </ul> </BInfo
-    >
-    &nbsp;&nbsp;&nbsp;
-    <BIcon tt="Toggle Bookmark" :icon="isCurrentlyFavorite() ? '#darkred solid bookmark_' : '#gray regular bookmark_'"
-      @click="fave(prospectStore.prospect.id, !isCurrentlyFavorite())" />
     <div style="display: flex; align-items: flex-start;">
       <table class="form-table">
         <tbody>
@@ -120,12 +82,12 @@ const prospectCSZ = (prosp:any) => {
           <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.format.ts(prospectStore.prospect.last_quote?.crttms), 'No quotes') }}
             <BInfo v-if="prospectStore.prospect.last_quote" pos="L" heading="Last Quote Details">
               <ul>
-                <li>{{ prospectStore.prospect.last_quote.qtype }} Quote ID: {{ prospectStore.prospect.last_quote.id }}
-                  ({{ prospectStore.prospect.last_quote.funding }} {{ prospectStore.prospect.last_quote.rlob }})<sup
-                    v-if="prospectStore.prospect.last_quote.nonstd == 'Y'" style="color:red">NS</sup>
+                <li>{{ B.codeToText.nonstd(prospectStore.prospect.last_quote.nonstd) }}
+                  {{ B.codeToText.qtype(prospectStore.prospect.last_quote.qtype) }} Quote ID: {{ prospectStore.prospect.last_quote.id }}
+                  ({{ prospectStore.prospect.last_quote.funding }} {{ prospectStore.prospect.last_quote.rlob }})
                 </li>
                 <li>Effective: {{ B.format.effdat(prospectStore.prospect.last_quote.effdat) }}</li>
-                <li>Staus: {{ B.format.effdat(prospectStore.prospect.last_quote.status) }}</li>
+                <li>Status: {{ B.codeToText.quoteStatus(prospectStore.prospect.last_quote.status) }}</li>
                 <li v-if="prospectStore.prospect.last_quote.med_plan">MED Plan: {{ prospectStore.prospect.last_quote.med_plan }}</li>
                 <li v-if="prospectStore.prospect.last_quote.dru_plan">DRU Plan: {{ prospectStore.prospect.last_quote.dru_plan }}</li>
                 <li v-if="prospectStore.prospect.last_quote.den_plan">DEN Plan: {{ prospectStore.prospect.last_quote.den_plan }}</li>
@@ -162,7 +124,7 @@ const prospectCSZ = (prosp:any) => {
         <tr><th>Contact:</th><td><input name="grpcontact" style="width: 30em;" v-model="prospHandler.temp.contact"></td></tr>
         <tr><th>Email:</th><td><input name="grpemail" style="width: 30em;" v-model="prospHandler.temp.email"></td></tr>
         <tr><th>Phone:</th><td><input name="grpphone" style="width: 12em;" v-model="prospHandler.temp.phone"></td></tr>
-        <tr><th>Subscribers:</th><td><input name="estimate" style="width: 5em;" v-model="prospHandler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
+        <tr><th>Eligible:</th><td><input name="estimate" style="width: 5em;" v-model="prospHandler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
         <tr><th>Address:</th><td><input name="grpaddr1" style="width: 30em;" v-model="prospHandler.temp.addr1"></td></tr>
         <tr><th></th><td><input name="grpaddr2" style="width: 30em;" v-model="prospHandler.temp.addr2"></td></tr>
         <tr><th></th><td>

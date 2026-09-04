@@ -49,7 +49,7 @@ const getIcon = ():string => {
 
 <template>
   <button tabindex="-1" onmousedown="event.preventDefault()" :popovertarget="popid" :disabled="props.disabled" :class="['anchor', $attrs.class]">
-    <BIcon :icon="getIcon()">{{props.text}}</BIcon>
+    <BIcon :icon="getIcon()"><span :style="{color:props.disabled ? '' : 'sienna'}">{{props.text}}</span></BIcon>
   </button>
   <div :id="popid" popover :class="props.pos" :style="{width:props.width,minWidth:props.width,maxWidth:props.width}">
     <div v-if="props.heading != ''" class="titlebar" v-html="props.heading" />

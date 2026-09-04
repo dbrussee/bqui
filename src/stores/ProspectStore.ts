@@ -3,8 +3,8 @@ import { defineStore } from "pinia";
 import BQAPIFetcher from "@/components/BQAPI";
 import { ref } from "vue";
 import { B } from "@/composables/BUtils";
-
 import { appUserStore } from "./AppUserStore";
+import { useToast } from '../composables/useToast'
 
 export const appProspectStore = defineStore("appProspectStore", () => {
   const prospect = ref<any>(null);
@@ -31,10 +31,12 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     delete userStore.user.recents
 
     const fetcher = new BQAPIFetcher()
-    fetcher.callAPI(`/recents`, "DELETE")
+    fetcher.callAPI(`/recents`, "DELETE").then(() => {
     // meta.value = fetcher.meta
     // issue.value = fetcher.issue
+      useToast().addToast("Cleared Recents List", "info")
 
+    })
   }
 
   const censusHash = ref("Unused")
@@ -77,7 +79,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         censusHash.value = hash
         censusDirty.value = false
       })
-      quotes.value = fetcher.resp.quotes
+      quotes.value = sortQuotes(fetcher.resp.quotes)
       // console.log(JSON.stringify(prospect.value, null, 2))
       if (registerRecent) {
         fetcher.callAPI('/recents', "GET").then(() => {
@@ -91,6 +93,19 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     // return prospect.value;
   }
 
+  function sortQuotes(original:any[]):any[] {
+    const sorted = original.sort((a, b) => {
+      const aDate = new Date(a.effdat)
+      const bDate = new Date(b.effdat)
+      if (aDate < bDate) return 1
+      if (aDate > bDate) return -1
+      if (a.id < b.id) return -1
+      if (a.id > b.id) return 1
+      return 0
+    })
+    return sorted
+  }
+
   async function setFavorite(pid: number, isFavorite: boolean = true) {
     const fetcher = await new BQAPIFetcher().callAPI(
       `/favorite/${pid}`,
@@ -100,6 +115,8 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       const updatedUser = fetcher.resp as any;
       const userStore = appUserStore();
       userStore.user.faves = updatedUser.faves as any[];
+      useToast().addToast(isFavorite ? "Added to Bookmarks" : "Removed from Bookmarks", isFavorite ? "success" : "info")
+
     }
   }
 
@@ -107,6 +124,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'POST', data)
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp.prosp
+      useToast().addToast("Added prospect number " + prospect.value.id, "success")
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
         censusHash.value = hash
         censusDirty.value = false
@@ -142,7 +160,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   async function getCensus() {
     const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'GET')
     if (fetcher.resp != null) {
-      prospect.value.census = 0
+      prospect.value.census.length = 0
       prospect.value.census = [...fetcher.resp[0].census]
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
         censusHash.value = hash
@@ -156,12 +174,13 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     // console.log(JSON.stringify(data, null, 2))
     const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'PUT', data)
     if (fetcher.resp != null) {
-      prospect.value.census = 0
+      prospect.value.census.length = 0
       prospect.value.census = [...fetcher.resp[0].census]
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
         censusHash.value = hash
         censusDirty.value = false
       })
+      useToast().addToast("Census Changes Saved", "success")
     }
     meta.value = fetcher.meta
     issue.value = fetcher.issue

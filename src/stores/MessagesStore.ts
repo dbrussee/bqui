@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import BQAPIFetcher from '@/components/BQAPI'
 import { ref } from 'vue'
+import { useToast } from '../composables/useToast'
 
 export const appMessageStore = defineStore('appMessageStore', () => {
   const messages = ref<any[]>([])
@@ -31,6 +32,11 @@ export const appMessageStore = defineStore('appMessageStore', () => {
     }
     meta.value = fetcher.meta
     issue.value = fetcher.issue
+    if (issue.value) {
+      useToast().addToast(`Error sending message: ${issue.value.error}`, "error")
+    } else {
+      useToast().addToast(`Message sent to ${sendto}`, "success")
+    }
   }
   async function deleteMessage(id:number) {
     const fetcher = await new BQAPIFetcher().callAPI(`/message/${id}`, 'DELETE')
