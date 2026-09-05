@@ -1,24 +1,28 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { appProspectStore } from "../stores/ProspectStore.ts";
-const prospectStore = appProspectStore();
+const prospStore = appProspectStore();
 import { B } from "@/composables/BUtils";
 import { useId, ref } from "vue";
 import BIcon from "./B/BIcon.vue";
 import BButton from "./B/BButton.vue";
 import BInfo from "./B/BInfo.vue";
+import BPopup from "./B/BPopup.vue";
+import BConfirm from "./B/BConfirm.vue";
+
+const menuPopup = ref()
 
 const prospHandler = ref({
   id: useId(),
   temp: {} as any,
   edit: () => {
-    prospHandler.value.temp = {...prospectStore.prospect}
+    prospHandler.value.temp = {...prospStore.prospect}
     const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
     popup?.showModal()
   },
   save: () => {
-    prospectStore.prospect = {...prospHandler.value.temp}
-    prospectStore.updateProspect(prospectStore.prospect)
+    prospStore.prospect = {...prospHandler.value.temp}
+    prospStore.updateProspect(prospStore.prospect)
     const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
     popup?.close()
   },
@@ -33,6 +37,17 @@ const prospectCSZ = (prosp:any) => {
   return `${prosp.city}, ${prosp.state_cd}&nbsp; ${prosp.zip_cd} <i style='font-size: .9em'>(${cnty})</i>`
 }
 
+const removeMeFromRecents = () => {
+  if (!prospStore.prospect) return
+  menuPopup.value?.close()
+  prospStore.removeMeFromRecents()
+}
+
+const handleBookmark = (isFav:boolean) => {
+  menuPopup.value?.close()
+  if (!prospStore.prospect) return
+  prospStore.setFavorite(prospStore.prospect.id, isFav)
+}
 </script>
 
 <style scoped>
@@ -45,66 +60,93 @@ const prospectCSZ = (prosp:any) => {
 
 <template>
   <!-- <div class="prospect_info"> -->
-  <div v-if="prospectStore.issue?.severity == 'FATAL'">
-    <BIcon icon="#red solid bug_">{{ prospectStore.issue.message }}</BIcon>
+  <div v-if="prospStore.issue?.severity == 'FATAL'">
+    <BIcon icon="#red solid bug_">{{ prospStore.issue.message }}</BIcon>
   </div>
-  <div v-if="prospectStore.issue?.severity == 'INFO'">
-    <BIcon icon="#sienna solid circle-exclamation_">{{ prospectStore.issue.message }}</BIcon>
+  <div v-if="prospStore.issue?.severity == 'INFO'">
+    <BIcon icon="#sienna solid circle-exclamation_">{{ prospStore.issue.message }}</BIcon>
   </div>
 
-  <div v-if="prospectStore.isLoading" class="prospect_info LOADING">
+  <div v-if="prospStore.isLoading" class="prospect_info LOADING">
     Loading...
   </div>
-  <div v-if="!prospectStore.issue?.severity && !prospectStore.isLoading && prospectStore.prospect" class="prospect_info AAA">
+  <div v-if="!prospStore.issue?.severity && !prospStore.isLoading && prospStore.prospect" class="prospect_info AAA">
     <div style="display: flex; align-items: flex-start;">
       <table class="form-table">
         <tbody>
           <tr><td>
-            <BIcon v-if="prospectStore.prospect" as="anchor"
+            <BIcon v-if="prospStore.prospect" as="anchor"
               @click="prospHandler.edit()"
-              icon="edit_">{{ prospectStore.prospect ? prospectStore.prospect.name : '&nbsp;' }}</BIcon>
+              icon="edit_">{{ prospStore.prospect ? prospStore.prospect.name : '&nbsp;' }}</BIcon>
           </td></tr>
-          <tr><td>{{ prospectStore.prospect.addr1 }}{{ prospectStore.prospect.addr2 ? ', ' + prospectStore.prospect.addr2 : '' }}</td></tr>
-          <tr><td v-html="prospectCSZ(prospectStore.prospect)"></td></tr>
+          <tr><td>{{ prospStore.prospect.addr1 }}{{ prospStore.prospect.addr2 ? ', ' + prospStore.prospect.addr2 : '' }}</td></tr>
+          <tr><td v-html="prospectCSZ(prospStore.prospect)"></td></tr>
         </tbody>
       </table>
       <table class="form-table" style="margin-left: 2em;">
         <tbody>
-          <tr><td>{{prospectStore.prospect.contact}}</td></tr>
-          <tr><td><a v-if="prospectStore.prospect.email" style="cursor: pointer"
-            :href="'mailto:' + encodeURI(`${prospectStore.prospect.contact} <${prospectStore.prospect.email}>`)">{{prospectStore.prospect.email}}</a></td></tr>
-          <tr><td>{{prospectStore.prospect.phone}}</td></tr>
+          <tr><td>{{prospStore.prospect.contact}}</td></tr>
+          <tr><td><a v-if="prospStore.prospect.email" style="cursor: pointer"
+            :href="'mailto:' + encodeURI(`${prospStore.prospect.contact} <${prospStore.prospect.email}>`)">{{prospStore.prospect.email}}</a></td></tr>
+          <tr><td>{{prospStore.prospect.phone}}</td></tr>
         </tbody>
       </table>
       <table class="form-table" style="margin-left: 2em;">
         <tbody>
-          <tr><th>Created:</th><td>{{ B.format.ts(prospectStore.prospect.created_ts) }}</td></tr>
-          <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.format.ts(prospectStore.prospect.last_quote?.crttms), 'No quotes') }}
-            <BInfo v-if="prospectStore.prospect.last_quote" pos="L" heading="Last Quote Details">
+          <tr><th>Created:</th><td>{{ B.format.ts(prospStore.prospect.created_ts) }}</td></tr>
+          <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.format.ts(prospStore.prospect.last_quote?.crttms), 'No quotes') }}
+            <BInfo v-if="prospStore.prospect.last_quote" pos="L" heading="Last Quote Details">
               <ul>
-                <li>{{ B.codeToText.nonstd(prospectStore.prospect.last_quote.nonstd) }}
-                  {{ B.codeToText.qtype(prospectStore.prospect.last_quote.qtype) }} Quote ID: {{ prospectStore.prospect.last_quote.id }}
-                  ({{ prospectStore.prospect.last_quote.funding }} {{ prospectStore.prospect.last_quote.rlob }})
+                <li>{{ B.codeToText.nonstd(prospStore.prospect.last_quote.nonstd) }}
+                  {{ B.codeToText.qtype(prospStore.prospect.last_quote.qtype) }} Quote ID: {{ prospStore.prospect.last_quote.id }}
+                  ({{ prospStore.prospect.last_quote.funding }} {{ prospStore.prospect.last_quote.rlob }})
                 </li>
-                <li>Effective: {{ B.format.effdat(prospectStore.prospect.last_quote.effdat) }}</li>
-                <li>Status: {{ B.codeToText.quoteStatus(prospectStore.prospect.last_quote.status) }}</li>
-                <li v-if="prospectStore.prospect.last_quote.med_plan">MED Plan: {{ prospectStore.prospect.last_quote.med_plan }}</li>
-                <li v-if="prospectStore.prospect.last_quote.dru_plan">DRU Plan: {{ prospectStore.prospect.last_quote.dru_plan }}</li>
-                <li v-if="prospectStore.prospect.last_quote.den_plan">DEN Plan: {{ prospectStore.prospect.last_quote.den_plan }}</li>
-                <li v-if="prospectStore.prospect.last_quote.vis_plan">VIS Plan: {{ prospectStore.prospect.last_quote.vis_plan }}</li>
-                <li>Created: {{ B.format.ts(prospectStore.prospect.last_quote.crttms) }}</li>
-                <li>By: {{ prospectStore.prospect.last_quote.crtusr }}</li>
+                <li>Effective: {{ B.format.effdat(prospStore.prospect.last_quote.effdat) }}</li>
+                <li>Status: {{ B.codeToText.quoteStatus(prospStore.prospect.last_quote.status) }}</li>
+                <li v-if="prospStore.prospect.last_quote.med_plan">MED Plan: {{ prospStore.prospect.last_quote.med_plan }}</li>
+                <li v-if="prospStore.prospect.last_quote.dru_plan">DRU Plan: {{ prospStore.prospect.last_quote.dru_plan }}</li>
+                <li v-if="prospStore.prospect.last_quote.den_plan">DEN Plan: {{ prospStore.prospect.last_quote.den_plan }}</li>
+                <li v-if="prospStore.prospect.last_quote.vis_plan">VIS Plan: {{ prospStore.prospect.last_quote.vis_plan }}</li>
+                <li>Created: {{ B.format.ts(prospStore.prospect.last_quote.crttms) }}</li>
+                <li>By: {{ prospStore.prospect.last_quote.crtusr }}</li>
               </ul>
             </BInfo>
 
           </td></tr>
-          <tr><th>Enrolled:</th><td>{{ B.ifNull(B.format.ts(prospectStore.prospect.enolled_ts), 'Not enrolled') }}</td></tr>
+          <tr><th>Enrolled:</th><td>{{ B.ifNull(B.format.ts(prospStore.prospect.enolled_ts), 'Not enrolled') }}</td></tr>
         </tbody>
       </table>
+      <div style="position: absolute; right: 0;">
+        <BPopup ref="menuPopup" class="anchor" icon="solid bars" style="font-size:1.5em" pos="L2B">
+          <template #body>
+            <p>
+              <BButton v-if="!prospStore.isCurrentlyFavorite()" @click="handleBookmark(true)" class="anchor" icon="#gold solid bookmark_">Bookmark Prospect</BButton>
+              <BButton v-else @click="handleBookmark(false)" class="anchor" icon="#gold bookmark_">Un-Bookmark Prospect</BButton>
+            </p>
+            <hr/>
+            <p><BConfirm @confirm="removeMeFromRecents()" width="30em" pos="L" class="anchor" icon="#black solid eject_" heading="Forget Prospect">
+              Forget Prospect&hellip;
+              <template #message>
+                <ul>
+                  <li class="info">Remove this prospect from your Recents list</li>
+                  <li class="info">Load the next most recent prospect in the list.</li>
+                </ul>
+                <p>
+                  It will <b style="color:red"><u>NOT</u></b> delete the prospect from the system,
+                  so it can be found in your Bookmarks or searched
+                  for at any time.
+                </p>
+                <p>Continue?</p>
+              </template>
+            </BConfirm></p>
+          </template>
+        </BPopup>
+
+      </div>
     </div>
     <!-- </div> -->
   </div>
-  <div v-if="!prospectStore.issue?.severity && !prospectStore.isLoading && !prospectStore.prospect" class="prospect_info BBB">
+  <div v-if="!prospStore.issue?.severity && !prospStore.isLoading && !prospStore.prospect" class="prospect_info BBB">
     No prospect is currently selected.
     <ul style="margin-top: .5em">
       <li>Use the [ <BIcon icon="square-plus_">New Prospect...</BIcon>] button to create a new Prospect</li>
@@ -113,10 +155,10 @@ const prospectCSZ = (prosp:any) => {
       <li>Use the [ <BIcon icon="solid magnifying-glass_">Search...</BIcon> ] Search button above to find prospects by ID or by name</li>
     </ul>
   </div>
-  <dialog v-if="prospectStore.prospect" :id="prospHandler.id">
+  <dialog v-if="prospStore.prospect" :id="prospHandler.id">
     <form @submit.prevent="prospHandler.save()">
     <div class="titlebar">
-      Edit Prospect {{ prospectStore.prospect.id }}
+      Edit Prospect Number {{ prospStore.prospect.id }}
     </div>
     <table class="form-table">
       <tbody>

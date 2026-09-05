@@ -11,8 +11,13 @@ const loginpwd = ref("");
 </script>
 
 <template>
-  <form @submit.prevent="userStore.login(loginuid, loginpwd)">
-    <table class="centerme form-table" style="margin-top: 15vh">
+  <div class="centerme message warning" v-if="!userStore.isLoading">
+    This system is for authorized users only. Unauthorized access or use is
+    prohibited and subject to criminal and civil penalties.
+    All activity may be monitored and recorded.
+  </div>
+  <form @submit.prevent="userStore.login(loginuid, loginpwd)" v-if="!userStore.isLoading">
+    <table class="centerme form-table" style="margin-top: 1em;">
       <tbody>
         <tr>
           <th>Username:</th>
@@ -30,8 +35,8 @@ const loginpwd = ref("");
       </tbody>
     </table>
   </form>
-  <div v-if="userStore.isLoading">
-    Loading...
+  <div class="message loading" v-if="userStore.isLoading">
+    <div class="spinner" style="height: 1em; width: 1em;"></div>&nbsp;Logging In...
   </div>
   <div v-if="userStore.issue?.severity == 'FATAL'" style="color: maroon;">
     <BIcon icon="#red solid bug" /> {{ userStore.issue.message }}
@@ -41,4 +46,18 @@ const loginpwd = ref("");
   </div>
 </template>
 
-<style lang="css" scoped></style>
+<style lang="css" scoped>
+.message {
+  margin-top: 15vh;
+  width: 30em;
+  font-size: 0.8em;
+  padding: 1em;
+}
+.warning {
+  color: maroon;
+}
+.loading {
+  font-size: 1.5em;
+  text-align: center;
+}
+</style>

@@ -200,12 +200,13 @@ const updateCensusDirty = () => {
 
 <template>
   <div class="drop_menu">
-    <BConfirm :bypass="!prospStore.censusDirty" class="anchor" width="20em" @confirm="prospStore.getCensus()" icon="solid rotate-left_">Reload
+    <span v-if="!prospStore.prospect">No Prospect Selected</span>
+    <BConfirm v-if="prospStore.prospect" :bypass="!prospStore.censusDirty" class="anchor" width="20em" @confirm="prospStore.getCensus()" icon="solid rotate-left_">Reload
       <template #message>
-        Any changes you have made will be lost. Are you sure?
+        <span style="color: red;">You will lose unsaved census changes!</span><p>Are you sure?</p>
       </template>
     </BConfirm>&nbsp;
-    <BButton class="modern" icon="solid user-plus_" @click="newSub()">Add Subscriber</BButton>&nbsp;
+    <BButton v-if="prospStore.prospect" class="modern" icon="solid user-plus_" @click="newSub()">Add Subscriber</BButton>&nbsp;
     <span style='float: right;'>
       <BIcon :as="prospStore.censusDirty ? 'anchor' : 'clickable'"
         :color="prospStore.censusDirty ? '' : 'gainsboro'"
@@ -232,7 +233,7 @@ const updateCensusDirty = () => {
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody v-if="prospStore.prospect">
         <template v-for="(sub, rn) in prospStore.prospect.census" :key="sub">
           <tr :class="{seperator: Number(rn) > 0}">
             <td>&nbsp;</td>

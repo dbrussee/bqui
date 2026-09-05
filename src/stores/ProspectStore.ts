@@ -38,6 +38,26 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
     })
   }
+  async function removeMeFromRecents() {
+    const fetcher = new BQAPIFetcher()
+    const userStore = appUserStore()
+    const pid = prospect.value.id
+    fetcher.callAPI(`/recents/${pid}`, "DELETE").then(() => {
+      if (fetcher.issue) {
+        useToast().addToast(`Error removing prospect ${pid} from Recents`, "error")
+      } else {
+        useToast().addToast(`Removed prospect ${pid} from Recents`, "info")
+        if (userStore.user.recents.length > 1) {
+          getProspect(userStore.user.recents[1]?.pid, true)
+        } else {
+          prospect.value = null
+        }
+      }
+      meta.value = fetcher.meta
+      issue.value = fetcher.issue
+    })
+  }
+
 
   const censusHash = ref("Unused")
   const censusDirty = ref(false)
@@ -75,6 +95,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         return
       }
       prospect.value = fetcher.resp.prosp
+      prospect.value.census = sortCensus(fetcher.resp.prosp.census)
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
         censusHash.value = hash
         censusDirty.value = false
@@ -90,7 +111,26 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         })
       }
     })
-    // return prospect.value;
+  }
+  const sortCensus = (original:any[]):any[] => {
+    for (const sub of original) {
+      sub.deps = sub.deps.sort((depa:any, depb:any) => {
+        if (depa.relation == 'SPS') return -1
+        const doba = new Date(depa.dob)
+        const dobb = new Date(depb.dob)
+        if (doba < dobb) return -1
+        if (doba > dobb) return 1
+        return 0
+      })
+    }
+    const sorted = original.sort((suba, subb) => {
+      if (suba.lstnam < subb.lstnam) return -1
+      if (suba.lstnam > subb.lstnam) return 1
+      if (suba.fstnam < subb.fstnam) return -1
+      if (suba.fstnam > subb.fstnam) return 1
+      return 0
+    })
+    return sorted
   }
 
   function sortQuotes(original:any[]):any[] {
@@ -116,8 +156,19 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       const userStore = appUserStore();
       userStore.user.faves = updatedUser.faves as any[];
       useToast().addToast(isFavorite ? "Added to Bookmarks" : "Removed from Bookmarks", isFavorite ? "success" : "info")
-
     }
+  }
+  const isCurrentlyFavorite = () => {
+    const userStore = appUserStore()
+    if (!userStore.user || !userStore.user.faves || !prospect.value.id) return false;
+    let rslt = false;
+    for (let i = 0; i < userStore.user.faves.length; i++) {
+      if (userStore.user.faves[i].pid == prospect.value.id) {
+        rslt = true;
+        break;
+      }
+    }
+    return rslt;
   }
 
   async function createProspect(data:any) {
@@ -133,6 +184,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       const userStore = appUserStore()
       if (!userStore.user.recents) userStore.user.recents = []
       userStore.user.recents.unshift({pid: prospect.value.id, name: prospect.value.name})
+      useToast().addToast(`Prospect ID ${prospect.value.id} created`, "success")
     }
     meta.value = fetcher.meta
     issue.value = fetcher.issue
@@ -152,6 +204,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
           fave.name = prospect.value.name
         }
       })
+      useToast().addToast("Prospect Changes Saved", "success")
     }
     meta.value = fetcher.meta
     issue.value = fetcher.issue
@@ -161,7 +214,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'GET')
     if (fetcher.resp != null) {
       prospect.value.census.length = 0
-      prospect.value.census = [...fetcher.resp[0].census]
+      prospect.value.census = sortCensus([...fetcher.resp[0].census])
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
         censusHash.value = hash
         censusDirty.value = false
@@ -193,5 +246,5 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     quotes,
     getCensus, updateCensus,
     prospect, createProspect, updateProspect, getProspect, searchProspects, searchResults,
-    clearRecents, setFavorite, setCensusDirty };
+    clearRecents, removeMeFromRecents, setFavorite, isCurrentlyFavorite, setCensusDirty };
 });

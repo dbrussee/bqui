@@ -10,9 +10,9 @@ import ProposalsPage from './ProposalsPage.vue';
 import MessagesPage from './MessagesPage.vue'
 const pageStore = appPageStore()
 
-import { countersStore } from "../stores/CountersStore";
+// import { countersStore } from "../stores/CountersStore";
 import CensusPage from './CensusPage.vue';
-const counters = countersStore();
+// const counters = countersStore();
 
 </script>
 
@@ -25,7 +25,7 @@ const counters = countersStore();
     <ProposalsPage v-if="pageStore.page == 'PROPOSALS'" />
   </div>
   <div v-else>
-    <LoginPage v-if="counters.apiCalls.active == 0" />
+    <LoginPage />
   </div>
   <!-- <APIIssue v-if="userStore.issue" :issue="userStore.issue"></APIIssue> -->
 </template>

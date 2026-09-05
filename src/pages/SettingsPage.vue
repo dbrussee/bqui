@@ -15,13 +15,15 @@ const rolesConfig = {
   ]
 }
 
-const decodeSource = (source:string):string => {
+const decodeSource = (source:string, td:any):void => {
+  if (!td) return
+  const cell = td as HTMLTableCellElement
   if (source == "@USER") {
-    return "User-Defined";
+    cell.innerHTML = "User-Defined";
   } else if (source == "@DFLT") {
-    return "";
+    cell.innerHTML = "";
   } else {
-    return "Role: <i>" + source + "</i>";
+    cell.innerHTML = "Role: <i>" + source + "</i>";
   }
 }
 const rightsConfig = {
@@ -39,11 +41,23 @@ const rightsRows = Object.entries(
   id: key,
   ...values,
 }))
+
+const getRightsDescription = (row:any, td:any):void => {
+  if (!td) return
+  const cell = td as HTMLTableCellElement
+  const right = app.config.rights.find((r:any) => r.code == row.id)
+  let descr = row.id // Right code
+  if (right) descr = right.descr
+  if (row.value == "N") cell.style.color = "red"
+  // if (row.value == "Y") cell.style.color = "green"
+  cell.innerHTML = descr
+}
 // console.dir(rightsRows)
 </script>
 
 <template>
   <table>
+    <tbody>
     <tr>
       <td style="vertical-align: top; padding-right: 2em;">
         <table class="form-table" style="margin-bottom: 1em;">
@@ -69,18 +83,17 @@ const rightsRows = Object.entries(
       <td style="vertical-align: top;">
         <p>
           <BTable nofooter :config="rightsConfig" :rows="rightsRows" @pick="(row:any) => rightsConfig.pickedRow = row" heading="Action Rights">
-            <template #column_descr="{row}">{{
-                app.config.rights.find((right:any) => {
-                  if (right.code == row.id) return right
-                }).descr
-            }}</template>
-            <template #column_source="{row}">
-              <span v-html="decodeSource(row.source)"/>
+            <template #column_descr="{row,td}">
+              {{ getRightsDescription(row, td) }}
+            </template>
+            <template #column_source="{row, td}">
+              {{ decodeSource(row.source, td) }}
             </template>
           </BTable>
         </p>
       </td>
     </tr>
+  </tbody>
   </table>
 </template>
 

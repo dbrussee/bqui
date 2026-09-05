@@ -88,6 +88,14 @@ const handleDblClick = (row:any, col:any, cn:any) => {
   emit('pick', row, col, cn as number)
   emit('dblpick', row, col, cn as number)
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getCellRef = (rn:any, cn:any) => {
+  const rownum = rn as number
+  const colnum = cn as number
+  const offset:number = (rownum * props.config.columns.length) + colnum
+  return tdRef.value?.[offset] || null
+}
 </script>
 
 <template>
@@ -116,7 +124,7 @@ const handleDblClick = (row:any, col:any, cn:any) => {
               @dblclick.stop="handleDblClick(row, col, cn)"
               ref="tdRef"
             >
-            <slot :name="'column_' + col.id" :row="row" :rn="rn" :td="tdRef">
+            <slot v-if="row" :name="'column_' + col.id" :row="row" :rn="rn" :td="getCellRef(rn, cn)" :col="col" :cn="cn">
               {{ getCellValueInSlot(row, col) }}
             </slot>
           </td>

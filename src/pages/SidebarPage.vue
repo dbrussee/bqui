@@ -8,36 +8,36 @@ const userStore = appUserStore();
 import { appPageStore } from "@/stores/PageStore";
 const pageStore = appPageStore();
 import { appProspectStore } from "@/stores/ProspectStore";
+const prospStore = appProspectStore();
 import { onRenderTriggered } from "vue";
 import BIcon from "@/components/B/BIcon.vue";
-const prospectStore = appProspectStore();
 
 onRenderTriggered(() => {
   if (userStore.user && userStore.user.recents) {
     if (userStore.user.recents.length > 0) {
-      if (!prospectStore.prospect) {
-        prospectStore.getProspect(userStore.user.recents[0].pid);
+      if (!prospStore.prospect) {
+        prospStore.getProspect(userStore.user.recents[0].pid);
       }
     }
   }
 })
 
 function getProspectID():string {
-  if (!prospectStore.prospect) return ""
-  if (prospectStore.isLoading) return " Loading..."
-  if (prospectStore.prospect.id) return " ID " + prospectStore.prospect.id
+  if (!prospStore.prospect) return ""
+  if (prospStore.isLoading) return " Loading..."
+  if (prospStore.prospect.id) return " #" + prospStore.prospect.id
   return ' unknown'
 }
 function getProspectName():string {
-  if (!prospectStore.prospect) return "No Prospect"
-  if (prospectStore.isLoading) return "Loading..."
-  if (prospectStore.prospect.name) return prospectStore.prospect.name
+  if (!prospStore.prospect) return "No Prospect"
+  if (prospStore.isLoading) return "Loading..."
+  if (prospStore.prospect.name) return prospStore.prospect.name
   return 'Unknown '
 }
 function getProposalsCount():string {
-  if (!prospectStore.prospect) return "No Prospect"
-  if (prospectStore.isLoading) return "Loading..."
-  if (prospectStore.prospect.name) return "None"
+  if (!prospStore.prospect) return "No Prospect"
+  if (prospStore.isLoading) return "Loading..."
+  if (prospStore.prospect.name) return "None"
   return 'Unknown '
 }
 function getUnreadMessageCounts():string {
@@ -52,23 +52,23 @@ function getUnreadMessageCounts():string {
 }
 function getCensusCount():string {
   let msg = "Unknown"
-  if (!prospectStore.prospect) {
+  if (!prospStore.prospect) {
     msg = "No Prospect"
-  } else if (prospectStore.isLoading) {
+  } else if (prospStore.isLoading) {
     msg = "Loading..."
-  } else if (prospectStore.prospect.census) {
-    if (prospectStore.prospect.census.length == 0) {
+  } else if (prospStore.prospect.census) {
+    if (prospStore.prospect.census.length == 0) {
       msg = "None"
     } else {
       let gtotal = 0
-      prospectStore.prospect.census.forEach((sub:any) => {
+      prospStore.prospect.census.forEach((sub:any) => {
         gtotal++
         gtotal += sub.deps.length
       })
-      if (gtotal == prospectStore.prospect.census.length) {
+      if (gtotal == prospStore.prospect.census.length) {
         msg = 'Subs: ' + gtotal.toString()
       } else {
-        msg = `Subs: ${prospectStore.prospect.census.length} / Total: ${gtotal}`
+        msg = `Subs: ${prospStore.prospect.census.length} / Total: ${gtotal}`
       }
     }
   }
@@ -84,7 +84,7 @@ function getCensusCount():string {
       <p style='font-size: .8em;'>{{ getProspectName() }}</p>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
-      ><BIcon as="icon" icon='solid people-group_' />Census<BIcon v-if="prospectStore.censusDirty" icon='#red solid _floppy-disk' />
+      ><BIcon as="icon" :icon="prospStore.censusDirty ? '#red solid people-group_' : 'solid people-group_'" />Census
       <p style='font-size: .8em;' v-html="getCensusCount()"></p>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'PROPOSALS'" :current="pageStore.page == 'PROPOSALS'"

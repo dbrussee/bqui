@@ -13,6 +13,7 @@ export default defineConfig({
     },
   },
   server: {
+    host: true,
     cors: true,
     proxy: {
       '/bqapi/v2.1': {

@@ -21,6 +21,11 @@ const props = defineProps({
     required: false,
     default: ''
   },
+  warning: {
+    type: String,
+    required: false,
+    default: ''
+  },
   source: {
     type: String,
     required: false,
@@ -98,6 +103,9 @@ const doBlur = ():void => {
   <div :id="popid" popover :class="props.pos" :style="{width:props.width,minWidth:props.width,maxWidth:props.width}">
     <div v-if="props.heading != ''" class="titlebar" v-html="props.heading" /><slot
       name="message">Are you sure?</slot>
+      <p v-if="props.warning != ''">
+        <BIcon icon="#red solid triangle-exclamation"><span style="color: red;">{{ props.warning }}</span></BIcon>
+      </p>
     <div class="buttonbar">
       <BButton @click="emit('confirm'); close()" icon="#green solid check_">{{ props.confirm_btn_text }}</BButton>
     </div>

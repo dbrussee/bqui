@@ -6,12 +6,15 @@ import { countersStore } from "../stores/CountersStore";
 const counters = countersStore();
 import { appStore } from "@/stores/AppStore.ts";
 const app = appStore()
+import { appUserStore } from "../stores/AppUserStore";
+const userStore = appUserStore();
+import { appProspectStore } from "@/stores/ProspectStore";
+const prospStore = appProspectStore();
 import BTable from "@/components/B/BTable.vue";
 import BPopup from "@/components/B/BPopup.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
 import BInfo from "@/components/B/BInfo.vue";
 import BIcon from "@/components/B/BIcon.vue";
-import UserComponent from "@/components/UserComponent.vue";
 
 const errsGrid = {
   height: "15em",
@@ -40,16 +43,24 @@ const errsGrid = {
       <table style="width: 100%">
         <tbody>
           <tr>
-            <td style="text-align: left; width: 10em">
+            <td style="text-align: left;">
               v{{app.version()}}
               <BInfo pos="T2R" :heading="'Application Ver ' + app.version()">
                 <ul>
                   <li>Ver: {{ app.versionDescription() }}</li>
                   <li>{{app.vers.release.getTime() < new Date().getTime() ? 'Released: ' : 'Scheduled Release: '}}{{app.vers.release.toLocaleDateString('en-US')}}</li>
                 </ul>
-              </BInfo></td>
+              </BInfo>
+              &nbsp;&nbsp;
+              <BConfirm v-if="userStore.user" :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''" class="anchor" style="color:white;" pos="T" @confirm="userStore.logout()">
+                Logout&hellip;
+                <template #message>
+                  Log out user '{{ userStore.user.id }}'
+                </template>
+              </BConfirm>
+            </td>
             <td style="text-align: center">
-              <UserComponent />
+              &nbsp;
             </td>
             <td style="text-align: right; width: 10em">
               <div v-if="counters.apiCalls.active > 0" class="spinner"></div>{{counters.apiCalls.active > 1 ? ':' + counters.apiCalls.active : ''}}&nbsp;

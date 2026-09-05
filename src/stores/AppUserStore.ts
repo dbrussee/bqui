@@ -9,18 +9,6 @@ export const appUserStore = defineStore("appUserStore", () => {
   const user = ref<any>(null);
   const otherUser = ref<any>(null);
   const meta = ref<any>(null);
-  // const meta = ref<any>({
-  //   ip: 'UNKNOWN',
-  //   name: 'UNKNOWN',
-  //   os: 'UNKNOWN',
-  //   arch: 'UNKNOWN',
-  //   tz: 'UNKNOWN',
-  //   times: {
-  //     start: new Date(),
-  //     end: new Date(),
-  //     ms: 0,
-  //   },
-  // })
   const issue = ref<any>(null)
   const isLoading = ref<boolean>(false)
 
@@ -49,7 +37,7 @@ export const appUserStore = defineStore("appUserStore", () => {
       user.value = fetcher.resp;
       meta.value = fetcher.meta;
       issue.value = fetcher.issue;
-
+      // console.log(JSON.stringify(user.value, null, 2))
       const msgStore = appMessageStore()
       msgStore.getMessages()
     })
@@ -65,15 +53,14 @@ export const appUserStore = defineStore("appUserStore", () => {
 
     return user.value;
   }
-  async function logout() {
+  function logout() {
+    if (!user.value) return;
+    user.value = null;
     const prospStore = appProspectStore()
     prospStore.prospect = null
-
-    if (!user.value) return;
-    await new BQAPIFetcher().callAPI(`/logout`, "POST");
-    user.value = null;
-    issue.value = null;
-    meta.value = null;
+    window.setTimeout(() => {
+      new BQAPIFetcher().callAPI(`/logout`, "POST");
+    },100)
   }
 
   return { isLoading, getOtherUser, relogin, login, logout, otherUser, user, meta, issue };

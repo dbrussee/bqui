@@ -49,18 +49,6 @@ const fave = (pid: number, isFavorite: boolean) => {
   }
 };
 
-const isCurrentlyFavorite = () => {
-  if (!userStore.user || !userStore.user.faves || !prospStore.prospect.id) return false;
-  let rslt = false;
-  for (let i = 0; i < userStore.user.faves.length; i++) {
-    if (userStore.user.faves[i].pid == prospStore.prospect.id) {
-      rslt = true;
-      break;
-    }
-  }
-  return rslt;
-}
-
 
 const favesPopover = ref()
 const recentPopover = ref()
@@ -151,7 +139,7 @@ const searchHandler = ref({
 })
 
 function getProspectName():string {
-  if (!prospStore.prospect) return "no prosp"
+  if (!prospStore.prospect) return ""
   if (prospStore.isLoading) return "Loading..."
   if (prospStore.prospect.id) return prospStore.prospect.name
   return 'Unknown'
@@ -161,7 +149,7 @@ function getBookmarkIcon():string {
   if (!userStore.user) return "#silver bookmark_"
   if (!prospStore.prospect) return "#silver bookmark_"
   if (!prospStore.prospect.id) return "#silver bookmark_"
-  if (isCurrentlyFavorite()) return "#gold solid bookmark_"
+  if (prospStore.isCurrentlyFavorite()) return "#gold solid bookmark_"
   return "#gold bookmark_"
 }
 
@@ -169,8 +157,8 @@ function getBookmarkIcon():string {
 
 <template>
   <div class="container">
-    <div class="logo-area">
-      <i><b>B</b>lueQuote</i>
+    <div class="logo-area" style="padding-left: 2.5em;">
+      <img src="../bcbc_logo.png" style="position: absolute; height: 2.5em; top: .5em; left: .8em;"/><i><b>B</b>lueQuote</i>
     </div>
     <div class="user-areaX">
 
@@ -178,8 +166,8 @@ function getBookmarkIcon():string {
         <tbody>
           <tr>
             <td style="text-align: left;">
-              <BIcon tt="Toggle Bookmark" :icon="getBookmarkIcon()"
-                @click="fave(prospStore.prospect.id, !isCurrentlyFavorite())" />
+              <BIcon v-if="prospStore.prospect" :icon="getBookmarkIcon()"
+                @click="fave(prospStore.prospect.id, !prospStore.isCurrentlyFavorite())" />
               {{ getProspectName() }}
               <BInfo v-if="prospStore.prospect" pos="B" :heading="`Prospect ${prospStore.prospect.id} Details`">
                 {{ prospStore.prospect.name }}
@@ -281,6 +269,7 @@ function getBookmarkIcon():string {
         <tr><th>Enroll Date:</th><td><input name="enrollDate" style="width: 10em;" v-model="prospHandler.temp.enroll_date"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
+            <span v-if="prospStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
             <BButton class="anchor" icon="#red solid x" @click="prospHandler.abort()">Cancel</BButton>&nbsp;
             <BButton class="action" icon="square-plus_" @click="prospHandler.save()">Create Prospect</BButton>
           </div>
