@@ -12,6 +12,8 @@ export const appUserStore = defineStore("appUserStore", () => {
   const issue = ref<any>(null)
   const isLoading = ref<boolean>(false)
 
+  const apiHistory = ref<any[]>([])
+
   initialize();
 
   function initialize() {
@@ -43,6 +45,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     })
   }
   async function relogin() {
+    isLoading.value = true
     const fetcher = await new BQAPIFetcher().callAPI(`/relogin`, "POST");
     user.value = fetcher.resp;
     meta.value = fetcher.meta;
@@ -50,6 +53,8 @@ export const appUserStore = defineStore("appUserStore", () => {
 
     const msgStore = appMessageStore()
     msgStore.getMessages()
+
+    isLoading.value = false
 
     return user.value;
   }
@@ -62,6 +67,14 @@ export const appUserStore = defineStore("appUserStore", () => {
       new BQAPIFetcher().callAPI(`/logout`, "POST");
     },100)
   }
+  async function getAPIHistory() {
+    apiHistory.value.length = 0
+    const fetcher = await new BQAPIFetcher().callAPI(`/apihistory`, 'GET')
+    if (fetcher.resp != null) {
+      apiHistory.value.push(...(fetcher.resp as any[]))
+    }
+  }
 
-  return { isLoading, getOtherUser, relogin, login, logout, otherUser, user, meta, issue };
+
+  return { isLoading, getOtherUser, relogin, login, logout, otherUser, user, meta, issue, getAPIHistory, apiHistory };
 });

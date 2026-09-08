@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const appStore = defineStore('qppStore', () => {
+  const apiHistory = ref<any[]>([])
   const config = ref<any>({})
   const vers = ref({
     major: 2,
@@ -36,5 +37,5 @@ export const appStore = defineStore('qppStore', () => {
     })
   }
 
-  return { initialize, vers, version, versionDescription, config }
+  return { initialize, vers, version, versionDescription, config, apiHistory }
 })

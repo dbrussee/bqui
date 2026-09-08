@@ -36,7 +36,7 @@ const loginpwd = ref("");
     </table>
   </form>
   <div class="message loading" v-if="userStore.isLoading">
-    <div class="spinner" style="height: 1em; width: 1em;"></div>&nbsp;Logging In...
+    <div class="spinner" style="height: 1em; width: 1em;"></div>&nbsp;Checking User Info...
   </div>
   <div v-if="userStore.issue?.severity == 'FATAL'" style="color: maroon;">
     <BIcon icon="#red solid bug" /> {{ userStore.issue.message }}

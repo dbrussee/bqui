@@ -12,6 +12,8 @@ const userStore = appUserStore();
 import BIcon from '@/components/B/BIcon.vue';
 import BInfo from '@/components/B/BInfo.vue';
 import { B } from '@/composables/BUtils.ts';
+import APIHistory from '@/components/APIHistory.vue';
+const apiHistoryRef = ref<InstanceType<typeof APIHistory> | null>(null)
 
 const prospHandler = ref({
   id: useId(),
@@ -153,12 +155,19 @@ function getBookmarkIcon():string {
   return "#gold bookmark_"
 }
 
+const openHistory = () => {
+  if (!userStore.user) return
+  apiHistoryRef.value?.open()
+}
+
 </script>
 
 <template>
+  <APIHistory ref="apiHistoryRef"/>
   <div class="container">
     <div class="logo-area" style="padding-left: 2.5em;">
-      <img src="../bcbc_logo.png" style="position: absolute; height: 2.5em; top: .5em; left: .8em;"/><i><b>B</b>lueQuote</i>
+      <img @click="openHistory()" src="../bcbc_logo.png" style="position: absolute; height: 2.5em; top: .5em; left: .8em;"/>
+      <i><b>B</b>lueQuote</i>
     </div>
     <div class="user-areaX">
 
@@ -252,6 +261,7 @@ function getBookmarkIcon():string {
 
   <dialog :id="prospHandler.id">
     <div class="titlebar">New Prospect</div>
+    <form @submit.prevent="prospHandler.save()">
     <table class="form-table">
       <tbody>
         <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="prospHandler.temp.name"></td></tr>
@@ -270,12 +280,13 @@ function getBookmarkIcon():string {
         <tr><td colspan="2">
           <div class="buttonbar">
             <span v-if="prospStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
-            <BButton class="anchor" icon="#red solid x" @click="prospHandler.abort()">Cancel</BButton>&nbsp;
-            <BButton class="action" icon="square-plus_" @click="prospHandler.save()">Create Prospect</BButton>
+            <BButton type="button" class="anchor" icon="#red solid x" @click="prospHandler.abort()">Cancel</BButton>&nbsp;
+            <BButton type="submit" class="action" icon="square-plus_">Create Prospect</BButton>
           </div>
         </td></tr>
       </tbody>
     </table>
+    </form>
   </dialog>
 
 </template>

@@ -17,6 +17,10 @@ const prospHandler = ref({
   temp: {} as any,
   edit: () => {
     prospHandler.value.temp = {...prospStore.prospect}
+    B.deleteProperties(prospHandler.value.temp,
+      "census", "last_quote", "grpnum", "agent_id", "created_by", "created_ts",
+      "group_type", "enroll_date", "enrolled_ts", "last_quote_id"
+    )
     const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
     popup?.showModal()
   },
@@ -120,8 +124,8 @@ const handleBookmark = (isFav:boolean) => {
         <BPopup ref="menuPopup" class="anchor" icon="solid bars" style="font-size:1.5em" pos="L2B">
           <template #body>
             <p>
-              <BButton v-if="!prospStore.isCurrentlyFavorite()" @click="handleBookmark(true)" class="anchor" icon="#gold solid bookmark_">Bookmark Prospect</BButton>
-              <BButton v-else @click="handleBookmark(false)" class="anchor" icon="#gold bookmark_">Un-Bookmark Prospect</BButton>
+              <BButton v-if="!prospStore.isCurrentlyFavorite()" @click="handleBookmark(true)" class="anchor" icon="#goldenrod solid bookmark_">Bookmark Prospect</BButton>
+              <BButton v-else @click="handleBookmark(false)" class="anchor" icon="#goldenrod bookmark_">Un-Bookmark Prospect</BButton>
             </p>
             <hr/>
             <p><BConfirm @confirm="removeMeFromRecents()" width="30em" pos="L" class="anchor" icon="#black solid eject_" heading="Forget Prospect">
@@ -177,7 +181,7 @@ const handleBookmark = (isFav:boolean) => {
         <tr><th>Enroll Date:</th><td><input name="enrollDate" style="width: 10em;" v-model="prospHandler.temp.enroll_date"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
-            <BButton class="anchor" style="margin-right: .6em;" @click="prospHandler.abort()" icon="#red solid x">Cancel</BButton>
+            <BButton type="button" class="anchor" style="margin-right: .6em;" @click="prospHandler.abort()" icon="#red solid x">Cancel</BButton>
             <BButton type="submit" class="action" icon="floppy-disk_"> Save Changes</BButton>
           </div>
         </td></tr>

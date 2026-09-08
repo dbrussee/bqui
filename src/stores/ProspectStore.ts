@@ -190,9 +190,9 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     issue.value = fetcher.issue
   }
   async function updateProspect(data:any) {
-    // console.log(JSON.stringify(data, null, 2))
-    const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'PUT', data)
-    const curCensus = JSON.parse(JSON.stringify(prospect.value.census)) // Clone the current census
+    const curCensus = JSON.parse(JSON.stringify(B.ifNull(prospect.value.census, []))) // Clone the current census
+    delete data.census
+    const fetcher = await new BQAPIFetcher().callAPI(`/prospect?census=N`, 'PUT', data)
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp.prosp
       prospect.value.census = [...curCensus]

@@ -2,6 +2,7 @@
 import { countersStore } from '../stores/CountersStore'
 import { B } from '@/composables/BUtils'
 import { useToast } from '../composables/useToast'
+import { appStore } from '@/stores/AppStore'
 
 export default class BQAPIFetcher {
   private static readonly BASE_URL = 'http://localhost:8080/bqapi/v2.1'
@@ -32,6 +33,14 @@ export default class BQAPIFetcher {
     body: any = {},
   ): Promise<BQAPIFetcher> {
     const counters = countersStore()
+    const historyEntry = {
+      ts: B.format.ts(new Date()),
+      endpoint: endpoint,
+      method: method,
+      body: body,
+      result: "PENDING",
+    }
+    appStore().apiHistory.unshift(historyEntry)
 
     console.log(method, endpoint)
 
@@ -50,6 +59,7 @@ export default class BQAPIFetcher {
       })
       if (!response.ok) {
         this.status = 'ERROR'
+        historyEntry.result = "ERROR " + response.status
         useToast().addToast(`HTTP error! status: ${response.status} for ${method} ${endpoint}`, "error")
         counters.apiCalls.active--
         counters.apiCalls.error++
@@ -64,6 +74,7 @@ export default class BQAPIFetcher {
 
       if (this.meta.username == '') {
         if (!BQAPIFetcher.no_user_ok_endpoints.includes(endpoint)) {
+          historyEntry.result = "ERROR User is not logged in"
           throw new Error("User is not logged in")
         }
       }
@@ -77,6 +88,7 @@ export default class BQAPIFetcher {
           const stack = "..." + this.issue.stackTrace.join('\n...')
           const msg = `${codeLoc} : ${this.issue.message}\t${stack}`
           // useToast().addToast(`Fatal Error! ${codeLoc}`, "error")
+          historyEntry.result = "ERROR " + msg
           throw new Error(msg)
         }
       }
@@ -85,6 +97,7 @@ export default class BQAPIFetcher {
       this.status = 'FETCHED'
       counters.apiCalls.active--
       counters.apiCalls.success++
+      historyEntry.result = "SUCCESS"
       return this
     } catch (error) {
       const msg_list = String(error).replace("Error: ", "").split("\t")
@@ -93,7 +106,7 @@ export default class BQAPIFetcher {
       counters.lastError.unshift({path: endpoint, method: method, msg: msg, stack: stack, ts: B.format.ts(new Date)})
       useToast().addToast(`System error! Message: ${msg}`, "error")
       this.status = 'ERROR'
-
+      historyEntry.result = "ERROR " + msg
       try {
         const targetUrl = `${BQAPIFetcher.BASE_URL}/logerror`
 
@@ -111,6 +124,7 @@ export default class BQAPIFetcher {
       counters.apiCalls.active--
       counters.apiCalls.error++
       console.error(`Failed to fetch from ${endpoint}:`, error)
+      historyEntry.result = `Failed to fetch`
       // this._json.value = null
       // throw error // Re-throw so the calling code knows it failed
     }

@@ -70,6 +70,10 @@ div.buttonbar {
     margin-left: 3px;
   }
 }
+.mini {
+  font-size: .9em;
+  font-family: monospace;
+}
 
 .material-symbols-outlined {
   position: relative;
@@ -187,6 +191,9 @@ button.modern {
   /* border-radius: .2em; */
   &:hover {
     background-color: oklch(0.5 0.25 250);
+  }
+  &:focus {
+    outline: 2px solid black;
   }
 }
 button.clear {
