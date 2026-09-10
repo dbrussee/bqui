@@ -72,6 +72,8 @@ div.buttonbar {
 }
 .mini {
   font-size: .9em;
+}
+.mono {
   font-family: monospace;
 }
 
@@ -302,10 +304,10 @@ table.form-table {
     padding-right: 0.2rem;
     color: var(--form-prompt-color);
     font-weight: normal;
-    vertical-align: top;
+    vertical-align: baseline;
   }
   tr td {
-    vertical-align: top;
+    vertical-align: first baseline;
 
     textarea {
       height: 5em;
@@ -315,19 +317,34 @@ table.form-table {
       position: relative;
       top: -.2em !important;
     }
-    input, textarea {
-      position: relative;
-      top: -.2em !important;
+    input[type='checkbox'],
+    input[type='radio'] {
+      display: inline-block;
+      margin-bottom: .4em;
+      cursor: pointer;
+    }
+    input, textarea, select {
       outline: none;
-      border: 1px solid gray;
+      border: none;
+      border-radius: 0;
+      border-bottom: 1.5px solid silver;
       margin-bottom: .2em;
       padding: .2em;
       &:active, &:focus {
         inset: unset;
         background-color: snow;
-        border-style: solid;
-        border-color: blue;
+        /* border-style: solid; */
+        border-bottom: 1.5px solid blue;
       }
+      &:invalid {
+        /* background-color: #FFE9F0; */
+        border-bottom-color: red;
+      }
+    }
+    select[size] {
+      padding: .2em;
+      padding-top: none;
+      border: none;
     }
   }
 }
@@ -364,8 +381,12 @@ table.form-table {
   }
 }
 button.anchor:disabled {
-  color: silver;
+  color: gainsboro;
   cursor: default;
+  background-color: transparent !important;
+  & * {
+    color: gainsboro;
+  }
 }
 
 i.gapleft {

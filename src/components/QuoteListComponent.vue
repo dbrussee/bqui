@@ -1,8 +1,10 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, useId } from 'vue';
 import { appProspectStore } from '@/stores/ProspectStore.ts';
 const prospStore = appProspectStore()
+import { QuoteStore } from '@/stores/QuoteStore.ts';
+const quoteStore = QuoteStore()
 import BTable from './B/BTable.vue';
 import { B } from '@/composables/BUtils.ts';
 import BPopup from './B/BPopup.vue';
@@ -10,6 +12,8 @@ import BButton from './B/BButton.vue';
 // import BActionlist from './B/BActionlist.vue';
 import BInfo from './B/BInfo.vue';
 import BIcon from './B/BIcon.vue';
+import NewQuoteDialog from '@/dialogs/NewQuoteDialog.vue';
+import { useToast } from '@/composables/useToast.ts';
 
 // Watch for changes to the prospect.
 // Because the value is in a store, we need to use
@@ -20,10 +24,44 @@ watch(() => prospStore.prospect, () => {
   }
 )
 
+const newQuoteHandler = ref({
+  popid: useId(),
+  family: 'MED',
+  startFromQuote: () => {
+    const q = cfgQuotesList.value.pickedRow
+    quoteStore.initializeFromQuote(q)
+    const popup = document.getElementById(newQuoteHandler.value.popid) as HTMLDialogElement
+    popup?.showModal()
+  },
+  start: (family:string) => {
+    if (family != quoteStore.newQuoteOptions.family) quoteStore.initializeNewQuoteOptions(family)
+    const popup = document.getElementById(newQuoteHandler.value.popid) as HTMLDialogElement
+    popup?.showModal()
+  },
+  step2: () => {
+    console.log(JSON.stringify(quoteStore.newQuoteOptions, null, 2))
+    useToast().addToast(JSON.stringify(quoteStore.newQuoteOptions, null, 2), "info")
+    const popup = document.getElementById(newQuoteHandler.value.popid) as HTMLDialogElement
+    popup?.showModal()
+  },
+  save: () => {
+    // prospStore.prospect = {...prospHandler.value.temp}
+    // prospStore.updateProspect(prospStore.prospect)
+    const popup = document.getElementById(newQuoteHandler.value.popid) as HTMLDialogElement
+    popup?.close()
+  },
+  abort: () => {
+    const popup = document.getElementById(newQuoteHandler.value.popid) as HTMLDialogElement
+    popup?.close()
+  }
+})
+
+
 const cfgQuotesList = ref({
   height: "calc(100vh - 12em)",
   width: "calc(100vw - 200px - 2em)",
   pickedRow: null as any,
+  no_rows_text: 'No quotes to display',
   columns: [
     { id: "id", heading: "Quote", width: "5em", flags: "R" },
     { id: "effdat", heading: "Effective", width: "5em", flags: "C" },
@@ -67,12 +105,14 @@ const handleQuoteRowClicked = (row:any, col:any, cn:number) => {
       >{{ B.codeToText.nonstd(row.nonstd) }}</span>
     </template>
     <template #buttons>
-      <BPopup class="action gapright" icon="solid bars_" pos="T2R" heading="New Quote Family">New Quote&hellip;
+      <BPopup class="action gapright" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
         <template #body>
-          <p><BButton class="anchor" icon="#black solid stethoscope_">Medical &amp; Drug</BButton></p>
-          <p><BButton class="anchor" icon="#black solid tooth_">Dental</BButton></p>
-          <p><BButton class="anchor" icon="#black solid glasses_">Vision</BButton></p>
-          <p><BButton class="anchor" icon="#black solid spa_">Wellness</BButton></p>
+          <p><BButton @click="newQuoteHandler.start('MED')" class="anchor" icon="#black solid stethoscope_">Medical &amp; Drug</BButton></p>
+          <p><BButton @click="newQuoteHandler.start('DEN')" class="anchor" icon="#black solid tooth_">Dental</BButton></p>
+          <p><BButton @click="newQuoteHandler.start('VIS')" class="anchor" icon="#black solid glasses_">Vision</BButton></p>
+          <p><BButton disabled @click="newQuoteHandler.start('WEL')" class="anchor" icon="#black solid spa_">Wellness</BButton></p>
+          <hr style="margin-top: .2em; margin-bottom: .2em;"/>
+          <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="newQuoteHandler.startFromQuote()" class="anchor" icon="#black clone_">Copy Selected</BButton></p>
         </template>
       </BPopup>
       <BInfo :disabled="!cfgQuotesList.pickedRow" pos="T2R" class="gapright" :heading="'Selected Quote Details'" text="Details">
@@ -95,15 +135,17 @@ const handleQuoteRowClicked = (row:any, col:any, cn:number) => {
       <BButton gapleft :disabled="!cfgQuotesList.pickedRow" class="anchor" icon="_file-pdf">Generate</BButton>
     </template>
   </BTable>
+  <dialog :id="newQuoteHandler.popid">
+    <NewQuoteDialog @abort="newQuoteHandler.abort()" @continue="(opts) => newQuoteHandler.step2()" :family="newQuoteHandler.family"></NewQuoteDialog>
+  </dialog>
 </template>
 
 <style lang="css" scoped>
 .nonstdC {
-  font-weight: bold;
-  color: red;
-  text-shadow: 0 0 1px black;
+  color: maroon;
+  font-style: italic;
 }
 .nonstdY {
-  color: orange;
+  font-style: italic;
 }
 </style>

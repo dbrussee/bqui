@@ -4,7 +4,6 @@
 import { ref } from 'vue';
 import { appProspectStore } from '@/stores/ProspectStore';
 const prospStore = appProspectStore()
-import BIcon from '@/components/B/BIcon.vue';
 import BButton from '@/components/B/BButton.vue';
 import BConfirm from '@/components/B/BConfirm.vue';
 
@@ -168,6 +167,12 @@ const setRelation = (subnum:number, depnum:number, e:Event) => {
         newSub.deps[depnum].relation = dep.relation
 
         prospStore.prospect.census.splice(subnum, 1, newSub)
+        // deps cannot have what some does not take
+        prospStore.prospect.census[subnum].deps.forEach((dep:any) => {
+          if (!sub.med) dep.med = false
+          if (!sub.den) dep.den = false
+          if (!sub.vis) dep.vis = false
+        });
       } else { // SPS or DOM ... set all others to CHD and then set new value
         sub.deps.forEach((dep:any)=> {
           dep.relation = 'CHD'
@@ -208,10 +213,11 @@ const updateCensusDirty = () => {
     </BConfirm>&nbsp;
     <BButton v-if="prospStore.prospect" class="modern" icon="solid user-plus_" @click="newSub()">Add Subscriber</BButton>&nbsp;
     <span style='float: right;'>
-      <BIcon :as="prospStore.censusDirty ? 'anchor' : 'clickable'"
-        :color="prospStore.censusDirty ? '' : 'gainsboro'"
-        :icon="prospStore.censusDirty ? '#red solid floppy-disk_' : 'floppy-disk_'"
-        @click="prospStore.updateCensus(prospStore.prospect.census)">Save Changes</BIcon>&nbsp;
+      <BButton class="anchor"
+        :disabled="!prospStore.censusDirty"
+        :icon="prospStore.censusDirty ? '#red solid floppy-disk' : 'floppy-disk'"
+        @click="prospStore.updateCensus(prospStore.prospect.census)">Save Changes
+      </BButton>&nbsp;
     </span>
   </div>
   <div style="display: flex; justify-content: center;">
@@ -337,7 +343,7 @@ input.dob {
   text-align: center;
 }
 div.b-table-container {
-  background-color: var(--unused_bgcolor);
+  /* background-color: var(--unused_bgcolor); */
   width: fit-content;
   overscroll-behavior: none;
 }

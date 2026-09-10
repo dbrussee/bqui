@@ -1,5 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const B = {
+  dateFromYYYYMMDD: (yyyymmdd:string):Date => {
+    const splitter = yyyymmdd.charAt(4)
+    const parts:string[] = yyyymmdd.split(splitter)
+    if (parts.length < 3) return new Date(yyyymmdd)
+    const newd = new Date(parseInt(parts[0]!), parseInt(parts[1]!)-1, parseInt(parts[2]!))
+    return newd
+  },
+  firstOfMonth: (month_offset:number = 0):Date => {
+    const d = new Date()
+    d.setDate(1)
+    d.setHours(0, 0, 0, 0)
+    if (month_offset != 0) d.setMonth(d.getMonth() + month_offset)
+    return d
+  },
   codeToText: {
     /**
      * converts quote status code to descriptive text
@@ -168,7 +182,13 @@ export const B = {
      */
     effdat: (d: string | Date) => {
       if (!d) return "";
-      const date = new Date(d);
+      let date:Date
+      if (typeof d == "string") {
+        date = B.dateFromYYYYMMDD(d)
+      } else {
+        date = d
+      }
+      // const date = new Date(d);
       const formatter = new Intl.DateTimeFormat("en-US", {
         month: "short",
         year: "numeric",
@@ -227,6 +247,31 @@ export const B = {
 
       return finalString;
       // Output: "Jul 30, 2026 08:12:10a"
+    },
+    date: (d: string | Date = new Date()) => {
+      if (!d) return "";
+      const date = new Date(d);
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        month: "numeric",
+        day: "numeric",
+        year: "numeric"
+      });
+
+      // Break the date down into raw layout tokens
+      let parts = null
+      try {
+        parts = formatter.formatToParts(date);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch(err) {
+        return d
+      }
+      const p = Object.fromEntries(parts.map((item) => [item.type, item.value]));
+
+      // Assemble your exact pattern string
+      const finalString = `${p.month}/${p.day}/${p.year}`;
+
+      return finalString;
+      // Output: "9/11/2026"
     },
 
     /**

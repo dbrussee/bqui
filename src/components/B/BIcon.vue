@@ -21,6 +21,11 @@ const props = defineProps({
       return ['fa', 'mat'].includes(value)
     }
   },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
   popovertarget: {
     type: String,
     required: false,
@@ -60,7 +65,7 @@ const getClasses_fa = () => {
   let vers = "fa-regular"
   const classes = new Set()
   classes.add("fa")
-  iconcolor.value = ""
+  iconcolor.value = props.disabled ? 'gainsboro' : ''
   let parts:string[] = []
   try {
     parts = props.icon.split(" ")
@@ -79,7 +84,7 @@ const getClasses_fa = () => {
       part = part.substring(0, part.length - 1)
     }
     if (part.startsWith("#")) {
-      iconcolor.value = part.substring(1)
+      if (!props.disabled) iconcolor.value = part.substring(1)
     } else if (part == "regular") {
       vers = " fa-regular"
     } else if (part == "solid") {

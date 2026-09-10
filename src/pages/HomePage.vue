@@ -18,7 +18,7 @@ import CensusPage from './CensusPage.vue';
 
 <template>
   <div v-if="userStore.user">
-    <ProspectsPage v-if="pageStore.page == 'PROSPECTS'" />
+    <KeepAlive><ProspectsPage v-if="pageStore.page == 'PROSPECTS'" /></KeepAlive>
     <CensusPage v-if="pageStore.page == 'CENSUS'" />
     <MessagesPage v-if="pageStore.page == 'MSGS'" />
     <SettingsPage v-if="pageStore.page == 'SETTINGS'" />

@@ -10,8 +10,6 @@ const prospStore = appProspectStore();
 import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
 import BIcon from '@/components/B/BIcon.vue';
-import BInfo from '@/components/B/BInfo.vue';
-import { B } from '@/composables/BUtils.ts';
 import APIHistory from '@/components/APIHistory.vue';
 const apiHistoryRef = ref<InstanceType<typeof APIHistory> | null>(null)
 
@@ -128,8 +126,8 @@ const searchHandler = ref({
         tbox.focus()
         if (prospStore.searchResults.length == 1) {
           cfgSearchResults.value.pickedRow = prospStore.searchResults[0]
-          const btn = document.getElementById(searchHandler.value.submitButtonId) as HTMLButtonElement
-          btn.focus()
+          // const btn = document.getElementById(searchHandler.value.submitButtonId) as HTMLButtonElement
+          // btn.focus()
         }
       }
     })
@@ -167,9 +165,9 @@ const openHistory = () => {
   <div class="container">
     <div class="logo-area" style="padding-left: 2.5em;">
       <img @click="openHistory()" src="../bcbc_logo.png" style="position: absolute; height: 2.5em; top: .5em; left: .8em;"/>
-      <i><b>B</b>lueQuote</i>
+      <i style="font-size:1.5em">B<b></b>lueQuote</i>
     </div>
-    <div class="user-areaX">
+    <div>
 
       <table style="width: 100%;">
         <tbody>
@@ -178,24 +176,6 @@ const openHistory = () => {
               <BIcon v-if="prospStore.prospect" :icon="getBookmarkIcon()"
                 @click="fave(prospStore.prospect.id, !prospStore.isCurrentlyFavorite())" />
               {{ getProspectName() }}
-              <BInfo v-if="prospStore.prospect" pos="B" :heading="`Prospect ${prospStore.prospect.id} Details`">
-                {{ prospStore.prospect.name }}
-                <ul>
-                  <li>Agent of Record: {{ prospStore.prospect.agent_id }}</li>
-                  <li>Eligible: {{ prospStore.prospect.subs_estimate }} <i>(estimate)</i>
-                    <ul>
-                      <li v-if="!prospStore.prospect.census || prospStore.prospect.census.length == 0">Census: <span style='color: red;'>None</span></li>
-                      <li v-else>Census: {{ prospStore.prospect.census.length }}</li>
-                    </ul>
-                  </li>
-                  <li>Size Code: {{ prospStore.prospect.size_cd }}, Type: {{ prospStore.prospect.group_type }}</li>
-                  <li>Created By: {{ prospStore.prospect.created_by }}<ul>
-                    <li>On: {{ B.format.ts(prospStore.prospect.created_ts) }}</li>
-                  </ul></li>
-                  <li v-if="prospStore.prospect.last_quoted_ts">Last Quoted: {{ B.format.ts(prospStore.prospect.last_quoted_ts) }}</li>
-                  <li v-if="prospStore.prospect.enrolled_ts">Enrolled: {{ B.format.ts(prospStore.prospect.enrolled_ts) + " as " + prospStore.prospect.grpnum }}</li>
-                </ul> </BInfo
-              >
             </td>
             <td v-if="userStore.user" style="text-align: right;">
               <BPopup class="anchor" pos="B" style="color: white" icon="solid list-ul_" ref="recentPopover">Recent
@@ -294,6 +274,6 @@ const openHistory = () => {
 <style scoped>
   .container {
     display: grid;
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: 170px 1fr;
   }
 </style>

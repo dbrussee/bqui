@@ -17,7 +17,7 @@ const cfgHistory = ref({
     { id: "category", heading: "", width: "2em", flags: "C" },
     // { id: "body", heading: "Body", width: "2em", flags: "C" },
     // { id: "issue", heading: "Err", width: "2em", flags: "C" },
-    { id: "response.meta.request.httpMethod", heading: "MTH", width: "4em", flags: "R"},
+    { id: "response.meta.request.httpMethod", heading: "", width: "4em", flags: "R"},
     { id: "endpoint", heading: "Endpoint", width: "35em" },
   ]
 })

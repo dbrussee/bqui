@@ -9,6 +9,7 @@ import BButton from "./B/BButton.vue";
 import BInfo from "./B/BInfo.vue";
 import BPopup from "./B/BPopup.vue";
 import BConfirm from "./B/BConfirm.vue";
+import BPopupMenuItem from "./B/BPopupMenuItem.vue";
 
 const menuPopup = ref()
 
@@ -123,12 +124,30 @@ const handleBookmark = (isFav:boolean) => {
       <div style="position: absolute; right: 0;">
         <BPopup ref="menuPopup" class="anchor" icon="solid bars" style="font-size:1.5em" pos="L2B">
           <template #body>
-            <p>
-              <BButton v-if="!prospStore.isCurrentlyFavorite()" @click="handleBookmark(true)" class="anchor" icon="#goldenrod solid bookmark_">Bookmark Prospect</BButton>
-              <BButton v-else @click="handleBookmark(false)" class="anchor" icon="#goldenrod bookmark_">Un-Bookmark Prospect</BButton>
-            </p>
+            <BPopupMenuItem :icon="prospStore.isCurrentlyFavorite() ? '#goldenrod bookmark' : '#goldenrod solid bookmark'" @click="handleBookmark(!prospStore.isCurrentlyFavorite())">
+              {{ prospStore.isCurrentlyFavorite() ? 'Un-Bookmark Prospect' : 'Bookmark Prospect' }}
+            </BPopupMenuItem>
+            <BInfo v-if="prospStore.prospect" pos="L2B" text="Information" :heading="`Prospect ${prospStore.prospect.id} Details`">
+              {{ prospStore.prospect.name }}
+              <ul>
+                <li>Agent of Record: {{ prospStore.prospect.agent_id }}</li>
+                <li>Eligible: {{ prospStore.prospect.subs_estimate }} <i>(estimate)</i>
+                  <ul>
+                    <li v-if="!prospStore.prospect.census || prospStore.prospect.census.length == 0">Census: <span style='color: red;'>None</span></li>
+                    <li v-else>Census: {{ prospStore.prospect.census.length }}</li>
+                  </ul>
+                </li>
+                <li>Size Code: {{ prospStore.prospect.size_cd }}, Type: {{ prospStore.prospect.group_type }}</li>
+                <li>Created By: {{ prospStore.prospect.created_by }}<ul>
+                  <li>On: {{ B.format.ts(prospStore.prospect.created_ts) }}</li>
+                </ul></li>
+                <li v-if="prospStore.prospect.last_quoted_ts">Last Quoted: {{ B.format.ts(prospStore.prospect.last_quoted_ts) }}</li>
+                <li v-if="prospStore.prospect.enrolled_ts">Enrolled: {{ B.format.ts(prospStore.prospect.enrolled_ts) + " as " + prospStore.prospect.grpnum }}</li>
+              </ul> </BInfo
+            >
+
             <hr/>
-            <p><BConfirm @confirm="removeMeFromRecents()" width="30em" pos="L" class="anchor" icon="#black solid eject_" heading="Forget Prospect">
+            <p><BConfirm @confirm="removeMeFromRecents()" width="30em" pos="L" class="anchor" icon="#black solid eject" heading="Forget Prospect">
               Forget Prospect&hellip;
               <template #message>
                 <ul>

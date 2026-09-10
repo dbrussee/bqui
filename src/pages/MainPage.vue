@@ -10,23 +10,20 @@ import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
 import { appProspectStore } from "@/stores/ProspectStore";
 const prospStore = appProspectStore();
-import BTable from "@/components/B/BTable.vue";
-import BPopup from "@/components/B/BPopup.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
 import BInfo from "@/components/B/BInfo.vue";
-import BIcon from "@/components/B/BIcon.vue";
 
-const errsGrid = {
-  height: "15em",
-  columns: [
+// const errsGrid = {
+//   height: "15em",
+//   columns: [
 
-    { id: "ts", heading: "Time", width: "5.5em", flags: "R" },
-    { id: "method", heading: "Mth", width: "3em", flags: "C" },
-    { id: "path", heading: "Path", width: "14em" },
+//     { id: "ts", heading: "Time", width: "5.5em", flags: "R" },
+//     { id: "method", heading: "Mth", width: "3em", flags: "C" },
+//     { id: "path", heading: "Path", width: "14em" },
 
-    { id: "msg", heading: "Message", width: "25em" },
-  ],
-};
+//     { id: "msg", heading: "Message", width: "25em" },
+//   ],
+// };
 
 
 </script>
@@ -65,7 +62,7 @@ const errsGrid = {
             <td style="text-align: right; width: 10em">
               <div v-if="counters.apiCalls.active > 0" class="spinner"></div>{{counters.apiCalls.active > 1 ? ':' + counters.apiCalls.active : ''}}&nbsp;
               <!-- {{ "⏸️".repeat(counters.apiCalls.active) }} -->
-              <span v-if="counters.apiCalls.error > 0">
+              <!-- <span v-if="counters.apiCalls.error > 0">
                 <BPopup v-if="counters.apiCalls.error > 0" class="clear" pos="TL"><BIcon icon="#red solid bugs"/>
                   <template #body>
                     Last Errors:
@@ -78,7 +75,7 @@ const errsGrid = {
                     </BTable>
                   </template>
                 </BPopup>
-              </span>
+              </span> -->
             </td>
           </tr>
         </tbody>

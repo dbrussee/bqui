@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 interface IColumn {
@@ -10,7 +11,6 @@ interface IColumn {
 const emit = defineEmits(["pick", "dblpick", "hdrclick"])
 const props = defineProps({
   config: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type: Object as () => any,
     required: true,
   },
@@ -25,7 +25,6 @@ const props = defineProps({
     defaul: false
   },
   rows: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type: Array as () => any[],
     required: false,
     default: () => [],
@@ -61,7 +60,6 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
 };
 
 const getCellValueInSlot = computed(() => {
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (row:any, col:any):string => {
     if (typeof row == 'string') return row
     const dotList:string[] = col.id.split(".")
@@ -73,23 +71,55 @@ const getCellValueInSlot = computed(() => {
   }
 })
 
-
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const handleClick = (row:any, col:any, cn:any) => {
-  if (row == props.config.pickedRow) {
-    emit('pick', null)
+const handleTableClick = (event:MouseEvent) => {
+  const el = event.target as HTMLElement // could be anything
+  let celltype = ''
+  let cell = el.closest('td') as HTMLTableCellElement | null
+  if (cell) {
+    celltype = 'td'
   } else {
-    emit('pick', row, col, cn as number)
+    cell = el.closest('th') as HTMLTableCellElement
+    if (cell) {
+      celltype = 'th'
+    }
+  }
+  if (celltype == '') return
+  const col = props.config.columns[cell.cellIndex]
+  if (celltype == 'th') {
+    emit("hdrclick", col)
+  } else {
+    const tr = cell.closest('tr') as HTMLTableRowElement
+    const row = props.rows[tr.rowIndex - 1] // Skip thead row
+    if (row == props.config.pickedRow) {
+      emit('pick', null)
+    } else {
+      emit('pick', row, col, cell.cellIndex as number)
+    }
   }
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const handleDblClick = (row:any, col:any, cn:any) => {
-  emit('pick', row, col, cn as number)
-  emit('dblpick', row, col, cn as number)
+const handleTableDblClick = (event:MouseEvent) => {
+  const el = event.target as HTMLElement // could be anything
+  const cell = el.closest('td') as HTMLTableCellElement | null
+  if (!cell) return
+  const col = props.config.columns[cell.cellIndex]
+  const tr = cell.closest('tr') as HTMLTableRowElement
+  const row = props.rows[tr.rowIndex - 1] // Skip thead row
+  emit('pick', row, col, cell.cellIndex as number)
+  emit('dblpick', row, col, cell.cellIndex as number)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// const handleClick = (row:any, col:any, cn:any) => {
+//   if (row == props.config.pickedRow) {
+//     emit('pick', null)
+//   } else {
+//     emit('pick', row, col, cn as number)
+//   }
+// }
+// const handleDblClick = (row:any, col:any, cn:any) => {
+//   emit('pick', row, col, cn as number)
+//   emit('dblpick', row, col, cn as number)
+// }
+
 const getCellRef = (rn:any, cn:any) => {
   const rownum = rn as number
   const colnum = cn as number
@@ -109,24 +139,30 @@ const getCellRef = (rn:any, cn:any) => {
       'overflow-y': props.config.height == '' ? 'visible' : 'scroll',
     }"
   >
-    <table :style="{ width: props.config.width }">
-      <thead>
-        <tr>
-          <th v-for="col in props.config.columns" :key="col.id" :style="deduceTHStyle(col)">
-            {{ col.heading }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(row,rn) in props.rows" :key="row" :class="{picked : props.config.pickedRow == row}">
-          <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
-              @click.stop="handleClick(row, col, cn)"
-              @dblclick.stop="handleDblClick(row, col, cn)"
-              ref="tdRef"
+    <table :style="{ width: props.config.width }"
+        @click.stop="handleTableClick($event)"
+        @dblclick.stop="handleTableDblClick($event)"
+        >
+        <thead>
+          <tr>
+            <th v-for="col in props.config.columns" :key="col.id" :style="deduceTHStyle(col)">
+              {{ col.heading }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row,rn) in props.rows" :key="row" :class="{picked : props.config.pickedRow == row}">
+            <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
+            ref="tdRef"
             >
             <slot v-if="row" :name="'column_' + col.id" :row="row" :rn="rn" :td="getCellRef(rn, cn)" :col="col" :cn="cn">
               {{ getCellValueInSlot(row, col) }}
             </slot>
+          </td>
+        </tr>
+        <tr v-if="(!props.rows || props.rows.length == 0) && props.config.no_rows_text && props.config.no_rows_text != ''" class="no_rows_text">
+          <td :colspan="props.config.columns.length">
+            {{ props.config.no_rows_text }}
           </td>
         </tr>
       </tbody>
@@ -137,8 +173,23 @@ const getCellRef = (rn:any, cn:any) => {
 </template>
 
 <style scoped lang="css">
+tr.no_rows_text {
+  cursor: default;
+  &:hover {
+    background-color: transparent;
+  }
+  & td {
+    cursor: default;
+    background-color: transparent;
+    border-bottom: none;
+    text-align: center;
+    padding-top: 1em;
+    font-style: italic;
+    color: silver;
+  }
+}
 div.b-table-container {
-  background-color: var(--unused_bgcolor);
+  /* background-color: var(--unused_bgcolor); */
   border-left: 1px solid black;
   width: fit-content;
   overscroll-behavior: none;

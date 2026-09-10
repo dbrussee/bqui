@@ -32,7 +32,7 @@ const props = defineProps({
 
 <template>
   <button :disabled="props.disabled" @click="emit('click')" :style="{marginLeft: props.gapleft ? '.4em' : ''}">
-    <BIcon as="icon" :icon="props.icon" :source="props.source"><slot/></BIcon>
+    <BIcon :disabled="props.disabled" as="icon" :icon="props.icon" :source="props.source"><slot/></BIcon>
   </button>
 </template>
 
