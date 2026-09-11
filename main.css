@@ -159,19 +159,19 @@ button {
   border-radius: .2rem;
   /* box-shadow: none; */
   &:disabled {
-    background-color: gainsboro !important;
-    color: #a0a0a0;
+    /* background-color: silver !important; */
+    color: silver !important;
     cursor: default;
     &:hover {
-      color: #a0a0a0;
+      color: silver !important;
       cursor: default !important;
       & * {
-        color: #a0a0a0;
+        color: silver !important;
         cursor: default !important;
       }
     }
     & * {
-      color: #a0a0a0;
+      color: white;
       cursor: default !important;
     }
   }
@@ -381,11 +381,14 @@ table.form-table {
   }
 }
 button.anchor:disabled {
-  color: gainsboro;
+  color: silver;
   cursor: default;
   background-color: transparent !important;
   & * {
-    color: gainsboro;
+    color: silver;
+  }
+  &:hover {
+    text-decoration: none;
   }
 }
 

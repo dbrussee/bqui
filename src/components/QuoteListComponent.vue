@@ -13,7 +13,7 @@ import BButton from './B/BButton.vue';
 import BInfo from './B/BInfo.vue';
 import BIcon from './B/BIcon.vue';
 import NewQuoteDialog from '@/dialogs/NewQuoteDialog.vue';
-import { useToast } from '@/composables/useToast.ts';
+import BConfirm from './B/BConfirm.vue';
 
 // Watch for changes to the prospect.
 // Because the value is in a store, we need to use
@@ -39,10 +39,13 @@ const newQuoteHandler = ref({
     popup?.showModal()
   },
   step2: () => {
-    console.log(JSON.stringify(quoteStore.newQuoteOptions, null, 2))
-    useToast().addToast(JSON.stringify(quoteStore.newQuoteOptions, null, 2), "info")
-    const popup = document.getElementById(newQuoteHandler.value.popid) as HTMLDialogElement
-    popup?.showModal()
+    quoteStore.createQuote(quoteStore.newQuoteOptions).then(() => {
+      cfgQuotesList.value.pickedRow = quoteStore.quote
+      // console.log(JSON.stringify(quoteStore.newQuoteOptions, null, 2))
+      // useToast().addToast(JSON.stringify(quoteStore.newQuoteOptions, null, 2), "info")
+      const popup = document.getElementById(newQuoteHandler.value.popid) as HTMLDialogElement
+      popup?.close()
+    })
   },
   save: () => {
     // prospStore.prospect = {...prospHandler.value.temp}
@@ -115,6 +118,7 @@ const handleQuoteRowClicked = (row:any, col:any, cn:number) => {
           <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="newQuoteHandler.startFromQuote()" class="anchor" icon="#black clone_">Copy Selected</BButton></p>
         </template>
       </BPopup>
+      <BConfirm class="anchor gapright" @confirm="quoteStore.deleteQuote(cfgQuotesList.pickedRow.id)" :disabled="!cfgQuotesList.pickedRow || cfgQuotesList.pickedRow.status != 'INPROG'" pos="T2R" icon="trash-can_">Delete...</BConfirm>
       <BInfo :disabled="!cfgQuotesList.pickedRow" pos="T2R" class="gapright" :heading="'Selected Quote Details'" text="Details">
         <ul>
           <li>{{ B.codeToText.nonstd(cfgQuotesList.pickedRow?.nonstd) }}
