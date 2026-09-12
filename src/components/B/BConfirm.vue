@@ -55,7 +55,7 @@ const props = defineProps({
   width: {
     type: String,
     required: false,
-    default: 'fit-content'
+    default: '25em'
   },
   confirm_btn_text: {
     type: String,
@@ -100,7 +100,7 @@ const doBlur = ():void => {
   <button v-if="!props.bypass" :popovertarget="popid" :disabled="props.disabled" :class="attrs.class" :style="attrs.style" @click="doBlur()">
     <BIcon :icon="props.icon" :source="props.source"><slot/></BIcon>
   </button>
-  <div :id="popid" popover :class="props.pos" :style="{width:props.width,minWidth:props.width,maxWidth:props.width}">
+  <div :id="popid" popover :class="props.pos" :style="{maxWidth:props.width}">
     <div v-if="props.heading != ''" class="titlebar" v-html="props.heading" /><slot
       name="message">Are you sure?</slot>
       <p v-if="props.warning != ''">

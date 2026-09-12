@@ -24,6 +24,11 @@ const props = defineProps({
     required: false,
     defaul: false
   },
+  togglePick: {
+    type: Boolean,
+    required: false,
+    defaul: false
+  },
   rows: {
     type: Array as () => any[],
     required: false,
@@ -90,10 +95,14 @@ const handleTableClick = (event:MouseEvent) => {
   } else {
     const tr = cell.closest('tr') as HTMLTableRowElement
     const row = props.rows[tr.rowIndex - 1] // Skip thead row
-    if (row == props.config.pickedRow) {
-      emit('pick', null)
+    if (props.togglePick) {
+      if (row == props.config.pickedRow) {
+        emit('pick', null)
+      } else {
+        emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
+      }
     } else {
-      emit('pick', row, col, cell.cellIndex as number)
+        emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
     }
   }
 }
@@ -104,8 +113,8 @@ const handleTableDblClick = (event:MouseEvent) => {
   const col = props.config.columns[cell.cellIndex]
   const tr = cell.closest('tr') as HTMLTableRowElement
   const row = props.rows[tr.rowIndex - 1] // Skip thead row
-  emit('pick', row, col, cell.cellIndex as number)
-  emit('dblpick', row, col, cell.cellIndex as number)
+  emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
+  emit('dblpick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
 }
 
 // const handleClick = (row:any, col:any, cn:any) => {
@@ -255,10 +264,10 @@ tbody tr td {
   cursor: pointer;
 }
 tbody tr:hover {
-  background-color: lightcyan;
+  background-color: rgba(0, 123, 255, 0.05);
 }
 tbody tr.picked {
-  background-color: springgreen;
+  background-color: rgba(0, 123, 255, 0.2);
 }
 /* tbody tr.picked:hover {
   background-color: paleturquoise;

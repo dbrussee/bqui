@@ -19,11 +19,11 @@ const decodeSource = (source:string, td:any):void => {
   if (!td) return
   const cell = td as HTMLTableCellElement
   if (source == "@USER") {
-    cell.innerHTML = "User-Defined";
+    cell.innerHTML = "User";
   } else if (source == "@DFLT") {
     cell.innerHTML = "";
   } else {
-    cell.innerHTML = "Role: <i>" + source + "</i>";
+    cell.innerHTML = "<i>" + source + "</i>";
   }
 }
 const rightsConfig = {

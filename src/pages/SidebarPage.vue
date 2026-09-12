@@ -96,7 +96,7 @@ function getCensusCount():string {
       <p style="font-size: .8em;" v-html="getUnreadMessageCounts()"></p>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'SETTINGS'" :current="pageStore.page == 'SETTINGS'"
-      ><BIcon as="icon" icon='circle-user_' />Profile: <span style="font-size: .8em;">{{ userStore.user.id }}</span>
+      ><BIcon as="icon" icon='circle-user_' />User: <span style="font-size: .8em;">{{ userStore.user.id }}</span>
       <p style="font-size: .8em;">{{ (userStore.user.fstnam + ' ' + userStore.user.lstnam).trim() }}</p>
     </SidebarItem>
   </div>

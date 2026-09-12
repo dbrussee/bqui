@@ -147,7 +147,7 @@ const simplifyEndpoint = (row:any) => {
         <pre>{{ getPickedRowBody() }}</pre>
       </div>
       <div v-if="cfgHistory.pickedRow?.response" :style="{'margin-top': cfgHistory.pickedRow?.body ? '.5em' : ''}">
-        <div class="titlebar">API Response Details</div>
+        <div class="titlebar">API Fetch Details</div>
         <pre>{{ getPickedRowError() }}</pre>
       </div>
     </dialog>

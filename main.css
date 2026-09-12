@@ -468,6 +468,22 @@ div.BR[popover]:popover-open {
   position-area: bottom right;
 }
 
+td.statusINPROGX {
+  background-image: linear-gradient(to right, yellow 20%, transparent 0 100%);
+}
+td.statusRATEREQX {
+  background-image: linear-gradient(to right, yellow 40%, transparent 0 100%);
+}
+td.statusRATEDX {
+  background-image: linear-gradient(to right, lightgreen 60%, transparent 0 100%);
+}
+td.statusHELDX {
+  background-image: linear-gradient(to right, pink 80%, lightyellow 0 100%);
+}
+td.statusREADYX {
+  background-color: transparent;
+}
+
 div[popover]::backdrop {
   background-color: rgba(0, 0, 0, 0.15);
 }

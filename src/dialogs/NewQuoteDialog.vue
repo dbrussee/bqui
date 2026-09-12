@@ -10,7 +10,7 @@ const emit = defineEmits(["continue","abort"])
 const effdatRef = ref()
 
 const props = defineProps({
-  family: { // For confirm popover
+  qtype: { // For confirm popover
     type: String,
     required: false,
     default: 'MED',
@@ -32,13 +32,13 @@ const doContinue = () => {
 </script>
 
 <template>
-  <div class="titlebar">New {{ B.codeToText.qtype(props.family) }} Quote</div>
+  <div class="titlebar">New {{ B.codeToText.qtype(props.qtype) }} Quote</div>
   <form>
   <table class="form-table">
     <tbody>
       <tr>
-        <th><b v-if="quoteStore.newQuoteOptions.name == ''" style="color: red;">* </b>Name:</th>
-        <td><input v-model="quoteStore.newQuoteOptions.name" style="width: 25em;" autofocus required></td>
+        <th><b v-if="quoteStore.newQuoteOptions.descr == ''" style="color: red;">* </b>Name:</th>
+        <td><input v-model="quoteStore.newQuoteOptions.descr" style="width: 25em;" autofocus required></td>
       </tr>
       <tr>
         <th><b v-if="quoteStore.newQuoteOptions.effdat == ''" style="color: red;">* </b>Effective:</th>
@@ -69,7 +69,7 @@ const doContinue = () => {
       <tr class="line-top">
         <th><b v-if="quoteStore.newQuoteOptions.rlob == ''" style="color: red;">* </b>Product:</th>
         <td style="display: flex; flex-direction: column; gap: 0;">
-          <label v-for="(rlob) in quoteStore.rlobList[quoteStore.newQuoteOptions.family]" :key="rlob.rlob">
+          <label v-for="(rlob) in quoteStore.rlobList[quoteStore.newQuoteOptions.qtype]" :key="rlob.rlob">
             <input type="radio" name="rlob_option" v-model="quoteStore.newQuoteOptions.rlob" :value="rlob.rlob"> {{ rlob.descr }}
           </label>
           <!-- <select v-model="quote.rlob" required>
@@ -83,7 +83,7 @@ const doContinue = () => {
   </form>
   <div class="buttonbar">
     <BButton class="anchor" icon="#red solid x_" @click="emit('abort')">Cancel</BButton>&nbsp;
-    <BButton :disabled="quoteStore.newQuoteOptions.effdat == '' || quoteStore.newQuoteOptions.name == '' || quoteStore.newQuoteOptions.rlob == ''" class="modern" @click="doContinue()">Select Plans...</BButton>
+    <BButton :disabled="quoteStore.newQuoteOptions.effdat == '' || quoteStore.newQuoteOptions.descr == '' || quoteStore.newQuoteOptions.rlob == ''" class="modern" @click="doContinue()">Select Plans...</BButton>
   </div>
 </template>
 

@@ -31,7 +31,9 @@ export const B = {
         case "QUOTED": return "Quoted";
         case "READY": return "Ready";
         case "RATEREQ": return "Rates Requested";
+        case "HELD": return "Held";
         case "INPROG": return "In Progress";
+        case "ENROLLED": return "Enrolled";
         default: return code;
       }
     },
@@ -51,6 +53,25 @@ export const B = {
         case "N": return "Standard";
         case "Y": return "Non-Std";
         case "C": return "Custom";
+        default: return code;
+      }
+    },
+    /**
+     * converts quote funding code to descriptive text
+     *
+     * @param code - The code to translate from
+     * @returns The descriptive text, or the passed code if not found
+     *
+     * @example
+     * ```typescript
+     * const desc = B.codeToText.funding('BF') // Balanced
+     * ```
+     */
+    funding: (code: string) => {
+      switch (code) {
+        case "FI": return "Fully Insured";
+        case "ASO": return "ASO";
+        case "BF": return "Balanced";
         default: return code;
       }
     },
