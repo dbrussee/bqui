@@ -18,10 +18,7 @@ const prospHandler = ref({
   temp: {} as any,
   edit: () => {
     prospHandler.value.temp = {...prospStore.prospect}
-    B.deleteProperties(prospHandler.value.temp,
-      "census", "last_quote", "grpnum", "agent_id", "created_by", "created_ts",
-      "group_type", "enroll_date", "enrolled_ts", "last_quote_id"
-    )
+    B.deleteProperties(prospHandler.value.temp)
     const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
     popup?.showModal()
   },
@@ -53,6 +50,9 @@ const handleBookmark = (isFav:boolean) => {
   if (!prospStore.prospect) return
   prospStore.setFavorite(prospStore.prospect.id, isFav)
 }
+const handleRefresh = () => {
+  prospStore.getProspect(prospStore.prospect.id, false)
+}
 </script>
 
 <style scoped>
@@ -82,7 +82,7 @@ const handleBookmark = (isFav:boolean) => {
           <tr><td>
             <BIcon v-if="prospStore.prospect" as="anchor"
               @click="prospHandler.edit()"
-              icon="edit_">{{ prospStore.prospect ? prospStore.prospect.name : '&nbsp;' }}</BIcon>
+              icon="solid pen_">{{ prospStore.prospect ? prospStore.prospect.name : '&nbsp;' }}</BIcon>
           </td></tr>
           <tr><td>{{ prospStore.prospect.addr1 }}{{ prospStore.prospect.addr2 ? ', ' + prospStore.prospect.addr2 : '' }}</td></tr>
           <tr><td v-html="prospectCSZ(prospStore.prospect)"></td></tr>
@@ -98,7 +98,7 @@ const handleBookmark = (isFav:boolean) => {
       </table>
       <table class="form-table" style="margin-left: 2em;">
         <tbody>
-          <tr><th>Created:</th><td>{{ B.format.ts(prospStore.prospect.created_ts) }}</td></tr>
+          <!-- <tr><th>Created:</th><td>{{ B.format.ts(prospStore.prospect.crttms) }}</td></tr> -->
           <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.format.ts(prospStore.prospect.last_quote?.crttms), 'No quotes') }}
             <BInfo v-if="prospStore.prospect.last_quote" pos="L" heading="Last Quote Details">
               <ul>
@@ -124,44 +124,26 @@ const handleBookmark = (isFav:boolean) => {
       <div style="position: absolute; right: 0;">
         <BPopup ref="menuPopup" class="anchor" icon="solid bars" style="font-size:1.5em" pos="L2B">
           <template #body>
+            <BPopupMenuItem icon="solid repeat" @click="handleRefresh()">Refresh Prospect</BPopupMenuItem>
             <BPopupMenuItem :icon="prospStore.isCurrentlyFavorite() ? '#goldenrod bookmark' : '#goldenrod solid bookmark'" @click="handleBookmark(!prospStore.isCurrentlyFavorite())">
               {{ prospStore.isCurrentlyFavorite() ? 'Un-Bookmark Prospect' : 'Bookmark Prospect' }}
             </BPopupMenuItem>
-            <BInfo v-if="prospStore.prospect" pos="L2B" text="Information" :heading="`Prospect ${prospStore.prospect.id} Details`">
-              {{ prospStore.prospect.name }}
-              <ul>
-                <li>Agent of Record: {{ prospStore.prospect.agent_id }}</li>
-                <li>Eligible: {{ prospStore.prospect.subs_estimate }} <i>(estimate)</i>
+            <BPopupMenuItem icon="solid eject">
+              <BConfirm @confirm="removeMeFromRecents()" width="30em" pos="L2B" class="anchor" heading="Forget Prospect">
+                Forget Recent&hellip;
+                <template #message>
                   <ul>
-                    <li v-if="!prospStore.prospect.census || prospStore.prospect.census.length == 0">Census: <span style='color: red;'>None</span></li>
-                    <li v-else>Census: {{ prospStore.prospect.census.length }}</li>
+                    <li class="info">Remove this prospect from your Recents list</li>
+                    <li class="info">Load the next most recent prospect in the list.</li>
                   </ul>
-                </li>
-                <li>Size Code: {{ prospStore.prospect.size_cd }}, Type: {{ prospStore.prospect.group_type }}</li>
-                <li>Created By: {{ prospStore.prospect.created_by }}<ul>
-                  <li>On: {{ B.format.ts(prospStore.prospect.created_ts) }}</li>
-                </ul></li>
-                <li v-if="prospStore.prospect.last_quoted_ts">Last Quoted: {{ B.format.ts(prospStore.prospect.last_quoted_ts) }}</li>
-                <li v-if="prospStore.prospect.enrolled_ts">Enrolled: {{ B.format.ts(prospStore.prospect.enrolled_ts) + " as " + prospStore.prospect.grpnum }}</li>
-              </ul> </BInfo
-            >
-
-            <hr/>
-            <p><BConfirm @confirm="removeMeFromRecents()" width="30em" pos="L" class="anchor" icon="#black solid eject" heading="Forget Prospect">
-              Forget Prospect&hellip;
-              <template #message>
-                <ul>
-                  <li class="info">Remove this prospect from your Recents list</li>
-                  <li class="info">Load the next most recent prospect in the list.</li>
-                </ul>
-                <p>
-                  It will <b style="color:red"><u>NOT</u></b> delete the prospect from the system,
-                  so it can be found in your Bookmarks or searched
-                  for at any time.
-                </p>
-                <p>Continue?</p>
-              </template>
-            </BConfirm></p>
+                  <p>
+                    This will <b style="color:red"><u>NOT</u></b> change the prospect in any way,
+                    so if it was bookmarked it will still be there, and you can search for and
+                    find it again at any time.
+                  </p>
+                </template>
+              </BConfirm>
+            </BPopupMenuItem>
           </template>
         </BPopup>
 
@@ -185,11 +167,19 @@ const handleBookmark = (isFav:boolean) => {
     </div>
     <table class="form-table">
       <tbody>
+        <tr><th>Created:</th><td class="info">{{ B.format.ts(prospHandler.temp.crttms) }} by {{ prospHandler.temp.crtusr }}</td></tr>
+        <tr><th>Updated:</th><td class="info">{{ B.format.ts(prospHandler.temp.updtms) }} by {{ prospHandler.temp.updusr }}</td></tr>
+        <tr><th>Agent of Record:</th><td class="info">{{ prospHandler.temp.agent_id }}</td></tr>
+
+        <tr><td colspan="2"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
+
         <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="prospHandler.temp.name"></td></tr>
         <tr><th>Contact:</th><td><input name="grpcontact" style="width: 30em;" v-model="prospHandler.temp.contact"></td></tr>
         <tr><th>Email:</th><td><input name="grpemail" style="width: 30em;" v-model="prospHandler.temp.email"></td></tr>
         <tr><th>Phone:</th><td><input name="grpphone" style="width: 12em;" v-model="prospHandler.temp.phone"></td></tr>
-        <tr><th>Eligible:</th><td><input name="estimate" style="width: 5em;" v-model="prospHandler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
+        <tr><th>Eligible:</th><td><input name="estimate" style="width: 5em;" v-model="prospHandler.temp.subs_estimate">
+          <span class="info">(estimate) - Census has {{ B.format.valueWithUnits(prospStore.prospect.census?.length, 'subscriber') }}</span>
+        </td></tr>
         <tr><th>Address:</th><td><input name="grpaddr1" style="width: 30em;" v-model="prospHandler.temp.addr1"></td></tr>
         <tr><th></th><td><input name="grpaddr2" style="width: 30em;" v-model="prospHandler.temp.addr2"></td></tr>
         <tr><th></th><td>

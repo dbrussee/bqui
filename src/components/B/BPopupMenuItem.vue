@@ -18,7 +18,7 @@ const doClick = () => {
 }
 </script>
 <template>
-  <div :class="{item:true, disabled:props.disabled}" @click.stop="doClick">
+  <div :class="{item:true, disabled:props.disabled}" style="margin-bottom: .3em;" @click.stop="doClick">
     <div class="icon_container">
       <BIcon :icon="props.icon" />
     </div>

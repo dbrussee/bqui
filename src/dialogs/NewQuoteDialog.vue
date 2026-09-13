@@ -10,13 +10,14 @@ const emit = defineEmits(["continue","abort"])
 const effdatRef = ref()
 
 const props = defineProps({
+  id: { // For confirm popover
+    type: String,
+    required: true
+  },
   qtype: { // For confirm popover
     type: String,
     required: false,
     default: 'MED',
-    validator(value: string) {
-      return ['MED','DEN','VIS','WEL'].includes(value)
-    }
   },
   rlob: { // For confirm popover
     type: String,
@@ -32,18 +33,19 @@ const doContinue = () => {
 </script>
 
 <template>
+  <dialog :id="id">
   <div class="titlebar">New {{ B.codeToText.qtype(props.qtype) }} Quote</div>
-  <form>
+  <form @submit.stop.prevent="doContinue()">
   <table class="form-table">
     <tbody>
       <tr>
-        <th><b v-if="quoteStore.newQuoteOptions.descr == ''" style="color: red;">* </b>Name:</th>
-        <td><input v-model="quoteStore.newQuoteOptions.descr" style="width: 25em;" autofocus required></td>
+        <th :style="{color: quoteStore.quote.descr == '' ? 'red': ''}">Name:</th>
+        <td><input v-model="quoteStore.quote.descr" style="width: 25em;" autofocus required></td>
       </tr>
       <tr>
-        <th><b v-if="quoteStore.newQuoteOptions.effdat == ''" style="color: red;">* </b>Effective:</th>
+        <th :style="{color: quoteStore.quote.effdat == '' ? 'red': ''}">Effective:</th>
         <td>
-          <select :ref="effdatRef" v-model="quoteStore.newQuoteOptions.effdat">
+          <select :ref="effdatRef" v-model="quoteStore.quote.effdat">
             <option v-for="n in quoteStore.number_of_effdates" :key="n" :value="B.firstOfMonth(n+quoteStore.initial_effdate_offset)">{{ B.format.effdat(B.firstOfMonth(n+quoteStore.initial_effdate_offset)) }}</option>
           </select>
         </td>
@@ -51,26 +53,26 @@ const doContinue = () => {
       <tr>
         <th>Funding:</th>
         <td>
-          <label><input type="radio" name="funding_option" value="FI" v-model="quoteStore.newQuoteOptions.funding"> Fully Insured</label>&nbsp;&nbsp;
-          <label><input type="radio" name="funding_option" value="ASO" v-model="quoteStore.newQuoteOptions.funding"> ASO</label>&nbsp;&nbsp;
-          <label><input type="radio" name="funding_option" value="BF" v-model="quoteStore.newQuoteOptions.funding"> Balanced</label>
+          <label><input type="radio" name="funding_option" value="FI" v-model="quoteStore.quote.funding"> Fully Insured</label>&nbsp;&nbsp;
+          <label><input type="radio" name="funding_option" value="ASO" v-model="quoteStore.quote.funding"> ASO</label>&nbsp;&nbsp;
+          <label><input type="radio" name="funding_option" value="BF" v-model="quoteStore.quote.funding"> Balanced</label>
         </td>
       </tr>
       <tr>
         <th>Grandfathered:</th>
-        <td><label><input type="checkbox" v-model="quoteStore.newQuoteOptions.grandfathered"> <span class='mini info'
-          >({{quoteStore.newQuoteOptions.grandfathered ? 'ONLY' : 'NO'}} Grandfathered plans)</span></label></td>
+        <td><label><input type="checkbox" v-model="quoteStore.quote.grandfathered"> <span class='mini info'
+          >({{quoteStore.quote.grandfathered ? 'ONLY' : 'NO'}} Grandfathered plans)</span></label></td>
       </tr>
       <tr>
         <th>Massachusetts:</th>
-        <td><label><input type="checkbox" v-model="quoteStore.newQuoteOptions.mass_compliant"> <span class='mini info'
-          >({{quoteStore.newQuoteOptions.mass_compliant ? 'ONLY' : 'NO' }} Massachusetts Compliant plans)</span></label></td>
+        <td><label><input type="checkbox" v-model="quoteStore.quote.mass_compliant"> <span class='mini info'
+          >({{quoteStore.quote.mass_compliant ? 'ONLY' : 'NO' }} Massachusetts Compliant plans)</span></label></td>
       </tr>
       <tr class="line-top">
-        <th><b v-if="quoteStore.newQuoteOptions.rlob == ''" style="color: red;">* </b>Product:</th>
+        <th :style="{color: quoteStore.quote.rlob == '' ? 'red': ''}">Product:</th>
         <td style="display: flex; flex-direction: column; gap: 0;">
-          <label v-for="(rlob) in quoteStore.rlobList[quoteStore.newQuoteOptions.qtype]" :key="rlob.rlob">
-            <input type="radio" name="rlob_option" v-model="quoteStore.newQuoteOptions.rlob" :value="rlob.rlob"> {{ rlob.descr }}
+          <label v-for="(rlob) in quoteStore.rlobList[quoteStore.quote.qtype]" :key="rlob">
+            <input type="radio" name="rlob_option" v-model="quoteStore.quote.rlob" :value="rlob"> {{ B.codeToText.rlob(rlob) }}
           </label>
           <!-- <select v-model="quote.rlob" required>
             <option v-for="(rlob) in rloblist" :key="rlob.rlob"
@@ -83,8 +85,9 @@ const doContinue = () => {
   </form>
   <div class="buttonbar">
     <BButton class="anchor" icon="#red solid x_" @click="emit('abort')">Cancel</BButton>&nbsp;
-    <BButton :disabled="quoteStore.newQuoteOptions.effdat == '' || quoteStore.newQuoteOptions.descr == '' || quoteStore.newQuoteOptions.rlob == ''" class="modern" @click="doContinue()">Select Plans...</BButton>
+    <BButton :disabled="quoteStore.quote.effdat == '' || quoteStore.quote.descr == '' || quoteStore.quote.rlob == ''" class="modern" @click="doContinue()">Select Plans...</BButton>
   </div>
+  </dialog>
 </template>
 
 <style lang="css" scoped>

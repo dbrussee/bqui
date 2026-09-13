@@ -7,11 +7,52 @@ import { useToast } from '@/composables/useToast'
 import BQAPIFetcher from '@/components/BQAPI'
 
 export const QuoteStore = defineStore('QuoteStore', () => {
-  const number_of_effdates = 10
-  const initial_effdate_offset = -2
+  const NUMBER_OF_EFFDATES = 10
+  const INITIAL_EFFDATE_OFFSET = -2
+  const quote = ref<any>({
+    descr: '',
+    prosp: -1,
+    status: 'INPROG',
+    size_cd: '',
+    qtype: '',
+    effdat: B.firstOfMonth(1),
+    mass_compliant: false,
+    grandfathered: false,
+    nonstd: 'N',
+    rlob: '',
+    funding: 'FI',
+    med_plan: '', dru_plan: '', vis_plan: '', den_plan: ''
+  })
+  const BLANK_QUOTE = {
+    descr: '',
+    prosp: -1,
+    status: 'INPROG',
+    size_cd: '',
+    qtype: '',
+    effdat: B.firstOfMonth(1),
+    grandfathered: false,
+    mass_compliant: false,
+    nonstd: 'N',
+    rlob: '',
+    funding: 'FI',
+    med_plan: '', dru_plan: '', vis_plan: '', den_plan: ''
+  }
+  // const UNUSEDQuoteOptions = ref<any>({
+  //   descr: '',
+  //   prosp: -1,
+  //   size_cd: '',
+  //   qtype: '',
+  //   effdat: B.firstOfMonth(1),
+  //   grandfathered: false,
+  //   nonstd: 'N',
+  //   rlob: '',
+  //   funding: 'FI',
+  //   mass_compliant: false,
+  //   med_plan: '', dru_plan: '', vis_plan: '', den_plan: ''
+  // })
 
-  const createQuote = async (jsonBody:string):Promise<any> => {
-    const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'POST', jsonBody)
+  const createQuote = async ():Promise<any> => {
+    const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'POST', quote.value)
     if (fetcher.resp != null) {
       const q:any = {...fetcher.resp}
       if (q.med_plan == null) q.med_plan = ''
@@ -20,11 +61,14 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       if (q.den_plan == null) q.deb_plan = ''
       appProspectStore().quotes.unshift(q)
       appProspectStore().quotes = sortQuotes(appProspectStore().quotes)
+      appProspectStore().prospect.last_quote = {...q}
+      appProspectStore().prospect.last_quote_id = q.id
       if (fetcher.issue) {
         useToast().addToast(`Error creating quote: ${fetcher.issue.error}`, "error")
       } else {
         useToast().addToast(`Quote ${q.id} created`, "success")
       }
+      quote.value = {...q}
       return q
     } else {
       return null
@@ -32,26 +76,32 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   }
   const deleteQuote = async (qid:number) => {
     const fetcher = await new BQAPIFetcher().callAPI(`/quote/${qid}`, 'DELETE')
-    if (fetcher.resp != null) {
-      appProspectStore().quotes = appProspectStore().quotes.filter((q) => {
-        return q.id != qid
-      })
-      //  = sortQuotes(fetcher.resp)
-    }
     if (fetcher.issue) {
       useToast().addToast(`Error deleting quote: ${fetcher.issue.error}`, "error")
     } else {
+      if (fetcher.resp == null) { // No more quotes
+        appProspectStore().prospect.last_quote = null
+        appProspectStore().prospect.last_quote_id = null
+      } else { // Found a new last quote
+        const newLastQuote = fetcher.resp
+        appProspectStore().prospect.last_quote = {...newLastQuote}
+        appProspectStore().prospect.last_quote_id = newLastQuote.id
+      }
+      quote.value = {...BLANK_QUOTE}
+      appProspectStore().quotes = appProspectStore().quotes.filter((q) => {
+        return q.id != qid
+      })
       useToast().addToast(`Quote ${qid} deleted`, "success")
     }
   }
-  const updateQuote = async (q:any):Promise<unknown> => {
+  const updateQuote = async (q:any, action:string):Promise<unknown> => {
     const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'PUT', q)
     if (fetcher.resp != null) {
       if (fetcher.issue) {
-        useToast().addToast(`Error updating quote: ${fetcher.issue.error}`, "error")
+        useToast().addToast(`Error: ${fetcher.issue.error}`, "error")
         return null
       } else {
-        useToast().addToast(`Quote ${fetcher.resp.id} updated`, "success")
+        useToast().addToast(`Quote ${fetcher.resp.id} ${action}`, "success")
         return fetcher.resp
       }
     }
@@ -71,44 +121,30 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   }
 
 
-  const quote = ref<any>({
-
-  })
-  const newQuoteOptions = ref<any>({
-    descr: '',
-    prosp: -1,
-    size_cd: '',
-    qtype: '',
-    effdat: B.firstOfMonth(1),
-    grandfathered: false,
-    nonstd: 'N',
-    rlob: '',
-    funding: 'FI',
-    mass_compliant: false,
-    med_plan: '', dru_plan: '', vis_plan: '', den_plan: ''
-  })
   const initializeNewQuoteOptions = (qtype:string = 'MED', month_offset:number | null = null) => {
     const prospStore = appProspectStore()
-    const opts = newQuoteOptions.value
-    opts.prosp = prospStore.prospect.id
-    opts.size_cd = prospStore.prospect.size_cd
-    opts.qtype = qtype
-    if (month_offset != null) opts.effdat = B.firstOfMonth(month_offset)
+    const q = quote.value
+    q.prosp = prospStore.prospect.id
+    q.size_cd = prospStore.prospect.size_cd
+    q.qtype = qtype
+    if (month_offset != null) q.effdat = B.firstOfMonth(month_offset)
     // opts.grandfathered = false
-    if (rlobList[qtype].length == 1) {
-      opts.rlob = rlobList[qtype][0].rlob
+    if (rlobList[qtype] && rlobList[qtype].length == 1) {
+      q.rlob = rlobList[qtype][0]
     } else {
-      opts.rlob = ''
+      q.rlob = ''
     }
     // opts.funding = 'FI'
     // opts.mass_compliant = false
-    if (!verifyEffdatInRange(opts.effdat)) {
-      opts.effdat = ''
+    if (typeof q.effdat == 'string') q.effdat = B.dateFromYYYYMMDD(q.effdat)
+
+    if (!verifyEffdatInRange(q.effdat)) {
+      q.effdat = ''
     }
   }
   const initializeFromQuote = (q:any) => {
     const prospStore = appProspectStore()
-    const opts = newQuoteOptions.value
+    const opts = quote.value
     opts.descr = q.descr
     opts.prosp = prospStore.prospect.id
     opts.size_cd = prospStore.prospect.size_cd
@@ -137,43 +173,27 @@ export const QuoteStore = defineStore('QuoteStore', () => {
 
   const verifyEffdatInRange = (effdat:Date):boolean => {
     if (!effdat) return true// Empty is ok... but not valid
-    for (let i = 0; i < number_of_effdates; i++) {
-      const test = B.firstOfMonth(i + initial_effdate_offset)
+    for (let i = 0; i < NUMBER_OF_EFFDATES; i++) {
+      const test = B.firstOfMonth(i + INITIAL_EFFDATE_OFFSET)
+      // console.log("Eff", effdat.getTime(), "Test", test.getTime())
       if (effdat.getTime() == test.getTime()) return true
     }
     // If I get here, effdat is not in range
     return false
   }
 
-  const rlobs = {
-    PPO1: {descr: 'Blue Options', qtype: 'MED'},
-    PPO3: {descr: 'Blue Options 1-2-3', qtype: 'MED'},
-    HPN1: {descr: 'Blue High Performance Network', qtype: 'MED'},
-    DTL1: {descr: 'Dental Blue', qtype: 'DEN'},
-    DTL2: {descr: 'Dental Blue Select', qtype: 'DEB'},
-    VIS1: {descr: 'Blue 20/20', qtype: 'VUS'}
-  } as any
-  const rlobList = {
-    MED: [
-      { rlob: 'PPO1', descr: rlobs.PPO1.descr},
-      { rlob: 'PPO3', descr: rlobs.PPO3.descr},
-      { rlob: 'HPN1', descr: rlobs.HPN1.descr}
-    ] as any[],
-    DEN: [
-      { rlob: 'DTL1', descr: rlobs.DTL1.descr},
-      { rlob: 'DTL2', descr: rlobs.DTL2.descr}
-    ] as any[],
-    VIS: [
-      { rlob: 'VIS1', descr: rlobs.VIS1.descr}
-  ] as any[]
-} as any
+  const rlobList: Record<string, string[]> = {
+    'MED': [ 'PPO1', 'PPO3', 'HPN1' ],
+    'DEN': [ 'DTL1', 'DTL2' ],
+    'VIS': [ 'VIS1' ]
+  }
 
   return {
     quote,
-    rlobs, rlobList,
-    newQuoteOptions,
+    rlobList,
+    // newQuoteOptions,
     initializeNewQuoteOptions, initializeFromQuote,
-    initial_effdate_offset, number_of_effdates,
+    initial_effdate_offset: INITIAL_EFFDATE_OFFSET, number_of_effdates: NUMBER_OF_EFFDATES,
     createQuote, deleteQuote, updateQuote
   }
 })

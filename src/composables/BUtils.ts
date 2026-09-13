@@ -5,6 +5,7 @@ export const B = {
     const parts:string[] = yyyymmdd.split(splitter)
     if (parts.length < 3) return new Date(yyyymmdd)
     const newd = new Date(parseInt(parts[0]!), parseInt(parts[1]!)-1, parseInt(parts[2]!))
+    newd.setHours(0, 0, 0, 0)
     return newd
   },
   firstOfMonth: (month_offset:number = 0):Date => {
@@ -15,6 +16,29 @@ export const B = {
     return d
   },
   codeToText: {
+    /**
+     * converts Rating LOB code to object with descr and quote type (family)
+     *
+     * @param rlob - The rlob code to translate from
+     * @returns The object with related data
+     *
+     * @example
+     * ```typescript
+     * const desc = B.codeToText.rlob('PPO1').descr // returns "Blue Options"
+     * ```
+     */
+    rlob: (rlob: string) => {
+      switch (rlob) {
+        case 'PPO1': return 'Blue Options'
+        case 'PPO3': return 'Blue Options 1-2-3'
+        case 'HPN1': return 'Blue High Performance Network'
+        case 'DTL1': return 'Dental Blue'
+        case 'DTL2': return 'Dental Blue Select'
+        case 'VIS1': return 'Blue 20/20'
+        default: return 'Unknown'
+      }
+    },
+
     /**
      * converts quote status code to descriptive text
      *
@@ -34,6 +58,7 @@ export const B = {
         case "HELD": return "Held";
         case "INPROG": return "In Progress";
         case "ENROLLED": return "Enrolled";
+        case "EXPIRED": return "Expired";
         default: return code;
       }
     },
@@ -311,6 +336,13 @@ export const B = {
      */
     plural: (n: number, singular: string, plural?: string) => {
       return n === 1 ? singular : plural || `${singular}s`;
+    },
+
+    valueWithUnits: (n: number, singular: string, plural?: string) => {
+      if (!n) n = 0
+      const value = n == 0 ? 'No' : n.toString()
+      const units = B.format.plural(n, singular, plural)
+      return `${value} ${units}`
     }
 
   },

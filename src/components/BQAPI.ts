@@ -5,7 +5,9 @@ import { useToast } from '../composables/useToast'
 import { appStore } from '@/stores/AppStore'
 
 export default class BQAPIFetcher {
-  private static readonly BASE_URL = 'http://localhost:8080/bqapi/v2.1'
+  // private static readonly BASE_URL = 'http://localhost:8080/bqapi/v2.1'
+  private static readonly BASE_URL =
+    window.location.hostname == 'localhost' ? 'http://localhost:8080/bqapi/v2.1' : 'https://hkb16htf-8080.use2.devtunnels.ms/bqapi/v2.1'
   private status: 'FETCHED' | 'FETCHING' | 'UNUSED' | 'ERROR' = 'UNUSED'
   public resp: any = {}
   public meta: any = {}
@@ -107,20 +109,20 @@ export default class BQAPIFetcher {
       useToast().addToast(`System error! Message: ${msg}`, "error")
       this.status = 'ERROR'
       historyEntry.result = "ERROR " + msg
-      try {
-        const targetUrl = `${BQAPIFetcher.BASE_URL}/logerror`
+      // try {
+      //   const targetUrl = `${BQAPIFetcher.BASE_URL}/logerror`
 
-        const response = await fetch(targetUrl, {
-          method: 'POST',
-          body: JSON.stringify(this),
-        })
-        if (!response.ok) {
-          useToast().addToast(`HTTP error! status: ${response.status}`, "error")
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-      } catch (innerError) {
-        console.error(`Failed to log Error: `, innerError)
-      }
+      //   const response = await fetch(targetUrl, {
+      //     method: 'POST',
+      //     body: JSON.stringify(this),
+      //   })
+      //   if (!response.ok) {
+      //     useToast().addToast(`HTTP error! status: ${response.status}`, "error")
+      //     throw new Error(`HTTP error! status: ${response.status}`)
+      //   }
+      // } catch (innerError) {
+      //   console.error(`Failed to log Error: `, innerError)
+      // }
       counters.apiCalls.active--
       counters.apiCalls.error++
       console.error(`Failed to fetch from ${endpoint}:`, error)

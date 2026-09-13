@@ -11,6 +11,7 @@ import BPopup from './B/BPopup.vue';
 import BButton from './B/BButton.vue';
 import NewQuoteDialog from '@/dialogs/NewQuoteDialog.vue';
 import EditQuoteDialog from '@/dialogs/EditQuoteDialog.vue';
+import BIcon from './B/BIcon.vue';
 
 // Watch for changes to the prospect.
 // Because the value is in a store, we need to use
@@ -24,26 +25,26 @@ watch(() => prospStore.prospect, () => {
 const quoteHandler = ref({
   startPopid: useId(),
   editPopid: useId(),
-  qtype: 'MED',
+  lastQtype: '',
   startFromQuote: () => {
-    quoteStore.quote = {}
+    // quoteStore.quote = {}
     const q = cfgQuotesList.value.pickedRow
     quoteStore.initializeFromQuote(q)
     const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
     popup?.showModal()
   },
   start: (qtype:string) => {
-    quoteStore.quote = {}
-    quoteHandler.value.qtype = qtype
-    if (qtype != quoteStore.newQuoteOptions.qtype) quoteStore.initializeNewQuoteOptions(qtype)
+    // quoteStore.quote = {}
+    if (qtype != quoteHandler.value.lastQtype) quoteStore.initializeNewQuoteOptions(qtype)
+    quoteHandler.value.lastQtype = qtype
     const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
     popup?.showModal()
   },
   step2: () => {
-    quoteStore.createQuote(quoteStore.newQuoteOptions).then((newquote:any) => {
-      quoteStore.quote = newquote
+    quoteStore.createQuote().then(() => {
+      // quoteStore.quote = newquote
       cfgQuotesList.value.pickedRow = quoteStore.quote
-      // console.log(JSON.stringify(quoteStore.newQuoteOptions, null, 2))
+      // console.log(JSON.stringify(quoteStore.quote, null, 2))
       const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
       popup?.close()
       const popup2 = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
@@ -52,7 +53,7 @@ const quoteHandler = ref({
   },
   delete: () => {
     quoteStore.deleteQuote(quoteStore.quote.id)
-    quoteStore.quote = {}
+    // quoteStore.clearQuote()
     cfgQuotesList.value.pickedRow = null
     const popup = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
     popup?.close()
@@ -62,18 +63,29 @@ const quoteHandler = ref({
     const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
     popup?.close()
     const popup2 = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
-    console.dir(popup2)
     popup2?.showModal()
   },
   save: () => {
-    quoteStore.updateQuote(quoteStore.quote).then((updatedQuote:any) => {
+    quoteStore.updateQuote(quoteStore.quote, "updated").then((updatedQuote:any) => {
       if (updatedQuote) {
         prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
         cfgQuotesList.value.pickedRow = {...updatedQuote}
       }
     })
-    // TODO: Update pickedrow
-    // TODO: Update rows collection
+    const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
+    popup?.close()
+    const popup2 = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
+    popup2?.close()
+  },
+  submit: () => {
+    quoteStore.quote.status = quoteStore.quote.nonstd == 'N' ? 'READY' : 'RATEREQ'
+    const toastMessage = quoteStore.quote.status == 'READY' ? 'submitted' : ' rates requested'
+    quoteStore.updateQuote(quoteStore.quote, toastMessage).then((updatedQuote:any) => {
+      if (updatedQuote) {
+        prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+        cfgQuotesList.value.pickedRow = {...updatedQuote}
+      }
+    })
     const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
     popup?.close()
     const popup2 = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
@@ -99,10 +111,10 @@ const cfgQuotesList = ref({
     { id: "effdat", heading: "Effective", width: "5em", flags: "C" },
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
     { id: "product", heading: "Product", width: "6em", cellclass: "mono" },
-    { id: "funding", heading: "Fund", width: "3em", flags: "C" },
+    { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
     // { id: "nonstd", heading: "NS", width: "3em", flags: "C" },
-    { id: "status", heading: "Status", width: "10em" },
-    { id: "descr", heading: "Description", cellclass: "anchor" },
+    { id: "status", heading: "Status", width: "11em" },
+    { id: "descr", heading: "Description" },
   ]
 })
 
@@ -114,32 +126,56 @@ const cfgQuotesList = ref({
 //   return '#red solid question'
 // }
 
-const handleQuoteRowClicked = (row:any, rn:number, col:any) => {
+const handleQuoteRowClicked = (row:any, rn:number) => {
   cfgQuotesList.value.pickedRow = row
   cfgQuotesList.value.pickedRowNumber = rn
-  if (col.id == "descr") {
-    quoteHandler.value.edit()
-  }
+  // if (col.id == "descr") {
+  //   quoteHandler.value.edit()
+  // }
 }
 
+const statusIcon = (row:any) => {
+  if ('INPROG,HELD'.indexOf(row.status) >= 0) return "#red hand_"
+  if ('RATEREQ'.indexOf(row.status) >= 0) return "#gold solid pause_"
+  if ('READY'.indexOf(row.status) >= 0) return "#green solid check_"
+  if ('ENROLLED'.indexOf(row.status) >= 0) return "#lime solid thumbs-up_"
+  if ('EXPIRED'.indexOf(row.status) >= 0) return "#maroon solid x_"
+  return "circle_"
+}
 const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
   if (td == null) return
   const classname = "status" + row.status
   td.classList.add(classname)
   return B.codeToText.quoteStatus(row.status)
 }
+// const formatIDCell = (row:any, rn:number, td:HTMLTableCellElement | null) => {
+//   if (td == null) return
+//   const cell = td as HTMLTableCellElement
+//   const tr = cell.closest("tr") as HTMLTableRowElement
+//   if (rn > 0) {
+//     const priorRowEff = prospStore.quotes[rn-1].effdat
+//     if (row.effdat != priorRowEff) {
+//       tr.style.borderTop = "3px solid sienna"
+//     } else {
+//       tr.style.borderTop = ""
+//     }
+//   } else {
+//       tr.style.borderTop = ""
+//   }
 
+//   return row.id
+// }
 </script>
 
 <template>
   <BTable
-      @pick="(row:any, rn:number, col:any) => {
-        handleQuoteRowClicked(row, rn, col)
-      }"
+      @pick="(row:any, rn:number, col:any) => { handleQuoteRowClicked(row, rn) }"
+      @dblpick="(row:any, rn:number, col:any) => { quoteHandler.edit() }"
       :config="cfgQuotesList" :rows="prospStore.quotes">
+    <!-- <template #column_id="{row, rn, td}">{{ formatIDCell(row, rn, td) }}</template> -->
     <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
     <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
-    <template #column_status="{row, td}">{{ formatStatusCell(row, td) }}</template>
+    <template #column_status="{row, td}"><BIcon :icon="statusIcon(row)">{{ formatStatusCell(row, td) }}</BIcon></template>
     <template #column_nonstd="{row}">
       <span :class="{
         'nonstdY': row.nonstd == 'Y',
@@ -159,24 +195,28 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
       </BPopup>
       <!-- <BConfirm class="anchor gapright" @confirm="quoteStore.deleteQuote(cfgQuotesList.pickedRow.id)" :disabled="!cfgQuotesList.pickedRow || cfgQuotesList.pickedRow.status != 'INPROG'" pos="T2R" icon="trash-can_">Delete...</BConfirm> -->
       <BButton class="anchor gapright" :disabled="!cfgQuotesList.pickedRow" icon="_edit" @click="quoteHandler.edit()">Edit...</BButton>
-      |
       <BButton class="anchor gapright" :disabled="!cfgQuotesList.pickedRow" icon="_file-pdf">Generate</BButton>
     </template>
   </BTable>
-  <dialog :id="quoteHandler.startPopid">
-    <NewQuoteDialog @abort="quoteHandler.abort()" @continue="(opts) => quoteHandler.step2()" :qtype="quoteHandler.qtype"></NewQuoteDialog>
-  </dialog>
-  <dialog v-if="quoteStore.quote.id" :id="quoteHandler.editPopid">
-    <EditQuoteDialog @abort="quoteHandler.abort()" @delete="quoteHandler.delete()" @save="() => quoteHandler.save()"></EditQuoteDialog>
-  </dialog>
+  <NewQuoteDialog :id="quoteHandler.startPopid"
+    @abort="quoteHandler.abort()"
+    @continue="(opts) => quoteHandler.step2()"
+    :qtype="quoteHandler.lastQtype"></NewQuoteDialog>
+  <EditQuoteDialog :id="quoteHandler.editPopid"
+    @abort="quoteHandler.abort()"
+    @delete="quoteHandler.delete()"
+    @submit="quoteHandler.submit()"
+    @save="() => quoteHandler.save()"></EditQuoteDialog>
 </template>
 
 <style lang="css" scoped>
 .nonstdC {
   color: maroon;
   font-style: italic;
+  font-weight: bold;
 }
 .nonstdY {
+  color: maroon;
   font-style: italic;
 }
 
