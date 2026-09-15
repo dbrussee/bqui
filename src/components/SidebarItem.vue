@@ -21,23 +21,23 @@ const props = defineProps({
     cursor: pointer;
 
     padding-bottom: .3em;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--table-row-border-color);
     padding-left: .3em;
     border-left: 3px solid transparent;
 
     &:hover {
-      color: var(--table-row-picked-text);
+      color: oklch(100% 0 0);
       background-color: var(--table-row-picked-bg);
 
-      p { color: var(--form-prompt-color); }
+      /* p { color: var(--form-prompt-color); } */
     }
     p { color: var(--form-prompt-color); }
 
   }
   .picked {
-    color: var(--table-row-picked-text);
+    color: var(--table-row-picked-text) !important;
     background-color: var(--table-row-picked-bg);
 
-    p { color: var(--form-prompt-color); }
+    /* p { color: var(--form-prompt-color); } */
   }
 </style>

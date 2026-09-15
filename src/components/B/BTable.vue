@@ -225,7 +225,6 @@ div.b-table-heading {
 }
 div.b-table-footer {
   width: 100%;
-  /* height: 1.5em; */
   font-size: .9em;
   padding: .2em .3em;
   border: 1px solid black;
@@ -253,6 +252,7 @@ thead tr th {
   text-align: left;
   font-weight: normal;
   background-color: var(--body-bg);
+  color: var(--form-prompt-color) !important;
   padding: 0.1rem 0.2rem;
   padding-bottom: .6rem;
   text-decoration: double underline;
@@ -268,7 +268,8 @@ tr td {
   cursor: pointer;
 }
 tbody tr:hover {
-  background-color: var(--table-row-hover-bg); /* rgba(0, 123, 255, 0.05); */
+  background-color: var(--table-row-picked-bg);
+  /* background-color: var(--table-row-hover-bg); */
 }
 tbody tr.picked {
   background-color: var(--table-row-picked-bg);

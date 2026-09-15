@@ -212,6 +212,15 @@ export const B = {
     hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     return hashHex.toString();
   },
+  statusIcon: (statusCode:string) => {
+    if ('INPROG'.indexOf(statusCode) >= 0) return "#red hand_"
+    if ('RATEREQ,PENDING'.indexOf(statusCode) >= 0) return "#sienna solid pause_"
+    if ('READY'.indexOf(statusCode) >= 0) return "#forestgreen solid check_"
+    if ('ENROLLED'.indexOf(statusCode) >= 0) return "#forestgreen solid thumbs-up_"
+    if ('EXPIRED'.indexOf(statusCode) >= 0) return "#maroon solid x_"
+    return "circle_"
+  },
+
   format: {
     /**
      * Returns 3-char month and year of provided date

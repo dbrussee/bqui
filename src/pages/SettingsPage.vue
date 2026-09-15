@@ -6,9 +6,11 @@ const userStore = appUserStore();
 import { appStore } from "@/stores/AppStore";
 const app = appStore()
 import { B } from "@/composables/BUtils.ts";
+import BButton from "@/components/B/BButton.vue";
 
 const rolesConfig = {
-  height: "calc(100vh - 17em)",
+  // height: "calc(100vh - 17em)",
+  height: "7em",
   columns: [
     { id: "role", heading: "Role", flags: "C", width: "4em"},
     { id: "descr", heading: "Description" }
@@ -27,7 +29,8 @@ const decodeSource = (source:string, td:any):void => {
   }
 }
 const rightsConfig = {
-  height: "calc(100vh - 9em)",
+  // height: "calc(100vh - 9em)",
+  height: "15em",
   pickedRow: null as any,
   columns: [
     { id: "descr", heading: "Right Description" },
@@ -52,25 +55,31 @@ const getRightsDescription = (row:any, td:any):void => {
   // if (row.value == "Y") cell.style.color = "green"
   cell.innerHTML = descr
 }
+
+const agencyDetails = () => {
+  if (!userStore.user.agency_id || userStore.user.agency_id == -1) return "No agency assigned"
+  if (userStore.user.agency_descr == '') return `Unknown agency (${userStore.user.agency_id})`
+  return `${userStore.user.agency_descr} (${userStore.user.agency_id})`
+}
 // console.dir(rightsRows)
 </script>
 
 <template>
-  <table>
+  <table style="width: 100%">
     <tbody>
     <tr>
-      <td style="vertical-align: top; padding-right: 2em;">
+      <td style="vertical-align: top; padding-right: 2em; width: 50%;">
         <table class="form-table" style="margin-bottom: 1em;">
           <tbody>
             <tr><th>User ID:</th><td>{{ userStore.user.id }}</td></tr>
-            <tr><th>First Name:</th><td>{{ userStore.user.fstnam }}</td></tr>
-            <tr><th>Last Name:</th><td>{{ userStore.user.lstnam }}</td></tr>
+            <tr><th>Name:</th><td>{{ userStore.user.lstnam }}, {{ userStore.user.fstnam }}</td></tr>
             <tr><th>Status:</th><td>{{ userStore.user.status }}</td></tr>
             <tr><th>Email:</th><td>{{ userStore.user.email }}</td></tr>
+            <tr><th>Agency:</th><td>{{ agencyDetails() }}</td></tr>
             <tr><th>Logged in:</th><td>{{ B.format.ts(userStore.user.lst_login) }}</td></tr>
           </tbody>
         </table>
-        <BTable nofooter :config="rolesConfig" :rows="userStore.user.config.roles" heading="Assigned Roles">
+        <BTable :config="rolesConfig" :rows="userStore.user.config.roles" heading="Assigned Roles">
           <template #column_descr="{row}">
             {{
               app.config.roles.find((role:any) => {
@@ -78,16 +87,23 @@ const getRightsDescription = (row:any, td:any):void => {
               }).descr
             }}
           </template>
+          <template #buttons>
+            <BButton style="margin: .3em 0;" class="anchor gapright" icon="#green solid add">Add Role</BButton> |
+            <BButton disabled style="margin: .3em 0;" class="anchor gapleft" icon="#red solid x">Remove</BButton>
+          </template>
         </BTable>
       </td>
       <td style="vertical-align: top;">
         <p>
-          <BTable nofooter :config="rightsConfig" :rows="rightsRows" @pick="(row:any) => rightsConfig.pickedRow = row" heading="Action Rights">
+          <BTable :config="rightsConfig" :rows="rightsRows" @pick="(row:any) => rightsConfig.pickedRow = row" heading="Action Rights">
             <template #column_descr="{row,td}">
               {{ getRightsDescription(row, td) }}
             </template>
             <template #column_source="{row, td}">
               {{ decodeSource(row.source, td) }}
+            </template>
+            <template #buttons>
+              <BButton disabled style="margin: .3em 0;" class="anchor gapright" icon="solid edit">Set Value</BButton>
             </template>
           </BTable>
         </p>
@@ -95,6 +111,7 @@ const getRightsDescription = (row:any, td:any):void => {
     </tr>
   </tbody>
   </table>
+  <p style="color:orange"><i>Editing of roles / rights will move to the Maintenance app in time</i></p>
 </template>
 
 <style lang="css" scoped></style>

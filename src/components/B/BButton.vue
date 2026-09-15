@@ -26,13 +26,18 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false
+  },
+  working: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
 </script>
 
 <template>
-  <button :disabled="props.disabled" @click="emit('click')" :style="{marginLeft: props.gapleft ? '.4em' : ''}">
-    <BIcon :disabled="props.disabled" as="icon" :icon="props.icon" :source="props.source"><slot/></BIcon>
+  <button :disabled="props.disabled || props.working" @click="emit('click')" :style="{marginLeft: props.gapleft ? '.4em' : ''}">
+    <BIcon :disabled="props.disabled || props.working" :icon="props.icon" :source="props.source"><slot/></BIcon>
   </button>
 </template>
 

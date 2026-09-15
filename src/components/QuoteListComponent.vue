@@ -134,37 +134,12 @@ const handleQuoteRowClicked = (row:any, rn:number) => {
   // }
 }
 
-const statusIcon = (row:any) => {
-  if ('INPROG'.indexOf(row.status) >= 0) return "#red hand_"
-  if ('RATEREQ,PENDING'.indexOf(row.status) >= 0) return "#sienna solid pause_"
-  if ('READY'.indexOf(row.status) >= 0) return "#forestgreen solid check_"
-  if ('ENROLLED'.indexOf(row.status) >= 0) return "#forestgreen solid thumbs-up_"
-  if ('EXPIRED'.indexOf(row.status) >= 0) return "#maroon solid x_"
-  return "circle_"
-}
 const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
   if (td == null) return
   const classname = "status" + row.status
   td.classList.add(classname)
   return B.codeToText.quoteStatus(row.status)
 }
-// const formatIDCell = (row:any, rn:number, td:HTMLTableCellElement | null) => {
-//   if (td == null) return
-//   const cell = td as HTMLTableCellElement
-//   const tr = cell.closest("tr") as HTMLTableRowElement
-//   if (rn > 0) {
-//     const priorRowEff = prospStore.quotes[rn-1].effdat
-//     if (row.effdat != priorRowEff) {
-//       tr.style.borderTop = "3px solid sienna"
-//     } else {
-//       tr.style.borderTop = ""
-//     }
-//   } else {
-//       tr.style.borderTop = ""
-//   }
-
-//   return row.id
-// }
 </script>
 
 <template>
@@ -175,7 +150,7 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
     <!-- <template #column_id="{row, rn, td}">{{ formatIDCell(row, rn, td) }}</template> -->
     <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
     <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
-    <template #column_status="{row, td}"><BIcon :icon="statusIcon(row)">{{ formatStatusCell(row, td) }}</BIcon></template>
+    <template #column_status="{row, td}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, td) }}</BIcon></template>
     <template #column_nonstd="{row}">
       <span :class="{
         'nonstdY': row.nonstd == 'Y',
@@ -211,12 +186,12 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
 
 <style lang="css" scoped>
 .nonstdC {
-  color: maroon;
+  color: goldenrod;
   font-style: italic;
   font-weight: bold;
 }
 .nonstdY {
-  color: maroon;
+  color: goldenrod;
   font-style: italic;
 }
 

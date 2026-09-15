@@ -1,8 +1,7 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { computed, ref, useAttrs, useId } from 'vue'
+import { computed, ref, useAttrs } from 'vue'
 const attrs = useAttrs()
-const popid = ref(useId())
 defineOptions({
   inheritAttrs: false // Stops Vue from automatically applying parent classes/attributes to the root element
 })
@@ -10,8 +9,7 @@ defineOptions({
 const props = defineProps({
   icon: {
     type: String,
-    required: false,
-    default: ''
+    required: true,
   },
   source: {
     type: String,
@@ -26,19 +24,6 @@ const props = defineProps({
     required: false,
     default: false
   },
-  popovertarget: {
-    type: String,
-    required: false,
-    default: ''
-  },
-  as: {
-    type: String,
-    required: false,
-    default: 'clickable',
-    validator(value: string) {
-      return ['icon', 'clickable', 'anchor', 'button'].includes(value)
-    }
-  },
   color: {
     type: String,
     required: false,
@@ -46,7 +31,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(["click", "subclick", "subpick"])
+const emit = defineEmits(["click"])
 const iconcolor = ref()
 
 const getClasses = computed(() => {
@@ -65,7 +50,7 @@ const getClasses_fa = () => {
   let vers = "fa-regular"
   const classes = new Set()
   classes.add("fa")
-  iconcolor.value = props.disabled ? 'gainsboro' : ''
+  iconcolor.value = props.disabled ? 'var(--ui-disabled-text)' : props.color
   let parts:string[] = []
   try {
     parts = props.icon.split(" ")
@@ -112,37 +97,17 @@ const getStyle = computed(() => {
 const getStyle_fa = () => {
   const stuff:any = {}
   if (iconcolor.value) stuff['color'] = iconcolor.value
-  if (props.as == 'clickable') stuff['cursor'] = 'pointer'
   return stuff
 }
-function open():void {
-  document.getElementById(popid.value)?.showPopover()
-}
-function close():void {
-  document.getElementById(popid.value)?.hidePopover()
-}
-function isOpen():boolean {
-  const pop = document.getElementById(popid.value)
-  if (!pop) return false
-  return pop.matches(':popover-open')
-}
-
-defineExpose({
-  open, close, isOpen
-})
 
 </script>
 
 <template>
-  <template v-if="props.as == 'icon'">
-    <i v-if="props.icon != ''" :class="[getClasses, attrs.classes]" :style="[getStyle, attrs.style]" @click="emit('click')" /><slot/>
-  </template>
-  <span v-if="props.as == 'anchor' || props.as == 'clickable'" @click="emit('click')" :style="{cursor:'pointer', color:props.color}" :class="{anchor: props.as=='anchor'}">
-    <i v-if="props.icon != ''" :class="[getClasses, attrs.classes]" :style="[getStyle, attrs.style]" /><slot/>
-  </span>
-  <button v-if="props.as == 'button'" @click="emit('click')" :class="attrs.class" :style="attrs.style" :popovertarget="props.popovertarget">
-    <i :class="[getClasses]" :style="[getStyle]" /><slot/>
-  </button>
+  <i v-if="props.icon != ''"
+    :class="[getClasses, attrs.classes]"
+    :style="[getStyle, attrs.style]"
+    @click="emit('click')"
+  /><slot/>
 </template>
 
 <style lang="css" scoped>

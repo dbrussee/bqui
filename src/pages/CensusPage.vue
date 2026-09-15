@@ -367,8 +367,7 @@ thead tr th {
   font-weight: normal;
   padding: 0.1rem 0.2rem;
   background-color: var(--body-bg);
-  /* background-color: var(--table-heading-bgcolor); */
-  /* color: var(--table-heading-color); */
+  color: var(--form-prompt-color) !important;
   padding-bottom: .6rem;
   text-decoration: double underline;
   text-underline-offset: 4px;

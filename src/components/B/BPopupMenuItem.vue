@@ -22,7 +22,7 @@ const doClick = () => {
     <div class="icon_container">
       <BIcon :icon="props.icon" />
     </div>
-    <span class="text_container anchor"><slot/></span>
+    <span :class="{disabled:props.disabled, 'my-anchor':!props.disabled}"><slot/></span>
   </div>
 </template>
 
@@ -32,6 +32,12 @@ const doClick = () => {
   color: silver;
   & * {
     color: silver;
+  }
+}
+.my-anchor {
+  color: var(--anchor-color);
+  &:hover {
+    text-decoration: underline;
   }
 }
 div.item {

@@ -80,23 +80,23 @@ function getCensusCount():string {
 <template>
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
-      ><BIcon as="icon" icon='solid shop_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
+      ><BIcon icon='solid shop_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
       <p style='font-size: .8em;'>{{ getProspectName() }}</p>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
-      ><BIcon as="icon" :icon="prospStore.censusDirty ? '#red solid people-group_' : 'solid people-group_'" />Census
+      ><BIcon :icon="prospStore.censusDirty ? '#red solid people-group_' : 'solid people-group_'" />Census
       <p style='font-size: .8em;' v-html="getCensusCount()"></p>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'PROPOSALS'" :current="pageStore.page == 'PROPOSALS'"
-      ><BIcon as="icon" icon='file-pdf_' />Proposals
+      ><BIcon icon='file-pdf_' />Proposals
       <p style="font-size: .8em;" v-html="getProposalsCount()"></p>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
-      ><BIcon as="icon" icon='envelope_' />Messages
+      ><BIcon icon='envelope_' />Messages
       <p style="font-size: .8em;" v-html="getUnreadMessageCounts()"></p>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'SETTINGS'" :current="pageStore.page == 'SETTINGS'"
-      ><BIcon as="icon" icon='circle-user_' />User: <span style="font-size: .8em;">{{ userStore.user.id }}</span>
+      ><BIcon icon='circle-user_' />User: <span style="font-size: .8em;">{{ userStore.user.id }}</span>
       <p style="font-size: .8em;">{{ (userStore.user.fstnam + ' ' + userStore.user.lstnam).trim() }}</p>
     </SidebarItem>
   </div>

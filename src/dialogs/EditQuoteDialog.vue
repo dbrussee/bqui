@@ -5,6 +5,7 @@ const quoteStore = QuoteStore()
 import { B } from '@/composables/BUtils';
 import BButton from '@/components/B/BButton.vue';
 import BConfirm from '@/components/B/BConfirm.vue';
+import BIcon from '@/components/B/BIcon.vue';
 
 const emit = defineEmits(["save","delete","abort","submit"])
 
@@ -33,7 +34,7 @@ const props = defineProps({
 
         <tr><th>Product:</th><td colspan="3" class="info">{{ B.codeToText.rlob(quoteStore.quote.rlob) }} ({{ quoteStore.quote.rlob }})</td></tr>
         <tr><th>Effective:</th><td class="info">{{ B.format.effdat(quoteStore.quote.effdat) }}</td>
-            <th>Status:</th><td class="info">{{ B.codeToText.quoteStatus(quoteStore.quote.status) }}</td></tr>
+            <th>Status:</th><td class="info"><BIcon :icon="B.statusIcon(quoteStore.quote.status)"/>{{ B.codeToText.quoteStatus(quoteStore.quote.status) }}</td></tr>
         <tr v-if="quoteStore.quote.status != 'INPROG'">
             <th>Design:</th><td class="info">{{ B.codeToText.nonstd(quoteStore.quote.nonstd) }}</td>
             <th>Funding:</th><td class="info">{{ B.codeToText.funding(quoteStore.quote.funding) }}</td></tr>

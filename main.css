@@ -287,7 +287,7 @@ button.modern {
 }
 button.clear {
   padding: 0 !important;
-  background-color: transparent;
+  background-color: none;
   border: none;
   /* border-radius: .2em; */
   /* font-size: 1em; */
@@ -539,7 +539,7 @@ i.gapright {
 }
 
 [popover]::backdrop {
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: rgba(0, 0, 0, 0.85);
 }
 
 
@@ -553,7 +553,7 @@ div[popover]:popover-open {
   margin: 0;
   inset: auto;
   padding: .4em;
-  border: 1px solid black;
+  border: 1px solid var(--body-text);
   border-radius: 0.5rem;
   position-area: bottom;
   box-shadow: 3px 3px 3px gray;
