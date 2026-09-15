@@ -256,12 +256,12 @@ const updateCensusDirty = () => {
             <td class="cobra"><BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'cobra')" :icon="sub.cobra ? 'square-check' : 'square'" /></td>
             <td class="dis">&nbsp;</td>
             <td>
-              <BButton class="clear" @click="delSub(Number(rn))" icon="#maroon trash-can" />
-              <BButton class="clear" @click="newDep(Number(rn))" icon="#black solid user-plus" />
+              <BButton class="clear" @click="delSub(Number(rn))" icon="#firebrick trash-can" />
+              <BButton class="clear" @click="newDep(Number(rn))" icon="solid user-plus" />
             </td>
           </tr>
           <tr v-for="(dep, dn) in sub.deps" :key="dep">
-            <td><select class="mono" style="width: 2em;" @change="setRelation(rn as number, dn as number, $event)">
+            <td><select class="mono" style="background-color: transparent; width: 2em;" @change="setRelation(rn as number, dn as number, $event)">
                 <option class="mono" :selected="dep.relation == 'SUB'" value="SUB">SUB - Subscriber</option>
                 <option class="mono" :selected="dep.relation == 'SPS'" value="SPS">SPS - Spouse</option>
                 <option class="mono" :selected="dep.relation == 'DOM'" value="DOM">DOM - Domestic Partner</option>
@@ -343,19 +343,17 @@ input.dob {
   text-align: center;
 }
 div.b-table-container {
-  /* background-color: var(--unused_bgcolor); */
   width: fit-content;
   overscroll-behavior: none;
 }
 div.b-table-heading {
   padding: 0.2rem 0.5rem;
   font-style: italic;
-  color: var(--heading-color);
+  color: var(--table-heading-color);
 }
 table {
   border-collapse: collapse;
   position: relative;
-  background-color: white;
 }
 thead tr {
   top: 0;
@@ -363,14 +361,18 @@ thead tr {
   z-index: 1;
 }
 thead tr th {
-  border-top: 1px solid var(--heading-color);
-  border-bottom: 1px solid var(--heading-color);
-  /* border: 1px solid var(--heading-color); */
+  border-top: 1px solid var(--table-heading-color);
+  border-bottom: 1px solid var(--table-heading-color);
   text-align: left;
   font-weight: normal;
   padding: 0.1rem 0.2rem;
-  background-color: var(--heading-bgcolor);
-  color: var(--heading-color);
+  background-color: var(--body-bg);
+  /* background-color: var(--table-heading-bgcolor); */
+  /* color: var(--table-heading-color); */
+  padding-bottom: .6rem;
+  text-decoration: double underline;
+  text-underline-offset: 4px;
+
   vertical-align: top;
 }
 tbody tr td {

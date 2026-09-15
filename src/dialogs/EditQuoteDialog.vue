@@ -114,7 +114,7 @@ const props = defineProps({
       </template>
     </BConfirm>
     <BButton class="anchor" icon="#red solid x_" @click="emit('abort')">Cancel</BButton>&nbsp;
-    <BButton :class="quoteStore.quote.status == 'INPROG' ? 'anchor' : 'modern'" icon="floppy-disk_" @click="emit('save')" :disabled="quoteStore.quote.descr == ''">Save Progress</BButton>&nbsp;
+    <BButton :class="quoteStore.quote.status == 'INPROG' ? 'anchor' : 'modern'" icon="floppy-disk_" @click="emit('save')" :disabled="quoteStore.quote.descr == ''">Save Changes</BButton>&nbsp;
     <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd == 'N'"
       class="modern"
       icon="solid share_"

@@ -163,7 +163,7 @@ const openHistory = () => {
 <template>
   <APIHistory ref="apiHistoryRef"/>
   <div class="container">
-    <div class="logo-area" style="padding-left: 2.5em;">
+    <div style="padding-left: 2.5em; color: white;">
       <img @click="openHistory()" src="../bcbc_logo.png" style="position: absolute; height: 2.5em; top: .5em; left: .8em;"/>
       <i style="font-size:1.5em">B<b></b>lueQuote</i>
     </div>
@@ -172,13 +172,13 @@ const openHistory = () => {
       <table style="width: 100%;">
         <tbody>
           <tr>
-            <td style="text-align: left;">
+            <td style="text-align: left; color:white;">
               <BIcon v-if="prospStore.prospect" :icon="getBookmarkIcon()"
                 @click="fave(prospStore.prospect.id, !prospStore.isCurrentlyFavorite())" />
               {{ getProspectName() }}
             </td>
             <td v-if="userStore.user" style="text-align: right;">
-              <BPopup class="anchor" pos="B" style="color: white" icon="solid list-ul_" ref="recentPopover">Recent
+              <BPopup class="anchor anchor-in-header" pos="B" icon="solid list-ul_" ref="recentPopover">Recent
                 <template #body>
                   <BTable nofooter
                     heading="Recently Accessed Prospects"
@@ -199,7 +199,7 @@ const openHistory = () => {
                 </template>
               </BPopup>&nbsp;
               <BPopup
-                class="anchor" pos="B" style="color: white" icon="bookmark_" ref="favesPopover">Bookmarked<template #body>
+                class="anchor anchor-in-header" pos="B" icon="bookmark_" ref="favesPopover">Bookmarked<template #body>
                   <BTable nofooter
                     heading="Bookmarked Prospects"
                     :rows="userStore.user.faves"

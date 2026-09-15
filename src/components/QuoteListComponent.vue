@@ -107,7 +107,7 @@ const cfgQuotesList = ref({
   pickedRowNumber: -1,
   no_rows_text: 'No quotes to display',
   columns: [
-    { id: "id", heading: "Quote", width: "5em", flags: "R" },
+    { id: "id", heading: "Quote", width: "4em", flags: "R" },
     { id: "effdat", heading: "Effective", width: "5em", flags: "C" },
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
     { id: "product", heading: "Product", width: "6em", cellclass: "mono" },
@@ -135,10 +135,10 @@ const handleQuoteRowClicked = (row:any, rn:number) => {
 }
 
 const statusIcon = (row:any) => {
-  if ('INPROG,HELD'.indexOf(row.status) >= 0) return "#red hand_"
-  if ('RATEREQ'.indexOf(row.status) >= 0) return "#gold solid pause_"
-  if ('READY'.indexOf(row.status) >= 0) return "#green solid check_"
-  if ('ENROLLED'.indexOf(row.status) >= 0) return "#lime solid thumbs-up_"
+  if ('INPROG'.indexOf(row.status) >= 0) return "#red hand_"
+  if ('RATEREQ,PENDING'.indexOf(row.status) >= 0) return "#sienna solid pause_"
+  if ('READY'.indexOf(row.status) >= 0) return "#forestgreen solid check_"
+  if ('ENROLLED'.indexOf(row.status) >= 0) return "#forestgreen solid thumbs-up_"
   if ('EXPIRED'.indexOf(row.status) >= 0) return "#maroon solid x_"
   return "circle_"
 }
@@ -185,17 +185,17 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
     <template #buttons>
       <BPopup class="action gapright" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
         <template #body>
-          <p><BButton @click="quoteHandler.start('MED')" class="anchor" icon="#black solid stethoscope_">Medical &amp; Drug</BButton></p>
-          <p><BButton @click="quoteHandler.start('DEN')" class="anchor" icon="#black solid tooth_">Dental</BButton></p>
-          <p><BButton @click="quoteHandler.start('VIS')" class="anchor" icon="#black solid glasses_">Vision</BButton></p>
-          <p><BButton disabled @click="quoteHandler.start('WEL')" class="anchor" icon="#black solid spa_">Wellness</BButton></p>
+          <p><BButton @click="quoteHandler.start('MED')" class="anchor" icon="solid stethoscope_">Medical &amp; Drug</BButton></p>
+          <p><BButton @click="quoteHandler.start('DEN')" class="anchor" icon="solid tooth_">Dental</BButton></p>
+          <p><BButton @click="quoteHandler.start('VIS')" class="anchor" icon="solid glasses_">Vision</BButton></p>
+          <p><BButton disabled @click="quoteHandler.start('WEL')" class="anchor" icon="solid spa_">Wellness</BButton></p>
           <hr style="margin-top: .2em; margin-bottom: .2em;"/>
-          <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="quoteHandler.startFromQuote()" class="anchor" icon="#black clone_">Copy Selected</BButton></p>
+          <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="quoteHandler.startFromQuote()" class="anchor" icon="clone_">Copy Selected</BButton></p>
         </template>
       </BPopup>
       <!-- <BConfirm class="anchor gapright" @confirm="quoteStore.deleteQuote(cfgQuotesList.pickedRow.id)" :disabled="!cfgQuotesList.pickedRow || cfgQuotesList.pickedRow.status != 'INPROG'" pos="T2R" icon="trash-can_">Delete...</BConfirm> -->
-      <BButton class="anchor gapright" :disabled="!cfgQuotesList.pickedRow" icon="_edit" @click="quoteHandler.edit()">Edit...</BButton>
-      <BButton class="anchor gapright" :disabled="!cfgQuotesList.pickedRow" icon="_file-pdf">Generate</BButton>
+      <BButton class="anchor anchor-in-table-footer gapright" style="color: white" :disabled="!cfgQuotesList.pickedRow" icon="_edit" @click="quoteHandler.edit()">Edit...</BButton>
+      <BButton class="anchor anchor-in-table-footer gapright" style="color: white" :disabled="!cfgQuotesList.pickedRow" icon="_file-pdf">Generate</BButton>
     </template>
   </BTable>
   <NewQuoteDialog :id="quoteHandler.startPopid"

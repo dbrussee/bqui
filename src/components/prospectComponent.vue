@@ -80,9 +80,12 @@ const handleRefresh = () => {
       <table class="form-table">
         <tbody>
           <tr><td>
-            <BIcon v-if="prospStore.prospect" as="anchor"
+            <BButton v-if="prospStore.prospect" class="anchor"
               @click="prospHandler.edit()"
-              icon="solid pen_">{{ prospStore.prospect ? prospStore.prospect.name : '&nbsp;' }}</BIcon>
+              icon="solid pen_">{{ prospStore.prospect ? prospStore.prospect.name : '&nbsp;' }}</BButton>
+            <!-- <BIcon v-if="prospStore.prospect" as="anchor"
+              @click="prospHandler.edit()"
+              icon="solid pen_">{{ prospStore.prospect ? prospStore.prospect.name : '&nbsp;' }}</BIcon> -->
           </td></tr>
           <tr><td>{{ prospStore.prospect.addr1 }}{{ prospStore.prospect.addr2 ? ', ' + prospStore.prospect.addr2 : '' }}</td></tr>
           <tr><td v-html="prospectCSZ(prospStore.prospect)"></td></tr>

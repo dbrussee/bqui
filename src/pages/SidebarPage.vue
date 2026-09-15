@@ -45,7 +45,7 @@ function getUnreadMessageCounts():string {
   const unread = messageStore.unreadCount()
   if (unread > 0) {
     const unread_msg = "<span style='color: white; background-color: red; border-radius: 50%; padding: 0 .4em;'>" + unread + "</span>"
-    if (unread == messageStore.messages.length) return unread_msg
+    // if (unread == messageStore.messages.length) return unread_msg
     return `Count: ${messageStore.messages.length}, Unread: ${unread_msg}`
   }
   return `Count: ${messageStore.messages.length.toString()}`

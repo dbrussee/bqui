@@ -109,7 +109,10 @@ const msgHandler = ref({
       <tbody>
         <tr><th>Send To:</th><td><input v-model="msgHandler.msg.sendto"></td></tr>
         <tr><th>Subject:</th><td><input style="width: 30em;" v-model="msgHandler.msg.subject"></td></tr>
-        <tr><th>Message:</th><td><textarea style="width: 30em; height: 6em;" v-model="msgHandler.msg.body"></textarea></td></tr>
+        <tr><th>Message:</th><td>
+          <textarea style="width: 100%; height: 10em; font-size: 1em;" v-model="msgHandler.msg.body"></textarea>
+           <!-- <div contenteditable style="width: 100%; height: 10em;"/> -->
+        </td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton class="anchor" @click="msgHandler.abort()" icon="#red solid x">Cancel</BButton>&nbsp;

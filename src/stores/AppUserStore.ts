@@ -7,7 +7,7 @@ import { ref } from "vue";
 
 export const appUserStore = defineStore("appUserStore", () => {
   const user = ref<any>(null);
-  const otherUser = ref<any>(null);
+  // const otherUser = ref<any>(null);
   const meta = ref<any>(null);
   const issue = ref<any>(null)
   const isLoading = ref<boolean>(false)
@@ -20,14 +20,14 @@ export const appUserStore = defineStore("appUserStore", () => {
     relogin();
   }
 
-  async function getOtherUser(uid: string) {
-    otherUser.value = null;
-    const fetcher = await new BQAPIFetcher().callAPI(`/user/${uid}`, "GET");
-    otherUser.value = fetcher.resp;
-    meta.value = fetcher.meta;
-    issue.value = fetcher.issue;
-    return otherUser.value;
-  }
+  // async function getOtherUser(uid: string) {
+  //   otherUser.value = null;
+  //   const fetcher = await new BQAPIFetcher().callAPI(`/user/${uid}`, "GET");
+  //   otherUser.value = fetcher.resp;
+  //   meta.value = fetcher.meta;
+  //   issue.value = fetcher.issue;
+  //   return otherUser.value;
+  // }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function login(uid: string, pwd: string = "") {
     if (uid == "") return
@@ -37,9 +37,9 @@ export const appUserStore = defineStore("appUserStore", () => {
     fetcher.callAPI(`/login/${uid}`, "POST").then(() => {
       isLoading.value = false
       user.value = fetcher.resp;
+      // console.log(JSON.stringify(user.value, null, 2))
       meta.value = fetcher.meta;
       issue.value = fetcher.issue;
-      // console.log(JSON.stringify(user.value, null, 2))
       const msgStore = appMessageStore()
       msgStore.getMessages()
     })
@@ -48,6 +48,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     isLoading.value = true
     const fetcher = await new BQAPIFetcher().callAPI(`/relogin`, "POST");
     user.value = fetcher.resp;
+    // console.log(JSON.stringify(user.value, null, 2))
     meta.value = fetcher.meta;
     issue.value = fetcher.issue;
 
@@ -75,6 +76,19 @@ export const appUserStore = defineStore("appUserStore", () => {
     }
   }
 
+  const getUserRightValue = (code:string):string => {
+    if (!user.value) return "ERROR"
+    if (!user.value.rights) return "ERROR"
+    const right = user.value.rights[code.trim().toUpperCase()]
+    if (!right) return "ERROR"
+    return right.value
+  }
 
-  return { isLoading, getOtherUser, relogin, login, logout, otherUser, user, meta, issue, getAPIHistory, apiHistory };
+  return { isLoading,
+    relogin, login, logout,
+    user, getUserRightValue,
+
+    getAPIHistory, apiHistory,
+    meta, issue
+  };
 });

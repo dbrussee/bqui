@@ -9,7 +9,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="content" :class="{'current_style': props.current, 'non_current_style': !props.current}">
+  <div class="content" :class="{'picked': props.current}">
     <slot />
   </div>
 </template>
@@ -18,6 +18,7 @@ const props = defineProps({
   .content {
     display: block;
     padding-top: .3em;
+    cursor: pointer;
 
     padding-bottom: .3em;
     border-bottom: 1px solid black;
@@ -25,8 +26,18 @@ const props = defineProps({
     border-left: 3px solid transparent;
 
     &:hover {
-      /* border-left-color: dodgerblue; */
-      background-color: lightcyan;
+      color: var(--table-row-picked-text);
+      background-color: var(--table-row-picked-bg);
+
+      p { color: var(--form-prompt-color); }
     }
+    p { color: var(--form-prompt-color); }
+
+  }
+  .picked {
+    color: var(--table-row-picked-text);
+    background-color: var(--table-row-picked-bg);
+
+    p { color: var(--form-prompt-color); }
   }
 </style>

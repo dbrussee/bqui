@@ -55,7 +55,7 @@ export const B = {
         case "QUOTED": return "Quoted";
         case "READY": return "Ready";
         case "RATEREQ": return "Rates Requested";
-        case "HELD": return "Held";
+        case "PENDING": return "Pending Approval";
         case "INPROG": return "In Progress";
         case "ENROLLED": return "Enrolled";
         case "EXPIRED": return "Expired";

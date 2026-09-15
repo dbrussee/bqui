@@ -107,7 +107,7 @@ const doBlur = ():void => {
         <BIcon icon="#red solid triangle-exclamation"><span style="color: red;">{{ props.warning }}</span></BIcon>
       </p>
     <div class="buttonbar">
-      <BButton @click="emit('confirm'); close()" icon="#green solid check_">{{ props.confirm_btn_text }}</BButton>
+      <BButton @click="emit('confirm'); close()" icon="#lime solid check_">{{ props.confirm_btn_text }}</BButton>
     </div>
   </div>
 </template>

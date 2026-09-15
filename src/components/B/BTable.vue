@@ -198,15 +198,19 @@ tr.no_rows_text {
   }
 }
 div.b-table-container {
-  /* background-color: var(--unused_bgcolor); */
   border-left: 1px solid black;
   width: fit-content;
   overscroll-behavior: none;
 }
 div.b-table-heading {
   padding-bottom: 0.2rem;
+  padding-left: .3rem;
+  padding-bottom: .4rem;
   font-style: italic;
-  color: var(--heading-color);
+  font-size: 1.2em;
+  color: var(--form-prompt-color) !important;
+  /* background-color: var(--table-header-bg); */
+  /* color: var(--table-header-text); */
 }
 .flex-row-container {
   display: flex;         /* Forces children onto the same line */
@@ -225,9 +229,9 @@ div.b-table-footer {
   font-size: .9em;
   padding: .2em .3em;
   border: 1px solid black;
-  border-top: 1px solid silver;
-  background-color: gainsboro;
-  color: silver;
+  border-top: 1px solid var(--separator-color);
+  background-color: var(--table-footer-bg);
+  color: var(--table-footer-text);
 
   & button {
     margin-right: 5em;
@@ -235,10 +239,8 @@ div.b-table-footer {
 
 }
 table {
-  /* border-right: 1px solid var(--heading-color); */
   border-collapse: collapse;
   position: relative;
-  background-color: white;
 }
 thead tr {
   top: 0;
@@ -246,28 +248,34 @@ thead tr {
   z-index: 1;
 }
 thead tr th {
-  border-top: 1px solid var(--heading-color);
-  border-bottom: 1px solid var(--heading-color);
+  /* border-top: 1px solid var(--table-header-bg); */
+  /* border-bottom: 1px solid var(--table-header-bg); */
   text-align: left;
   font-weight: normal;
+  background-color: var(--body-bg);
   padding: 0.1rem 0.2rem;
-  background-color: var(--heading-bgcolor);
-  color: var(--heading-color);
+  padding-bottom: .6rem;
+  text-decoration: double underline;
+  text-underline-offset: 4px;
   vertical-align: top;
 }
-tbody tr td {
+tr td {
   line-height: 1.1em;
   /* border-left: 1px solid black; */
-  border-bottom: 1px solid silver;
+  border-bottom: 1px solid var(--table-row-border-color);
   padding: 0.1rem 0.2rem;
   vertical-align: top;
   cursor: pointer;
 }
 tbody tr:hover {
-  background-color: rgba(0, 123, 255, 0.05);
+  background-color: var(--table-row-hover-bg); /* rgba(0, 123, 255, 0.05); */
 }
 tbody tr.picked {
-  background-color: rgba(0, 123, 255, 0.2);
+  background-color: var(--table-row-picked-bg);
+  color: var(--table-row-picked-text);
+
+  /* background-color: var(--table-row-picked-bg);
+  color: var(--table-row-picked-text); */
 }
 /* tbody tr.picked:hover {
   background-color: paleturquoise;
