@@ -115,12 +115,17 @@ const props = defineProps({
       </template>
     </BConfirm>
     <BButton class="anchor" icon="#red solid x_" @click="emit('abort')">Cancel</BButton>&nbsp;
-    <BButton :class="quoteStore.quote.status == 'INPROG' ? 'anchor' : 'modern'" icon="floppy-disk_" @click="emit('save')" :disabled="quoteStore.quote.descr == ''">Save Changes</BButton>&nbsp;
+    <BButton
+      :class="quoteStore.quote.status == 'INPROG' ? 'anchor' : 'modern'"
+      icon="floppy-disk_"
+      @click="emit('save')"
+      :disabled="quoteStore.working != null || quoteStore.quote.descr == ''">Save Changes</BButton>&nbsp;
     <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd == 'N'"
       class="modern"
       icon="solid share_"
       heading="Submit Standard Quote"
       pos="T"
+      :disabled="quoteStore.working != null"
       @confirm="emit('submit')">Submit
       <template #message>
         After submitting this quote, you will no longer be able to edit anything other than the name.
@@ -131,6 +136,7 @@ const props = defineProps({
       icon="solid coins_"
       heading="Request Rates"
       pos="T"
+      :disabled="quoteStore.working != null"
       @confirm="emit('submit')">Request Rates
       <template #message>
         After requesting rates for this quote, you will no longer be able to edit anything other than the name.

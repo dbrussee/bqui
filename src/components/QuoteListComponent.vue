@@ -35,7 +35,8 @@ const quoteHandler = ref({
   },
   start: (qtype:string) => {
     // quoteStore.quote = {}
-    if (qtype != quoteHandler.value.lastQtype) quoteStore.initializeNewQuoteOptions(qtype)
+    // if (qtype != quoteHandler.value.lastQtype)
+    quoteStore.initializeNewQuoteOptions(qtype)
     quoteHandler.value.lastQtype = qtype
     const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
     popup?.showModal()
@@ -118,20 +119,9 @@ const cfgQuotesList = ref({
   ]
 })
 
-// const productIcon = (qtype:string):string => {
-//   if (qtype == 'MED') return '#black solid stethoscope_'
-//   if (qtype == 'DEN') return '#black solid tooth_'
-//   if (qtype == 'VIS') return '#black solid glasses_'
-//   if (qtype == 'WEL') return '#black solid spa_'
-//   return '#red solid question'
-// }
-
 const handleQuoteRowClicked = (row:any, rn:number) => {
   cfgQuotesList.value.pickedRow = row
   cfgQuotesList.value.pickedRowNumber = rn
-  // if (col.id == "descr") {
-  //   quoteHandler.value.edit()
-  // }
 }
 
 const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {

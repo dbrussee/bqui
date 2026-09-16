@@ -9,6 +9,8 @@ import { appPageStore } from "@/stores/PageStore";
 const pageStore = appPageStore();
 import { appProspectStore } from "@/stores/ProspectStore";
 const prospStore = appProspectStore();
+// import { QuoteStore } from "@/stores/QuoteStore";
+// const quoteStore = QuoteStore()
 import { onRenderTriggered } from "vue";
 import BIcon from "@/components/B/BIcon.vue";
 
@@ -23,24 +25,24 @@ onRenderTriggered(() => {
 })
 
 function getProspectID():string {
-  if (!prospStore.prospect) return ""
-  if (prospStore.isLoading) return " Loading..."
+  if (!prospStore.prospect?.id) return ""
   if (prospStore.prospect.id) return " #" + prospStore.prospect.id
   return ' unknown'
 }
 function getProspectName():string {
-  if (!prospStore.prospect) return "No Prospect"
-  if (prospStore.isLoading) return "Loading..."
+  if (!prospStore.prospect?.id) return "No Prospect"
+  if (prospStore.prospWorking != null) return prospStore.prospWorking as string
   if (prospStore.prospect.name) return prospStore.prospect.name
   return 'Unknown '
 }
 function getProposalsCount():string {
-  if (!prospStore.prospect) return "No Prospect"
-  if (prospStore.isLoading) return "Loading..."
+  if (!prospStore.prospect?.id) return "No Prospect"
+  // if (quoteStore.working) return quoteStore.working
   if (prospStore.prospect.name) return "None"
   return 'Unknown '
 }
 function getUnreadMessageCounts():string {
+  if (messageStore.working) return messageStore.working
   if (messageStore.messages.length == 0) return "None"
   const unread = messageStore.unreadCount()
   if (unread > 0) {
@@ -52,10 +54,10 @@ function getUnreadMessageCounts():string {
 }
 function getCensusCount():string {
   let msg = "Unknown"
-  if (!prospStore.prospect) {
+  if (!prospStore.prospect?.id) {
     msg = "No Prospect"
-  } else if (prospStore.isLoading) {
-    msg = "Loading..."
+  } else if (prospStore.censusWorking) {
+    msg = prospStore.censusWorking
   } else if (prospStore.prospect.census) {
     if (prospStore.prospect.census.length == 0) {
       msg = "None"
@@ -80,23 +82,23 @@ function getCensusCount():string {
 <template>
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
-      ><BIcon icon='solid shop_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
+      ><BIcon :working="prospStore.prospWorking" icon='solid shop_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
       <p style='font-size: .8em;'>{{ getProspectName() }}</p>
-    </SidebarItem>
-    <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
-      ><BIcon :icon="prospStore.censusDirty ? '#red solid people-group_' : 'solid people-group_'" />Census
-      <p style='font-size: .8em;' v-html="getCensusCount()"></p>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'PROPOSALS'" :current="pageStore.page == 'PROPOSALS'"
       ><BIcon icon='file-pdf_' />Proposals
       <p style="font-size: .8em;" v-html="getProposalsCount()"></p>
     </SidebarItem>
+    <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
+      ><BIcon :working="prospStore.censusWorking" :icon="prospStore.censusDirty ? '#red solid people-group_' : 'solid people-group_'" />Census
+      <p style='font-size: .8em;' v-html="getCensusCount()"></p>
+    </SidebarItem>
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
-      ><BIcon icon='envelope_' />Messages
+      ><BIcon :working="messageStore.working" icon='envelope_' />Messages
       <p style="font-size: .8em;" v-html="getUnreadMessageCounts()"></p>
     </SidebarItem>
     <SidebarItem @click="pageStore.page = 'SETTINGS'" :current="pageStore.page == 'SETTINGS'"
-      ><BIcon icon='circle-user_' />User: <span style="font-size: .8em;">{{ userStore.user.id }}</span>
+      ><BIcon :working="userStore.working" icon='circle-user_' />User: <span style="font-size: .8em;">{{ userStore.user.id }}</span>
       <p style="font-size: .8em;">{{ (userStore.user.fstnam + ' ' + userStore.user.lstnam).trim() }}</p>
     </SidebarItem>
   </div>

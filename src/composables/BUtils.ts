@@ -1,3 +1,5 @@
+import type { Ref } from "vue";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const B = {
   dateFromYYYYMMDD: (yyyymmdd:string):Date => {
@@ -220,6 +222,24 @@ export const B = {
     if ('EXPIRED'.indexOf(statusCode) >= 0) return "#maroon solid x_"
     return "circle_"
   },
+
+  working: {
+    set: (whichRef:Ref, val:string):void => {
+      window.setTimeout(() => {
+        whichRef.value = val
+      })
+    },
+    clear: (whichRef:Ref):void => {
+      window.setTimeout(() => {
+        whichRef.value = null
+      })
+    }
+  },
+
+
+  // setWorking: (whichRef:Ref, val:string || null) => {
+
+  // },
 
   format: {
     /**

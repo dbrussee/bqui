@@ -9,6 +9,7 @@ import BQAPIFetcher from '@/components/BQAPI'
 export const QuoteStore = defineStore('QuoteStore', () => {
   const NUMBER_OF_EFFDATES = 10
   const INITIAL_EFFDATE_OFFSET = -2
+  const working = ref<any>(null)
   const quote = ref<any>({
     descr: '',
     prosp: -1,
@@ -37,22 +38,11 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     funding: 'FI',
     med_plan: '', dru_plan: '', vis_plan: '', den_plan: ''
   }
-  // const UNUSEDQuoteOptions = ref<any>({
-  //   descr: '',
-  //   prosp: -1,
-  //   size_cd: '',
-  //   qtype: '',
-  //   effdat: B.firstOfMonth(1),
-  //   grandfathered: false,
-  //   nonstd: 'N',
-  //   rlob: '',
-  //   funding: 'FI',
-  //   mass_compliant: false,
-  //   med_plan: '', dru_plan: '', vis_plan: '', den_plan: ''
-  // })
 
   const createQuote = async ():Promise<any> => {
+    B.working.set(working, "Creating Quote...")
     const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'POST', quote.value)
+    B.working.clear(working)
     if (fetcher.resp != null) {
       const q:any = {...fetcher.resp}
       if (q.med_plan == null) q.med_plan = ''
@@ -75,7 +65,9 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     }
   }
   const deleteQuote = async (qid:number) => {
+    B.working.set(working, "Deleting Quote...")
     const fetcher = await new BQAPIFetcher().callAPI(`/quote/${qid}`, 'DELETE')
+    B.working.clear(working)
     if (fetcher.issue) {
       useToast().addToast(`Error deleting quote: ${fetcher.issue.error}`, "error")
     } else {
@@ -95,7 +87,9 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     }
   }
   const updateQuote = async (q:any, action:string):Promise<unknown> => {
+    B.working.set(working, "Updating Quote...")
     const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'PUT', q)
+    B.working.clear(working)
     if (fetcher.resp != null) {
       if (fetcher.issue) {
         useToast().addToast(`Error: ${fetcher.issue.error}`, "error")
@@ -136,7 +130,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     }
     // opts.funding = 'FI'
     // opts.mass_compliant = false
-    if (typeof q.effdat == 'string') q.effdat = B.dateFromYYYYMMDD(q.effdat)
+    // if (typeof q.effdat == 'string') q.effdat = B.dateFromYYYYMMDD(q.effdat)
 
     if (!verifyEffdatInRange(q.effdat)) {
       q.effdat = ''
@@ -189,7 +183,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   }
 
   return {
-    quote,
+    quote, working,
     rlobList,
     // newQuoteOptions,
     initializeNewQuoteOptions, initializeFromQuote,

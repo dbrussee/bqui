@@ -225,7 +225,7 @@ div.b-table-heading {
 }
 div.b-table-footer {
   width: 100%;
-  font-size: .9em;
+  /* font-size: .9em; */
   padding: .2em .3em;
   border: 1px solid black;
   border-top: 1px solid var(--separator-color);

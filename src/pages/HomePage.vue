@@ -2,17 +2,15 @@
 import { appUserStore } from '../stores/AppUserStore'
 const userStore = appUserStore()
 // import APIIssue from '@/components/APIIssue.vue'
+import { appPageStore } from '@/stores/PageStore';
+const pageStore = appPageStore()
 import SettingsPage from './SettingsPage.vue'
 import LoginPage from './LoginPage.vue'
-import { appPageStore } from '@/stores/PageStore';
 import ProspectsPage from './ProspectsPage.vue'
 import ProposalsPage from './ProposalsPage.vue';
 import MessagesPage from './MessagesPage.vue'
-const pageStore = appPageStore()
-
-// import { countersStore } from "../stores/CountersStore";
 import CensusPage from './CensusPage.vue';
-// const counters = countersStore();
+
 
 </script>
 
@@ -27,7 +25,6 @@ import CensusPage from './CensusPage.vue';
   <div v-else>
     <LoginPage />
   </div>
-  <!-- <APIIssue v-if="userStore.issue" :issue="userStore.issue"></APIIssue> -->
 </template>
 
 <style scoped></style>

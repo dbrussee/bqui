@@ -13,19 +13,6 @@ const prospStore = appProspectStore();
 import BConfirm from "@/components/B/BConfirm.vue";
 import BInfo from "@/components/B/BInfo.vue";
 
-// const errsGrid = {
-//   height: "15em",
-//   columns: [
-
-//     { id: "ts", heading: "Time", width: "5.5em", flags: "R" },
-//     { id: "method", heading: "Mth", width: "3em", flags: "C" },
-//     { id: "path", heading: "Path", width: "14em" },
-
-//     { id: "msg", heading: "Message", width: "25em" },
-//   ],
-// };
-
-
 </script>
 <template>
   <div class="page-container">
@@ -61,21 +48,6 @@ import BInfo from "@/components/B/BInfo.vue";
             </td>
             <td style="text-align: right; width: 10em">
               <div v-if="counters.apiCalls.active > 0" class="spinner"></div>{{counters.apiCalls.active > 1 ? ':' + counters.apiCalls.active : ''}}&nbsp;
-              <!-- {{ "⏸️".repeat(counters.apiCalls.active) }} -->
-              <!-- <span v-if="counters.apiCalls.error > 0">
-                <BPopup v-if="counters.apiCalls.error > 0" class="clear" pos="TL"><BIcon icon="#red solid bugs"/>
-                  <template #body>
-                    Last Errors:
-                    <BConfirm class="anchor" icon="#red solid x"
-                      @confirm="counters.lastError.length = 0; counters.apiCalls.error = 0">Clear Errors?</BConfirm>
-                    <BTable :rows="counters.lastError" :config="errsGrid">
-                      <template #column_ts="{row}">
-                        {{ row.ts.split(" ")[3] }}
-                      </template>
-                    </BTable>
-                  </template>
-                </BPopup>
-              </span> -->
             </td>
           </tr>
         </tbody>

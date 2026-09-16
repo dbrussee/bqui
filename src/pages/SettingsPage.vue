@@ -6,14 +6,27 @@ const userStore = appUserStore();
 import { appStore } from "@/stores/AppStore";
 const app = appStore()
 import { B } from "@/composables/BUtils.ts";
-import BButton from "@/components/B/BButton.vue";
+import BAnchor from "@/components/B/BAnchor.vue";
 
 const rolesConfig = {
   // height: "calc(100vh - 17em)",
   height: "7em",
+  width: "25em",
   columns: [
     { id: "role", heading: "Role", flags: "C", width: "4em"},
     { id: "descr", heading: "Description" }
+  ]
+}
+
+const rightsConfig = {
+  // height: "calc(100vh - 9em)",
+  height: "calc(100vh - 21em)",
+  width: "25em",
+  pickedRow: null as any,
+  columns: [
+    { id: "descr", heading: "Activity Description" },
+    { id: "value", heading: "Value", flags: "C", width: "5em" },
+    { id: "source", heading: "Source" },
   ]
 }
 
@@ -27,16 +40,6 @@ const decodeSource = (source:string, td:any):void => {
   } else {
     cell.innerHTML = "<i>" + source + "</i>";
   }
-}
-const rightsConfig = {
-  // height: "calc(100vh - 9em)",
-  height: "15em",
-  pickedRow: null as any,
-  columns: [
-    { id: "descr", heading: "Right Description" },
-    { id: "value", heading: "Value", flags: "C", width: "5em" },
-    { id: "source", heading: "Source" },
-  ]
 }
 const rightsRows = Object.entries(
   userStore.user.rights as Record<string, { value: unknown; source: string }>,
@@ -76,9 +79,12 @@ const agencyDetails = () => {
             <tr><th>Status:</th><td>{{ userStore.user.status }}</td></tr>
             <tr><th>Email:</th><td>{{ userStore.user.email }}</td></tr>
             <tr><th>Agency:</th><td>{{ agencyDetails() }}</td></tr>
-            <tr><th>Logged in:</th><td>{{ B.format.ts(userStore.user.lst_login) }}</td></tr>
+            <tr><th>Last Login:</th><td>{{ B.format.ts(userStore.user.lst_login) }}</td></tr>
           </tbody>
         </table>
+        <p style="color:orange"><i>Editing of roles / rights will move to the Maintenance app in time</i></p>
+      </td>
+      <td style="vertical-align: top;">
         <BTable :config="rolesConfig" :rows="userStore.user.config.roles" heading="Assigned Roles">
           <template #column_descr="{row}">
             {{
@@ -88,30 +94,25 @@ const agencyDetails = () => {
             }}
           </template>
           <template #buttons>
-            <BButton style="margin: .3em 0;" class="anchor gapright" icon="#green solid add">Add Role</BButton> |
-            <BButton disabled style="margin: .3em 0;" class="anchor gapleft" icon="#red solid x">Remove</BButton>
+            <BAnchor class="gapright" color="green" icon="solid add">Add Role</BAnchor> |
+            <BAnchor disabled icon="@red solid x_">Remove</BAnchor>
           </template>
         </BTable>
-      </td>
-      <td style="vertical-align: top;">
-        <p>
-          <BTable :config="rightsConfig" :rows="rightsRows" @pick="(row:any) => rightsConfig.pickedRow = row" heading="Action Rights">
-            <template #column_descr="{row,td}">
-              {{ getRightsDescription(row, td) }}
-            </template>
-            <template #column_source="{row, td}">
-              {{ decodeSource(row.source, td) }}
-            </template>
-            <template #buttons>
-              <BButton disabled style="margin: .3em 0;" class="anchor gapright" icon="solid edit">Set Value</BButton>
-            </template>
-          </BTable>
-        </p>
+        <BTable style="margin-top: 1.2em;" :config="rightsConfig" :rows="rightsRows" @pick="(row:any) => rightsConfig.pickedRow = row" heading="Activity Rights">
+          <template #column_descr="{row,td}">
+            {{ getRightsDescription(row, td) }}
+          </template>
+          <template #column_source="{row, td}">
+            {{ decodeSource(row.source, td) }}
+          </template>
+          <template #buttons>
+            <BAnchor disabled icon="solid edit_" class="gapright">Set Value...</BAnchor>
+          </template>
+        </BTable>
       </td>
     </tr>
   </tbody>
   </table>
-  <p style="color:orange"><i>Editing of roles / rights will move to the Maintenance app in time</i></p>
 </template>
 
 <style lang="css" scoped></style>

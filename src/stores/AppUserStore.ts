@@ -4,13 +4,15 @@ import BQAPIFetcher from "@/components/BQAPI";
 import { appMessageStore } from "./MessagesStore";
 import { appProspectStore } from "./ProspectStore";
 import { ref } from "vue";
+import { useToast } from "@/composables/useToast";
+import { B } from "@/composables/BUtils";
 
 export const appUserStore = defineStore("appUserStore", () => {
   const user = ref<any>(null);
   // const otherUser = ref<any>(null);
   const meta = ref<any>(null);
   const issue = ref<any>(null)
-  const isLoading = ref<boolean>(false)
+  const working = ref<any>(null)
 
   const apiHistory = ref<any[]>([])
 
@@ -33,9 +35,9 @@ export const appUserStore = defineStore("appUserStore", () => {
     if (uid == "") return
     logout();
     const fetcher = new BQAPIFetcher()
-    isLoading.value = true
+    B.working.set(working, "Login...")
     fetcher.callAPI(`/login/${uid}`, "POST").then(() => {
-      isLoading.value = false
+      B.working.clear(working)
       user.value = fetcher.resp;
       // console.log(JSON.stringify(user.value, null, 2))
       meta.value = fetcher.meta;
@@ -45,8 +47,9 @@ export const appUserStore = defineStore("appUserStore", () => {
     })
   }
   async function relogin() {
-    isLoading.value = true
+    B.working.set(working, "Relogin...")
     const fetcher = await new BQAPIFetcher().callAPI(`/relogin`, "POST");
+    B.working.clear(working)
     user.value = fetcher.resp;
     // console.log(JSON.stringify(user.value, null, 2))
     meta.value = fetcher.meta;
@@ -55,14 +58,14 @@ export const appUserStore = defineStore("appUserStore", () => {
     const msgStore = appMessageStore()
     msgStore.getMessages()
 
-    isLoading.value = false
-
     return user.value;
   }
   function logout() {
     if (!user.value) return;
+    B.working.set(working, "Logout...")
     user.value = null;
     const prospStore = appProspectStore()
+    B.working.clear(working)
     prospStore.prospect = null
     window.setTimeout(() => {
       new BQAPIFetcher().callAPI(`/logout`, "POST");
@@ -84,10 +87,26 @@ export const appUserStore = defineStore("appUserStore", () => {
     return right.value
   }
 
-  return { isLoading,
-    relogin, login, logout,
-    user, getUserRightValue,
+  async function clearRecents() {
+    B.working.set(working, "...")
+    const userStore = appUserStore()
+    delete userStore.user.recents
 
+    const fetcher = new BQAPIFetcher()
+    fetcher.callAPI(`/recents`, "DELETE").then(() => {
+    B.working.clear(working)
+    // meta.value = fetcher.meta
+    // issue.value = fetcher.issue
+      useToast().addToast("Cleared Recents List", "info")
+
+    })
+  }
+
+
+  return { isLoading: working,
+    relogin, login, logout,
+    user, getUserRightValue, working,
+    clearRecents,
     getAPIHistory, apiHistory,
     meta, issue
   };

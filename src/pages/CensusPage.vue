@@ -282,7 +282,7 @@ const updateCensusDirty = () => {
             </td>
             <td class="cobra">&nbsp;</td>
             <td class="dis"><BButton class="clear" v-if="dep.relation == 'CHD'" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'dis')" :icon="dep.dis ? 'square-check' : 'square'"/></td>
-            <td><BButton class="clear" @click="delDep(Number(rn), Number(dn))" icon="#maroon trash-can"/></td>
+            <td><BButton class="clear" @click="delDep(Number(rn), Number(dn))" icon="#firebrick trash-can"/></td>
           </tr>
       </template>
       </tbody>

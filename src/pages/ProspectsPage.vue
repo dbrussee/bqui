@@ -10,7 +10,7 @@ import QuoteListComponent from "@/components/QuoteListComponent.vue";
 <template>
 
   <ProspectComponent />
-  <div style="margin-top: .5em;" v-if="prospectStore.prospect">
+  <div style="margin-top: .5em;" v-if="prospectStore.prospect?.id">
     <QuoteListComponent />
   </div>
 

@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import BQAPIFetcher from '@/components/BQAPI'
 import { ref } from 'vue'
 import { useToast } from '../composables/useToast'
+import { B } from '@/composables/BUtils'
 
 export const appMessageStore = defineStore('appMessageStore', () => {
   const messages = ref<any[]>([])
@@ -19,14 +20,18 @@ export const appMessageStore = defineStore('appMessageStore', () => {
     },
   })
   const issue = ref<any>({})
+  const working = ref<any>(null)
+
 
   async function sendNewMessage(sendto:string, subject:string, message:string) {
+    B.working.set(working, "Sending...")
     const msgBody = {
       sendto: sendto,
       subject: subject,
       message: message
     }
     const fetcher = await new BQAPIFetcher().callAPI(`/message`, 'POST', msgBody)
+    B.working.clear(working)
     if (fetcher.resp != null) {
       messages.value.unshift(fetcher.resp as any)
     }
@@ -39,7 +44,9 @@ export const appMessageStore = defineStore('appMessageStore', () => {
     }
   }
   async function deleteMessage(id:number) {
+    B.working.set(working, "Deleting...")
     const fetcher = await new BQAPIFetcher().callAPI(`/message/${id}`, 'DELETE')
+    B.working.clear(working)
     messages.value.length = 0
     if (fetcher.resp != null) {
       messages.value.push(...(fetcher.resp as any[]))
@@ -49,8 +56,10 @@ export const appMessageStore = defineStore('appMessageStore', () => {
   }
 
   async function getMessages() {
+    B.working.set(working, "Getting...")
     messages.value.length = 0
     const fetcher = await new BQAPIFetcher().callAPI(`/messages`, 'GET')
+    B.working.clear(working)
     if (fetcher.resp != null) {
       messages.value.length = 0
       messages.value.push(...(fetcher.resp as any[]))
@@ -71,7 +80,9 @@ export const appMessageStore = defineStore('appMessageStore', () => {
   async function acknowledge(index:number) {
     const msg = messages.value[index]
     if (msg.readat != null) return
+    B.working.set(working, "Acknowledging...")
     const fetcher = await new BQAPIFetcher().callAPI(`/message/${msg.id}`, 'PUT')
+    B.working.clear(working)
     if (fetcher.resp != null) {
       msg.readat = fetcher.resp.readat
     }
@@ -79,5 +90,5 @@ export const appMessageStore = defineStore('appMessageStore', () => {
     issue.value = fetcher.issue
   }
 
-  return { getMessages, acknowledge, unreadCount, sendNewMessage, deleteMessage, messages, meta, issue }
+  return { getMessages, working, acknowledge, unreadCount, sendNewMessage, deleteMessage, messages, meta, issue }
 })

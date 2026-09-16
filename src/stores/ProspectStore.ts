@@ -23,21 +23,9 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     },
   });
   const issue = ref<any>({});
-  const isLoading = ref<boolean>(false)
+  const prospWorking = ref<any>(null)
+  const censusWorking = ref<any>(null)
 
-
-  async function clearRecents() {
-    const userStore = appUserStore()
-    delete userStore.user.recents
-
-    const fetcher = new BQAPIFetcher()
-    fetcher.callAPI(`/recents`, "DELETE").then(() => {
-    // meta.value = fetcher.meta
-    // issue.value = fetcher.issue
-      useToast().addToast("Cleared Recents List", "info")
-
-    })
-  }
   async function removeMeFromRecents() {
     const fetcher = new BQAPIFetcher()
     const userStore = appUserStore()
@@ -68,8 +56,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
   async function searchProspects(query:string) {
     if (query == "") return
+    B.working.set(prospWorking, "Searching...")
     searchResults.value.length = 0
     const fetcher = await new BQAPIFetcher().callAPI(`/search/prospects`, 'POST', query)
+    B.working.clear(prospWorking)
     if (fetcher.resp != null) {
       searchResults.value = [...fetcher.resp]
     }
@@ -83,11 +73,13 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     quotes.value.length = 0;
     issue.value = {}
     const fetcher = new BQAPIFetcher()
-    isLoading.value = true
+    B.working.set(prospWorking, "Loading...")
+    B.working.set(censusWorking, "Loading Prospect...")
     fetcher.callAPI(`/prospect/${pid}`, "GET").then(() => {
       // Dont wait for recents to be updated
       // Release the Prospect screen to show data
-      isLoading.value = false
+      B.working.clear(prospWorking)
+      B.working.clear(censusWorking)
       meta.value = fetcher.meta
       issue.value = fetcher.issue
       // resp is null if not found
@@ -147,10 +139,12 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
 
   async function setFavorite(pid: number, isFavorite: boolean = true) {
+    B.working.set(prospWorking, isFavorite ? "Set Bookmark..." : "Remove Bookmark...")
     const fetcher = await new BQAPIFetcher().callAPI(
       `/favorite/${pid}`,
       isFavorite ? "POST" : "DELETE",
     );
+    B.working.clear(prospWorking)
     if (fetcher.resp != null) {
       const updatedUser = fetcher.resp as any;
       const userStore = appUserStore();
@@ -190,9 +184,11 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     issue.value = fetcher.issue
   }
   async function updateProspect(data:any) {
+    B.working.set(prospWorking, "Saving...")
     const curCensus = JSON.parse(JSON.stringify(B.ifNull(prospect.value.census, []))) // Clone the current census
     delete data.census
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect?census=N`, 'PUT', data)
+    B.working.clear(prospWorking)
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp.prosp
       prospect.value.census = [...curCensus]
@@ -211,7 +207,9 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
 
   async function getCensus() {
+    B.working.set(censusWorking, "Loading...")
     const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'GET')
+    B.working.clear(censusWorking)
     if (fetcher.resp != null) {
       prospect.value.census.length = 0
       prospect.value.census = sortCensus([...fetcher.resp[0].census])
@@ -224,8 +222,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     issue.value = fetcher.issue
   }
   async function updateCensus(data:any) {
+    B.working.set(censusWorking, "Saving...")
     // console.log(JSON.stringify(data, null, 2))
     const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'PUT', data)
+    B.working.clear(censusWorking)
     if (fetcher.resp != null) {
       prospect.value.census.length = 0
       prospect.value.census = [...fetcher.resp[0].census]
@@ -241,10 +241,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
 
   return {
-    isLoading, meta, issue,
+    prospWorking, censusWorking, meta, issue,
     censusDirty,
     quotes,
     getCensus, updateCensus,
     prospect, createProspect, updateProspect, getProspect, searchProspects, searchResults,
-    clearRecents, removeMeFromRecents, setFavorite, isCurrentlyFavorite, setCensusDirty };
+    removeMeFromRecents, setFavorite, isCurrentlyFavorite, setCensusDirty };
 });

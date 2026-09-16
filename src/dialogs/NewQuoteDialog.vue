@@ -85,7 +85,11 @@ const doContinue = () => {
   </form>
   <div class="buttonbar">
     <BButton class="anchor" icon="#red solid x_" @click="emit('abort')">Cancel</BButton>&nbsp;
-    <BButton :disabled="quoteStore.quote.effdat == '' || quoteStore.quote.descr == '' || quoteStore.quote.rlob == ''" class="modern" @click="doContinue()">Select Plans...</BButton>
+    <BButton
+      :disabled="quoteStore.quote.effdat == ''
+        || quoteStore.working != null
+        || quoteStore.quote.descr == ''
+        || quoteStore.quote.rlob == ''" class="modern" @click="doContinue()">Select Plans...</BButton>
   </div>
   </dialog>
 </template>

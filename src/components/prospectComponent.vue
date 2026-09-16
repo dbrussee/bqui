@@ -72,17 +72,17 @@ const handleRefresh = () => {
     <BIcon icon="#sienna solid circle-exclamation_">{{ prospStore.issue.message }}</BIcon>
   </div>
 
-  <div v-if="prospStore.isLoading" class="prospect_info LOADING">
-    Loading...
+  <div v-if="!prospStore.prospect?.id && prospStore.prospWorking" class="prospect_info" style="text-align: center; padding-top: 3em;">
+    <div class="spinner" />Loading...
   </div>
-  <div v-if="!prospStore.issue?.severity && !prospStore.isLoading && prospStore.prospect" class="prospect_info AAA">
+  <div v-if="!prospStore.issue?.severity && !prospStore.prospWorking && prospStore.prospect" class="prospect_info AAA">
     <div style="display: flex; align-items: flex-start;">
       <table class="form-table">
         <tbody>
           <tr><td>
             <BButton v-if="prospStore.prospect" class="anchor"
               @click="prospHandler.edit()"
-              icon="solid pen_">{{ prospStore.prospect ? prospStore.prospect.name : '&nbsp;' }}</BButton>
+              icon="solid pen_">Edit Prospect Details</BButton>
           </td></tr>
           <tr><td>{{ prospStore.prospect.addr1 }}{{ prospStore.prospect.addr2 ? ', ' + prospStore.prospect.addr2 : '' }}</td></tr>
           <tr><td v-html="prospectCSZ(prospStore.prospect)"></td></tr>
@@ -108,12 +108,12 @@ const handleRefresh = () => {
                 </li>
                 <li>Effective: {{ B.format.effdat(prospStore.prospect.last_quote.effdat) }}</li>
                 <li>Status: {{ B.codeToText.quoteStatus(prospStore.prospect.last_quote.status) }}</li>
-                <li v-if="prospStore.prospect.last_quote.med_plan">MED Plan: {{ prospStore.prospect.last_quote.med_plan }}</li>
-                <li v-if="prospStore.prospect.last_quote.dru_plan">DRU Plan: {{ prospStore.prospect.last_quote.dru_plan }}</li>
-                <li v-if="prospStore.prospect.last_quote.den_plan">DEN Plan: {{ prospStore.prospect.last_quote.den_plan }}</li>
-                <li v-if="prospStore.prospect.last_quote.vis_plan">VIS Plan: {{ prospStore.prospect.last_quote.vis_plan }}</li>
-                <li>Created: {{ B.format.ts(prospStore.prospect.last_quote.crttms) }}</li>
-                <li>By: {{ prospStore.prospect.last_quote.crtusr }}</li>
+                <li v-if="prospStore.prospect.last_quote.qtype == 'MED'">MED Plan: {{ prospStore.prospect.last_quote.med_plan }}</li>
+                <li v-if="prospStore.prospect.last_quote.qtype == 'MED'">DRU Plan: {{ prospStore.prospect.last_quote.dru_plan }}</li>
+                <li v-if="prospStore.prospect.last_quote.qtype == 'DEN'">DEN Plan: {{ prospStore.prospect.last_quote.den_plan }}</li>
+                <li v-if="prospStore.prospect.last_quote.qtype == 'VIS'">VIS Plan: {{ prospStore.prospect.last_quote.vis_plan }}</li>
+                <li>Created: {{ B.format.ts(prospStore.prospect.last_quote.crttms) }} ({{ prospStore.prospect.last_quote.crtusr }})</li>
+                <li>Updated: {{ B.format.ts(prospStore.prospect.last_quote.updtms) }} ({{ prospStore.prospect.last_quote.updusr }})</li>
               </ul>
             </BInfo>
 
@@ -151,7 +151,7 @@ const handleRefresh = () => {
     </div>
     <!-- </div> -->
   </div>
-  <div v-if="!prospStore.issue?.severity && !prospStore.isLoading && !prospStore.prospect" class="prospect_info BBB">
+  <div v-if="!prospStore.issue?.severity && !prospStore.prospWorking && !prospStore.prospect" class="prospect_info BBB">
     No prospect is currently selected.
     <ul style="margin-top: .5em">
       <li>Use the [ <BIcon icon="square-plus_">New Prospect...</BIcon>] button to create a new Prospect</li>
@@ -163,7 +163,7 @@ const handleRefresh = () => {
   <dialog v-if="prospStore.prospect" :id="prospHandler.id">
     <form @submit.prevent="prospHandler.save()">
     <div class="titlebar">
-      Edit Prospect Number {{ prospStore.prospect.id }}
+      Edit Prospect #{{ prospStore.prospect.id }}
     </div>
     <table class="form-table">
       <tbody>

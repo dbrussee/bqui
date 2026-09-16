@@ -67,7 +67,7 @@ function pickRecent(pid: string) {
   recentPopover.value?.close();
 }
 function clearRecents() {
-  prospStore.clearRecents();
+  userStore.clearRecents();
   pickedRecent.value = "";
   recentPopover.value?.close();
 }
@@ -140,7 +140,7 @@ const searchHandler = ref({
 
 function getProspectName():string {
   if (!prospStore.prospect) return ""
-  if (prospStore.isLoading) return "Loading..."
+  if (prospStore.prospWorking) return "Loading..."
   if (prospStore.prospect.id) return prospStore.prospect.name
   return 'Unknown'
 }
@@ -199,7 +199,7 @@ const openHistory = () => {
                 </template>
               </BPopup>&nbsp;
               <BPopup
-                class="anchor anchor-in-header" pos="B" icon="bookmark_" ref="favesPopover">Bookmarked<template #body>
+                class="anchor anchor-in-header" pos="B" icon="bookmark_" ref="favesPopover">Bookmarks<template #body>
                   <BTable nofooter
                     heading="Bookmarked Prospects"
                     :rows="userStore.user.faves"

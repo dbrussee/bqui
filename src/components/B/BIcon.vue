@@ -7,6 +7,11 @@ defineOptions({
 })
 
 const props = defineProps({
+  working: {
+    type: String,
+    required: false,
+    default: null
+  },
   icon: {
     type: String,
     required: true,
@@ -103,7 +108,8 @@ const getStyle_fa = () => {
 </script>
 
 <template>
-  <i v-if="props.icon != ''"
+  <div v-if="working != null" class="spinner" />
+  <i v-if="props.icon != '' && working == null"
     :class="[getClasses, attrs.classes]"
     :style="[getStyle, attrs.style]"
     @click="emit('click')"
