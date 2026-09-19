@@ -87,6 +87,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         return
       }
       prospect.value = fetcher.resp.prosp
+      // console.log(JSON.stringify(prospect.value, null, 2))
       prospect.value.census = sortCensus(fetcher.resp.prosp.census)
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
         censusHash.value = hash

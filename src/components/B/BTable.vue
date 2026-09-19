@@ -152,16 +152,16 @@ const getCellRef = (rn:any, cn:any) => {
         @click.stop="handleTableClick($event)"
         @dblclick.stop="handleTableDblClick($event)"
         >
-        <thead>
-          <tr>
-            <th v-for="col in props.config.columns" :key="col.id" :style="deduceTHStyle(col)">
-              {{ col.heading }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(row,rn) in props.rows" :key="row" :class="{picked : props.config.pickedRow == row}">
-            <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
+      <thead>
+        <tr>
+          <th v-for="col in props.config.columns" :key="col.id" :style="deduceTHStyle(col)">
+            {{ col.heading }}
+          </th>
+        </tr>
+      </thead>
+      <tbody v-if="Array.isArray(props.rows)">
+        <tr v-for="(row,rn) in props.rows" :key="row" :class="{picked : props.config.pickedRow == row}">
+          <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
             ref="tdRef"
             >
             <slot v-if="row" :name="'column_' + col.id" :row="row" :rn="rn" :td="getCellRef(rn, cn)" :col="col" :cn="cn">
@@ -172,6 +172,17 @@ const getCellRef = (rn:any, cn:any) => {
         <tr v-if="(!props.rows || props.rows.length == 0) && props.config.no_rows_text && props.config.no_rows_text != ''" class="no_rows_text">
           <td :colspan="props.config.columns.length">
             {{ props.config.no_rows_text }}
+          </td>
+        </tr>
+      </tbody>
+      <tbody v-if="!Array.isArray(props.rows)">
+        <tr v-for="(value,objProp,rn) in props.rows" :key="objProp" :class="{picked : props.config.pickedRow == props.rows[objProp]}">
+          <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
+            ref="tdRef"
+            >
+            <slot v-if="objProp" :name="'column_' + col.id" :row="objProp" :rn="rn" :td="getCellRef(rn, cn)" :key="objProp" :col="col" :cn="cn">
+              {{ value }}
+            </slot>
           </td>
         </tr>
       </tbody>
@@ -273,12 +284,7 @@ tbody tr:hover {
 }
 tbody tr.picked {
   background-color: var(--table-row-picked-bg);
-  color: var(--table-row-picked-text);
-
-  /* background-color: var(--table-row-picked-bg);
-  color: var(--table-row-picked-text); */
+  /* background-color: var(--table-row-picked-bg); */
+  /* color: var(--table-row-picked-text); */
 }
-/* tbody tr.picked:hover {
-  background-color: paleturquoise;
-} */
 </style>

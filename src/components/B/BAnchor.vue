@@ -17,6 +17,16 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  gapleft: {
+    type: Boolean,
+    required: false,
+    defalt: false
+  },
+  gapright: {
+    type: Boolean,
+    required: false,
+    defalt: false
+  },
   source: {
     type: String,
     required: false,
@@ -46,8 +56,14 @@ const handleClick = () => {
 
 <template>
   <label
+      :style="{
+        display: 'inline-block',
+        margin: '.2em 0',
+        marginLeft: props.gapleft ? '.4em' : '',
+        marginRight: props.gapright ? '.4em' : '',
+        color: props.disabled ? 'var(--ui-disabled-text)' : 'var(--anchor-color)'
+      }"
       :class="{anchor: !props.disabled}"
-      :style="{color: props.disabled ? 'var(--ui-disabled-text)' : 'var(--anchor-color)'}"
       @click.prevent="handleClick()">
     <BIcon :working="props.working" :disabled="props.disabled" :icon="props.icon" :color="props.color" :class="[attrs.classes]" :style="[attrs.style]" />
     <slot/>

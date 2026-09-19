@@ -37,7 +37,7 @@ import BInfo from "@/components/B/BInfo.vue";
               </BInfo>
               &nbsp;&nbsp;
               <BConfirm v-if="userStore.user" :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''" class="anchor" style="color:white;" pos="T" @confirm="userStore.logout()">
-                Logout&hellip;
+                Logout?
                 <template #message>
                   Log out user '{{ userStore.user.id }}'
                 </template>

@@ -26,6 +26,16 @@ const props = defineProps({
     required: false,
     default: ''
   },
+  gapleft: {
+    type: Boolean,
+    required: false,
+    defalt: false
+  },
+  gapright: {
+    type: Boolean,
+    required: false,
+    defalt: false
+  },
   source: {
     type: String,
     required: false,
@@ -94,10 +104,10 @@ const doBlur = ():void => {
 </script>
 
 <template>
-  <button v-if="props.bypass" :disabled="props.disabled" :class="attrs.class" :style="attrs.style" @click="doBlur(); emit('confirm')">
+  <button v-if="props.bypass" :disabled="props.disabled" :class="attrs.class" :style="[attrs.style, {marginRight: props.gapright ? '.4em' : '', marginLeft: props.gapleft ? '.4em' : ''}]" @click="doBlur(); emit('confirm')">
     <BIcon :icon="props.icon" :source="props.source"><slot/></BIcon>
   </button>
-  <button v-if="!props.bypass" :popovertarget="popid" :disabled="props.disabled" :class="attrs.class" :style="attrs.style" @click="doBlur()">
+  <button v-if="!props.bypass" :popovertarget="popid" :disabled="props.disabled" :class="attrs.class" :style="[attrs.style, {marginRight: props.gapright ? '.4em' : '', marginLeft: props.gapleft ? '.4em' : ''}]" @click="doBlur()">
     <BIcon :icon="props.icon" :source="props.source"><slot/></BIcon>
   </button>
   <div :id="popid" popover :class="props.pos" :style="{maxWidth:props.width}">
@@ -107,7 +117,7 @@ const doBlur = ():void => {
         <BIcon icon="#red solid triangle-exclamation"><span style="color: red;">{{ props.warning }}</span></BIcon>
       </p>
     <div class="buttonbar">
-      <BButton @click="emit('confirm'); close()" icon="#lime solid check_">{{ props.confirm_btn_text }}</BButton>
+      <BButton @click="emit('confirm'); close()" class="modern" icon="#lime solid check_">{{ props.confirm_btn_text }}</BButton>
     </div>
   </div>
 </template>

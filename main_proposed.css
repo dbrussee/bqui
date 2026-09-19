@@ -2,54 +2,68 @@
   /* Required: Activates browser runtime evaluation for light and dark schemes */
   color-scheme: light dark;
 
-  /* --- BRAND DEFINITIONS (OKLCH) --- */
-  --bcbs-dark-blue: oklch(28.5% 0.082 248);     /* #003359 */
-  --bcbs-primary-blue: oklch(65.5% 0.16 230);   /* #0099CC */
-  --bcbs-light-blue: oklch(81.5% 0.09 226);     /* #8FCAE7 */
-  --bcbs-ultra-light: oklch(94.5% 0.015 240);   /* Soft canvas background */
-  --bcbs-orange: oklch(74.5% 0.16 74);          /* #E9A83B Traditional Brand Accent Orange */
+  --blue-cerulean: #00B0F1;
+  --blue-astronaut: #00465E;
+  --blue-bright: #0099CC;
+  --blue-midnight: #030A16;
+  --ice-blue: #F4F9FC;
 
-  /* --- MAIN APP BODY SYSTEM --- */
-  --body-bg: light-dark(oklch(100% 0 0), oklch(0.31 0 0));
+  --white: #FFFFFF;
+  --slate-navy: #0A192F;
+  --layered-navy: #172A45;
+
+  --steel-muted: #4A607A;
+  --gray-blue-muted: #8892B0;
+
+  --border-light: #D1E3ED;
+  --border-dark: #233554;
+
+  --blue-border-darken: #003142;
+  --border-dark: #233554;
+
+  /* UI Mapping using the modern light-dark(light, dark) syntax */
+  --brand-primary: var(--blue-cerulean);
+  --brand-secondary: light-dark(var(--blue-astronaut), var(--blue-bright));
+
+  --bg-surface-base: light-dark(var(--white), var(--slate-navy));
+  --bg-surface-muted: light-dark(var(--ice-blue), var(--layered-navy));
+
+  --text-main: light-dark(var(--blue-astronaut), var(--ice-blue));
+  --text-subtle: light-dark(var(--steel-muted), var(--gray-blue-muted));
+
+  --border-structural: light-dark(var(--border-light), var(--border-dark));
+  --shadow-ui: light-dark(rgba(0, 70, 94, 0.08), rgba(0, 0, 0, 0.4));
+
+
+
+
+  --body-bg: light-dark(oklch(100% 0 0), oklch(0.25 0 0));
   --body-text: light-dark(var(--bcbs-dark-blue), oklch(95% 0 0));
-  --body-muted: light-dark(oklch(45% 0.01 240), oklch(72% 0.02 226));
 
-  /* --- HEADER & FOOTER SYSTEM (RENAMED, NO BORDERS) --- */
-  --Xheader-surface-bg: light-dark(oklch(96.5% 0.008 240), oklch(14% 0.03 248));
-  --Xheader-surface-text: light-dark(var(--bcbs-dark-blue), oklch(98% 0 0));
-  --header-surface-bg: light-dark(var(--bcbs-dark-blue), oklch(21% 0 0));
+  --header-surface-bg: black;
   --header-surface-text: white;
-
-  /* --- SIDEBAR LAYOUT ELEMENTS --- */
-  --Xsidebar-bg: light-dark(var(--bcbs-ultra-light), var(--bcbs-dark-blue));
-  --Xsidebar-text: light-dark(var(--bcbs-dark-blue), oklch(100% 0 0));
-  --sidebar-bg: light-dark(var(--bcbs-dark-blue), oklch(21% 0 0));
+  --sidebar-bg: black;
   --sidebar-text: white;
-  --sidebar-text-muted: light-dark(oklch(42% 0.005 0), var(--bcbs-light-blue));
-  --sidebar-accent: light-dark(var(--bcbs-primary-blue), var(--bcbs-light-blue));
-
-  /* Sidebar Interactive States */
   --sidebar-hover-bg: light-dark(oklch(65.5% 0.16 230 / 15%), oklch(100% 0 0 / 8%));
   --sidebar-active-bg: light-dark(var(--bcbs-light-blue), var(--bcbs-primary-blue));
   --sidebar-active-text: light-dark(var(--bcbs-dark-blue), oklch(100% 0 0));
 
-  /* --- COMPONENT: DATA TABLES (NO STRIPES) --- */
   --table-header-bg: light-dark(var(--bcbs-dark-blue), var(--bcbs-light-blue));
   --table-header-text: light-dark(oklch(100% 0 0), var(--bcbs-dark-blue));
-  --table-footer-bg: light-dark(oklch(91% 0.02 240), oklch(25% 0.02 240));
+  --table-footer-bg: light-dark(oklch(91% 0.02 240), oklch(25% 0.07 248));
   --table-footer-text: light-dark(var(--bcbs-dark-blue), oklch(90% 0.02 240));
   --table-row-hover-bg: light-dark(oklch(96.5% 0.008 240), var(--sidebar-bg));
   --table-row-hover-text: light-dark(transparent, black);
   --table-row-picked-bg: light-dark(oklch(88% 0.04 228), var(--bcbs-primary-blue));
-  --table-row-picked-text: light-dark(black, white);
+  --table-row-picked-text: light-dark(black, black);
   --table-row-border-color: light-dark(gainsboro, darkslategray);
-  /* --- COMPONENT: FORM CONTROL FIELDS --- */
+
   --form-input-bg: light-dark(oklch(100% 0 0), oklch(20% 0.04 248));
   --form-input-text: light-dark(var(--bcbs-dark-blue), oklch(100% 0 0));
-  --form-input-placeholder: light-dark(lightpink, var(--ui-disabled-text));
+  --form-input-placeholder: light-dark(oklch(55% 0.01 240), oklch(65% 0.04 226));
   --form-input-border: light-dark(oklch(80% 0.01 240), oklch(38% 0.05 245));
   --form-input-focus-border: light-dark(var(--bcbs-primary-blue), var(--bcbs-light-blue));
-  --form-input-focus-ring: light-dark(oklch(65.5% 0.16 230 / 25%), oklch(81.5% 0.09 226 / 30%));
+  --form-input-focus-outline: light-dark(oklch(65.5% 0.16 230 / 25%), oklch(81.5% 0.09 226 / 30%));
 
   /* --- COMPONENT: BUTTONS --- */
   --btn-primary-bg: var(--bcbs-orange);
@@ -60,26 +74,28 @@
   --btn-secondary-text: oklch(0.99 0 0);
   --btn-secondary-hover-bg: oklch(0.5 0.25 250);
 
-  /* --- UNIFIED DISABLED STATES --- */
-  --Xui-disabled-bg: light-dark(oklch(94% 0 0), oklch(25% 0 0));
-  --Xui-disabled-text: light-dark(oklch(60% 0 0), oklch(50% 0 0));
   --ui-disabled-bg: transparent;
   --ui-disabled-text: grey;
-  --ui-disabled-border: light-dark(oklch(85% 0 0), oklch(30% 0 0));
-
-  /* --- Special CSS for BlueQuote --- */
   --anchor-color: oklch(62% 0.22 250); /*light-dark(royalblue, dodgerblue); */
   --form-prompt-color: light-dark(sienna, bisque);
   --separator-color: light-dark(sienna, gainsboro);
-  --info-text: light-dark(sienna, sienna);
+
+  /* --- BRAND DEFINITIONS (OKLCH) --- */
+  --bcbs-dark-blue: oklch(28.5% 0.082 248);     /* #003359 */
+  --bcbs-primary-blue: oklch(65.5% 0.16 230);   /* #0099CC */
+  --bcbs-light-blue: oklch(81.5% 0.09 226);     /* #8FCAE7 */
+  --bcbs-ultra-light: oklch(94.5% 0.015 240);   /* Soft canvas background */
+  --bcbs-orange: oklch(74.5% 0.16 74);          /* #E9A83B Traditional Brand Accent Orange */
+
+
+
+
+
+
+
 }
 
-html[data-theme="light"] {
-  color-scheme: light;
-}
-html[data-theme="dark"] {
-  color-scheme: dark;
-}
+
 
 body {
   /* font-family: system-ui, -apple-system, sans-serif; */
@@ -143,18 +159,14 @@ dialog {
   padding: .5em;
   border-radius: .3em;
   box-shadow: .3em .3em .3em gray;
-  /* background-color: silver; */
+
 }
 dialog:modal {
   margin: auto;
 }
-dialog:modal::backdrop {
-  background-color: rgba(0, 0, 0, 0.25);
-  /* backdrop-filter: blur(4px); */
-}
 div.buttonbar {
   padding-top: .5em;
-  border-top: 1px solid var(--separator-color);
+  border-top: 1px solid var(--info-color);
   /* padding-right: .5em; */
   margin-top: .3em;
   text-align: right;
@@ -280,10 +292,10 @@ button {
   }
 }
 button.gapright {
-  padding-right: .4em;
+  margin-right: .4em;
 }
 button.gapleft {
-  padding-left: .4em;
+  margin-left: .4em;
 }
 button.modern {
   /* font-size: 1em  !important; */
@@ -340,7 +352,7 @@ div.drop_menu {
 }
 
 .info {
-  color: var(--info-text);
+  color: var(--info-color);
   font-style: italic;
   padding-right: .5em;
   text-align: left;
@@ -350,7 +362,7 @@ input {
   font-size: 1em;
 
   &::placeholder {
-    color: var(--form-input-placeholder);
+    color: silver;
   }
 }
 
@@ -405,9 +417,7 @@ table.form-table {
   }
   tr td {
     vertical-align: first baseline;
-    hr {
-      color: sienna;
-    }
+
     textarea {
       height: 5em;
       width: 25em;
@@ -555,8 +565,7 @@ a, .anchor {
 }
 
 [popover]::backdrop {
-  background-color: rgba(0, 0, 0, 0.25);
-  /* backdrop-filter: blur(4px); */
+  background-color: rgba(0, 0, 0, 0.85);
 }
 
 
@@ -641,9 +650,9 @@ td.statusREADYX {
   background-color: transparent;
 }
 
-/* div[popover]::backdrop {
+div[popover]::backdrop {
   background-color: rgba(0, 0, 0, 0.15);
-} */
+}
 
 /* Responsive collapse for small screens */
 /* @media (max-width: 768px) {

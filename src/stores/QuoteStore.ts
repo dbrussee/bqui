@@ -12,7 +12,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   const working = ref<any>(null)
   const quote = ref<any>({
     descr: '',
-    prosp: -1,
+    prospect_id: -1,
     status: 'INPROG',
     size_cd: '',
     qtype: '',
@@ -24,20 +24,6 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     funding: 'FI',
     med_plan: '', dru_plan: '', vis_plan: '', den_plan: ''
   })
-  const BLANK_QUOTE = {
-    descr: '',
-    prosp: -1,
-    status: 'INPROG',
-    size_cd: '',
-    qtype: '',
-    effdat: B.firstOfMonth(1),
-    grandfathered: false,
-    mass_compliant: false,
-    nonstd: 'N',
-    rlob: '',
-    funding: 'FI',
-    med_plan: '', dru_plan: '', vis_plan: '', den_plan: ''
-  }
 
   const createQuote = async ():Promise<any> => {
     B.working.set(working, "Creating Quote...")
@@ -64,6 +50,23 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       return null
     }
   }
+  const blankQuote = (qtype:string):void => {
+    quote.value.descr = ''
+    quote.value.prospect_id = -1
+    quote.value.status = 'INPROG'
+    quote.value.size_cd = ''
+    quote.value.qtype = qtype
+    quote.value.effdat = B.firstOfMonth(1)
+    quote.value.grandfathered = false
+    quote.value.mass_compliant = false
+    quote.value.nonstd = 'N'
+    quote.value.rlob = ''
+    quote.value.funding = 'FI'
+    quote.value.med_plan = 'M_NOPLN'
+    quote.value.dru_plan = 'R_NOPLN'
+    quote.value.vis_plan = 'V_NOPLN'
+    quote.value.den_plan = 'D_NOPLN'
+  }
   const deleteQuote = async (qid:number) => {
     B.working.set(working, "Deleting Quote...")
     const fetcher = await new BQAPIFetcher().callAPI(`/quote/${qid}`, 'DELETE')
@@ -79,7 +82,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         appProspectStore().prospect.last_quote = {...newLastQuote}
         appProspectStore().prospect.last_quote_id = newLastQuote.id
       }
-      quote.value = {...BLANK_QUOTE}
+      blankQuote(quote.value.qtype)
       appProspectStore().quotes = appProspectStore().quotes.filter((q) => {
         return q.id != qid
       })
@@ -115,23 +118,19 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   }
 
 
-  const initializeNewQuoteOptions = (qtype:string = 'MED', month_offset:number | null = null) => {
+  const initializeNewQuoteOptions = (qtype:string = 'MED', pickedQuote:any = null) => {
     const prospStore = appProspectStore()
+    blankQuote(qtype)
     const q = quote.value
-    q.prosp = prospStore.prospect.id
+    q.prospect_id = prospStore.prospect.id
     q.size_cd = prospStore.prospect.size_cd
-    q.qtype = qtype
-    if (month_offset != null) q.effdat = B.firstOfMonth(month_offset)
+    if (pickedQuote != null) q.effdat = B.dateFromYYYYMMDD(pickedQuote.effdat)
     // opts.grandfathered = false
     if (rlobList[qtype] && rlobList[qtype].length == 1) {
       q.rlob = rlobList[qtype][0]
     } else {
       q.rlob = ''
     }
-    // opts.funding = 'FI'
-    // opts.mass_compliant = false
-    // if (typeof q.effdat == 'string') q.effdat = B.dateFromYYYYMMDD(q.effdat)
-
     if (!verifyEffdatInRange(q.effdat)) {
       q.effdat = ''
     }
@@ -139,8 +138,9 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   const initializeFromQuote = (q:any) => {
     const prospStore = appProspectStore()
     const opts = quote.value
-    opts.descr = q.descr
-    opts.prosp = prospStore.prospect.id
+    opts.descr = q.descr as string
+    if (!opts.descr.endsWith("- Copy")) opts.descr += ' - Copy'
+    opts.prospect_id = prospStore.prospect.id
     opts.size_cd = prospStore.prospect.size_cd
     opts.qtype = q.qtype
     opts.effdat = B.dateFromYYYYMMDD(q.effdat)

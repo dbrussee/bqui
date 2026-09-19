@@ -2,16 +2,18 @@
 <script setup lang="ts">
 import { QuoteStore } from '@/stores/QuoteStore';
 const quoteStore = QuoteStore()
+import { appUserStore } from '@/stores/AppUserStore';
+const userStore = appUserStore()
 import { B } from '@/composables/BUtils';
 import BButton from '@/components/B/BButton.vue';
 import BConfirm from '@/components/B/BConfirm.vue';
 import BIcon from '@/components/B/BIcon.vue';
 
-const emit = defineEmits(["save","delete","abort","submit"])
+const emit = defineEmits(["save","delete","abort","submit","force"])
 
 
 const props = defineProps({
-  id: { // For confirm popover
+  popupid: { // For confirm popover
     type: String,
     required: true
   },
@@ -20,8 +22,8 @@ const props = defineProps({
 </script>
 
 <template>
-  <dialog :id="props.id">
-  <div class="titlebar">Edit {{ B.codeToText.nonstd(quoteStore.quote.nonstd) }} {{ B.codeToText.qtype(quoteStore.quote.qtype)}} Quote #{{ quoteStore.quote.id }}</div>
+  <dialog :id="props.popupid">
+  <div class="titlebar">Edit {{ B.codeToText.qtype(quoteStore.quote.qtype)}} Quote #{{ quoteStore.quote.id }}</div>
   <form @submit.stop.prevent="emit('save')">
     <table class="form-table">
       <tbody>
@@ -34,7 +36,10 @@ const props = defineProps({
 
         <tr><th>Product:</th><td colspan="3" class="info">{{ B.codeToText.rlob(quoteStore.quote.rlob) }} ({{ quoteStore.quote.rlob }})</td></tr>
         <tr><th>Effective:</th><td class="info">{{ B.format.effdat(quoteStore.quote.effdat) }}</td>
-            <th>Status:</th><td class="info"><BIcon :icon="B.statusIcon(quoteStore.quote.status)"/>{{ B.codeToText.quoteStatus(quoteStore.quote.status) }}</td></tr>
+            <th>Status:</th><td class="info">
+              <BIcon :icon="B.statusIcon(quoteStore.quote.status)"/>
+              {{ B.codeToText.quoteStatus(quoteStore.quote.status) }}
+            </td></tr>
         <tr v-if="quoteStore.quote.status != 'INPROG'">
             <th>Design:</th><td class="info">{{ B.codeToText.nonstd(quoteStore.quote.nonstd) }}</td>
             <th>Funding:</th><td class="info">{{ B.codeToText.funding(quoteStore.quote.funding) }}</td></tr>
@@ -57,6 +62,11 @@ const props = defineProps({
         <tr v-if="quoteStore.quote.status != 'INPROG' &&  quoteStore.quote.qtype == 'DEN'">
           <th>Dental Plan:</th>
           <td colspan="3" class="info">{{ quoteStore.quote.den_plan}}</td>
+        </tr>
+
+        <tr>
+          <th :style="{color:quoteStore.quote.descr == '' ? 'red' : ''}">Name:</th>
+          <td colspan="3"><input v-model="quoteStore.quote.descr" style="width: 25em;" autofocus required></td>
         </tr>
 
         <!-- In Progress editable plan coded-->
@@ -90,19 +100,11 @@ const props = defineProps({
           <th :style="{color:!quoteStore.quote.vis_plan ? 'red' : ''}">Vision Plan:</th>
           <td colspan="3"><input v-model="quoteStore.quote.vis_plan" style="width: 7em;" maxlength="7" required></td>
         </tr>
-
-        <tr v-if="quoteStore.quote.status != 'INPROG'"><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
-
-        <tr>
-          <th :style="{color:quoteStore.quote.descr == '' ? 'red' : ''}">Name:</th>
-          <td colspan="3"><input v-model="quoteStore.quote.descr" style="width: 25em;" autofocus required></td>
-        </tr>
-
       </tbody>
     </table>
   </form>
   <div class="buttonbar">
-    <BConfirm v-if="quoteStore.quote.status == 'INPROG'" style="float: left;" class="anchor gapright" @confirm="emit('delete')"
+    <BConfirm v-if="quoteStore.quote.status == 'INPROG'" style="float: left;" class="anchor" gapright @confirm="emit('delete')"
       pos="T2R"
       tabindex="-1"
       heading="Permanently Delete Quote"
@@ -114,6 +116,16 @@ const props = defineProps({
         <p>Are you sure you want to delete this quote?</p>
       </template>
     </BConfirm>
+    <BConfirm v-if="userStore.getUserRightValue('FORCE_INPROG') && quoteStore.quote.status != 'INPROG'" class="anchor" gapright icon="solid backward-step" pos="T" @confirm="emit('force')">
+      <template #message>
+        <div class="titlebar">Force quote {{quoteStore.quote?.id}} back to 'In Progress'?</div>
+        <b style="color: red;">This is not something typically done.</b> Please be sure you
+        are clear that any documents seen by a prospect and possibly rated
+        may no longer be valid if you change plans or any other features
+        of the quote.
+      </template>
+    </BConfirm>
+
     <BButton class="anchor" icon="#red solid x_" @click="emit('abort')">Cancel</BButton>&nbsp;
     <BButton
       :class="quoteStore.quote.status == 'INPROG' ? 'anchor' : 'modern'"
@@ -126,7 +138,7 @@ const props = defineProps({
       heading="Submit Standard Quote"
       pos="T"
       :disabled="quoteStore.working != null"
-      @confirm="emit('submit')">Submit
+      @confirm="emit('submit')">Submit?
       <template #message>
         After submitting this quote, you will no longer be able to edit anything other than the name.
       </template>

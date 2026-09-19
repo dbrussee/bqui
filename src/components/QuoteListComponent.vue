@@ -36,8 +36,7 @@ const quoteHandler = ref({
   start: (qtype:string) => {
     // quoteStore.quote = {}
     // if (qtype != quoteHandler.value.lastQtype)
-    quoteStore.initializeNewQuoteOptions(qtype)
-    quoteHandler.value.lastQtype = qtype
+    quoteStore.initializeNewQuoteOptions(qtype, cfgQuotesList.value.pickedRow)
     const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
     popup?.showModal()
   },
@@ -66,11 +65,21 @@ const quoteHandler = ref({
     const popup2 = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
     popup2?.showModal()
   },
+  revertToINPROG: () => {
+    quoteStore.quote = {...cfgQuotesList.value.pickedRow} // copy of data
+    quoteStore.quote.status = 'INPROG'
+    quoteStore.updateQuote(quoteStore.quote, "set back to In Progress").then((updatedQuote:any) => {
+      if (updatedQuote) {
+        // prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+        cfgQuotesList.value.pickedRow.status = 'INPROG'
+      }
+    })
+  },
   save: () => {
     quoteStore.updateQuote(quoteStore.quote, "updated").then((updatedQuote:any) => {
       if (updatedQuote) {
         prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
-        cfgQuotesList.value.pickedRow = {...updatedQuote}
+        cfgQuotesList.value.pickedRow = null
       }
     })
     const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
@@ -84,7 +93,7 @@ const quoteHandler = ref({
     quoteStore.updateQuote(quoteStore.quote, toastMessage).then((updatedQuote:any) => {
       if (updatedQuote) {
         prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
-        cfgQuotesList.value.pickedRow = {...updatedQuote}
+        cfgQuotesList.value.pickedRow = null
       }
     })
     const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
@@ -148,7 +157,7 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
       >{{ B.codeToText.nonstd(row.nonstd) }}</span>
     </template>
     <template #buttons>
-      <BPopup class="action gapright" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
+      <BPopup class="action" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
         <template #body>
           <p><BButton @click="quoteHandler.start('MED')" class="anchor" icon="solid stethoscope_">Medical &amp; Drug</BButton></p>
           <p><BButton @click="quoteHandler.start('DEN')" class="anchor" icon="solid tooth_">Dental</BButton></p>
@@ -159,18 +168,19 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
         </template>
       </BPopup>
       <!-- <BConfirm class="anchor gapright" @confirm="quoteStore.deleteQuote(cfgQuotesList.pickedRow.id)" :disabled="!cfgQuotesList.pickedRow || cfgQuotesList.pickedRow.status != 'INPROG'" pos="T2R" icon="trash-can_">Delete...</BConfirm> -->
-      <BButton class="anchor anchor-in-table-footer gapright" style="color: white" :disabled="!cfgQuotesList.pickedRow" icon="_edit" @click="quoteHandler.edit()">Edit...</BButton>
-      <BButton class="anchor anchor-in-table-footer gapright" style="color: white" :disabled="!cfgQuotesList.pickedRow" icon="_file-pdf">Generate</BButton>
+      <BButton class="anchor anchor-in-table-footer" gapleft gapright style="color: white" :disabled="!cfgQuotesList.pickedRow" icon="edit" @click="quoteHandler.edit()">Edit...</BButton>
+      <BButton class="anchor anchor-in-table-footer" style="color: white" disabled icon="file-pdf">Generate</BButton>
     </template>
   </BTable>
-  <NewQuoteDialog :id="quoteHandler.startPopid"
+  <NewQuoteDialog :popupid="quoteHandler.startPopid"
     @abort="quoteHandler.abort()"
     @continue="(opts) => quoteHandler.step2()"
-    :qtype="quoteHandler.lastQtype"></NewQuoteDialog>
-  <EditQuoteDialog :id="quoteHandler.editPopid"
+    :qtype="quoteStore.quote.qtype"></NewQuoteDialog>
+  <EditQuoteDialog :popupid="quoteHandler.editPopid"
     @abort="quoteHandler.abort()"
     @delete="quoteHandler.delete()"
     @submit="quoteHandler.submit()"
+    @force="quoteHandler.revertToINPROG()"
     @save="() => quoteHandler.save()"></EditQuoteDialog>
 </template>
 

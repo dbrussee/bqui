@@ -17,6 +17,7 @@ const prospHandler = ref({
   id: useId(),
   temp: {} as any,
   edit: () => {
+    console.log(JSON.stringify(prospStore.prospect, null, 2))
     prospHandler.value.temp = {...prospStore.prospect}
     B.deleteProperties(prospHandler.value.temp)
     const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
@@ -118,7 +119,7 @@ const handleRefresh = () => {
             </BInfo>
 
           </td></tr>
-          <tr><th>Enrolled:</th><td>{{ B.ifNull(B.format.ts(prospStore.prospect.enolled_ts), 'Not enrolled') }}</td></tr>
+          <tr><th>Enrolled:</th><td>{{ B.ifNull(B.format.ts(prospStore.prospect.enrolled_ts), "Not Enrolled") }}</td></tr>
         </tbody>
       </table>
       <div style="position: absolute; right: 0;">
@@ -130,7 +131,7 @@ const handleRefresh = () => {
             </BPopupMenuItem>
             <BPopupMenuItem icon="solid eject">
               <BConfirm @confirm="removeMeFromRecents()" width="30em" pos="L2B" class="anchor" heading="Forget Prospect">
-                Forget Recent&hellip;
+                Forget Recent?
                 <template #message>
                   <ul>
                     <li class="info">Remove this prospect from your Recents list</li>
@@ -160,6 +161,7 @@ const handleRefresh = () => {
       <li>Use the [ <BIcon icon="solid magnifying-glass_">Search...</BIcon> ] Search button above to find prospects by ID or by name</li>
     </ul>
   </div>
+  <Teleport to="body">
   <dialog v-if="prospStore.prospect" :id="prospHandler.id">
     <form @submit.prevent="prospHandler.save()">
     <div class="titlebar">
@@ -198,4 +200,5 @@ const handleRefresh = () => {
     </table>
     </form>
   </dialog>
+  </Teleport>
 </template>

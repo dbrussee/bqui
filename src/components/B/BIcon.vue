@@ -74,7 +74,9 @@ const getClasses_fa = () => {
       part = part.substring(0, part.length - 1)
     }
     if (part.startsWith("#")) {
-      if (!props.disabled) iconcolor.value = part.substring(1)
+      let clr = part.substring(1) as string
+      if (clr.startsWith("--")) clr = `var(${clr})`
+      if (!props.disabled) iconcolor.value = clr
     } else if (part == "regular") {
       vers = " fa-regular"
     } else if (part == "solid") {

@@ -35,12 +35,13 @@ const cfgCensus = ref({
     { id: "lstnam", heading: " Last Name" },
     { id: "fstnam", heading: " First Name" },
     { id: "midnam", heading: "Mid", width: "2em", flags: "C" },
+    { id: "sufnam", heading: "Suff", width: "3em" },
     { id: "dob", heading: "DOB", width: "6em", flags: "C" },
     { id: "sex", heading: "Sex", width: "2em", flags: "C" },
     { id: "plans", heading:"Med Den Vis", width: "6.5em", flags: "C" },
     { id: "cobra", heading: "COBRA", width: "4em", flags: "C" },
     { id: "dis", heading: "Dis", width: "2em", flags: "C" },
-    { id:"acts", heading: "", width: "4.5em" }
+    { id: "acts", heading: "", width: "4.5em" }
   ],
 })
 
@@ -76,7 +77,7 @@ const setFocus = (subnum:number, depnum:number):void => {
 }
 
 const newSub = ():void => {
-  const sub = {relation:"SUB", fstnam:'', lstnam:'', midnam:'',
+  const sub = {relation:"SUB", fstnam:'', lstnam:'', midnam:'', sufnam:'',
     sex:'M', dob:'', med:false, den:false, vis:false, cobra: false, deps:[]
   } as any
   prospStore.prospect.census.unshift(sub)
@@ -96,7 +97,7 @@ const newDep = (subnum:number):void => {
   } else {
     sex = sub.sex == 'M' ? 'F' : 'M'
   }
-  const data = {relation:relation, fstnam:'', lstnam:sub.lstnam, midnam:'',
+  const data = {relation:relation, fstnam:'', lstnam:sub.lstnam, midnam:'', sufnam:'',
     sex:sex, dob:'', med:sub.med, den:sub.den, vis:sub.vis, cobra: false
   } as any
   sub.deps.push(data)
@@ -246,6 +247,7 @@ const updateCensusDirty = () => {
             <td><input v-model="sub.lstnam" class="lstnam" placeholder="Last name"/></td>
             <td><input v-model="sub.fstnam" class="fstnam" placeholder="First name"/></td>
             <td><input maxlength="1" v-model="sub.midnam" class="midnam"/></td>
+            <td><input maxlength="3" v-model="sub.suffnam" class="sufnam"/></td>
             <td><input v-model="sub.dob" class="dob" placeholder="m/d/yyyy"/></td>
             <td style="text-align: center;"><button @click="(e:Event) => setSex(Number(rn), -1)" class="clear sex mono">{{ sub.sex }}</button></td>
             <td style="text-align: center;">
@@ -270,15 +272,16 @@ const updateCensusDirty = () => {
             <td><input v-model="dep.lstnam" class="lstnam dep" placeholder="Last name"/></td>
             <td><input v-model="dep.fstnam" class="fstnam dep" placeholder="First name"/></td>
             <td><input maxlength="1" v-model="dep.midnam" class="midnam"/></td>
+            <td><input maxlength="3" v-model="dep.suffnam" class="sufnam"/></td>
             <td><input v-model="dep.dob" class="dob" placeholder="m/d/yyyy"/></td>
             <td style="text-align: center;"><BButton class="clear sex" @click="(e:Event) => setSex(Number(rn), Number(dn))">{{ dep.sex }}</BButton></td>
             <td style="text-align: center;">
               <BButton class="clear" v-if="sub.med" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'med')" :icon="dep.med ? 'square-check' : 'square'"/>
-              <BButton class="clear" v-else icon="#gainsboro solid ban"/>
+              <BButton disabled class="clear" v-else icon="solid ban"/>
               <BButton class="clear gapleft gapright" v-if="sub.den" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'den')" :icon="dep.den ? 'square-check' : 'square'"/>
-              <BButton class="clear gapleft gapright" v-else icon="#gainsboro solid ban"/>
+              <BButton disabled class="clear gapleft gapright" v-else icon="solid ban"/>
               <BButton class="clear" v-if="sub.vis" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'vis')" :icon="dep.vis ? 'square-check' : 'square'"/>
-              <BButton class="clear" v-else icon="#gainsboro solid ban"/>
+              <BButton disabled class="clear" v-else icon="solid ban"/>
             </td>
             <td class="cobra">&nbsp;</td>
             <td class="dis"><BButton class="clear" v-if="dep.relation == 'CHD'" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'dis')" :icon="dep.dis ? 'square-check' : 'square'"/></td>
@@ -306,7 +309,7 @@ input {
   font-size: 1em;
 
   &::placeholder {
-    color: lightpink;
+    color: var(--form-input-placeholder);
   }
 }
 input.fstnam,
@@ -316,6 +319,9 @@ input.lstnam {
 input.midnam {
   width: 2em;
   text-align: center;
+}
+input.sufnam {
+  width: 2em;
 }
 input.dep {
   width: 7.5em;

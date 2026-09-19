@@ -54,7 +54,7 @@ const loginpwd = ref("");
   padding: 1em;
 }
 .warning {
-  color: maroon;
+  color: var(--form-prompt-color);
 }
 .loading {
   font-size: 1.5em;

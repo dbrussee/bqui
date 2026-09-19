@@ -3,6 +3,7 @@ import type { Ref } from "vue";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const B = {
   dateFromYYYYMMDD: (yyyymmdd:string):Date => {
+    if (typeof yyyymmdd != 'string') return yyyymmdd
     const splitter = yyyymmdd.charAt(4)
     const parts:string[] = yyyymmdd.split(splitter)
     if (parts.length < 3) return new Date(yyyymmdd)
@@ -219,7 +220,7 @@ export const B = {
     if ('RATEREQ,PENDING'.indexOf(statusCode) >= 0) return "#sienna solid pause_"
     if ('READY'.indexOf(statusCode) >= 0) return "#forestgreen solid check_"
     if ('ENROLLED'.indexOf(statusCode) >= 0) return "#forestgreen solid thumbs-up_"
-    if ('EXPIRED'.indexOf(statusCode) >= 0) return "#maroon solid x_"
+    if ('EXPIRED'.indexOf(statusCode) >= 0) return "#red solid x_"
     return "circle_"
   },
 

@@ -39,6 +39,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     fetcher.callAPI(`/login/${uid}`, "POST").then(() => {
       B.working.clear(working)
       user.value = fetcher.resp;
+      applyTheme()
       // console.log(JSON.stringify(user.value, null, 2))
       meta.value = fetcher.meta;
       issue.value = fetcher.issue;
@@ -51,15 +52,32 @@ export const appUserStore = defineStore("appUserStore", () => {
     const fetcher = await new BQAPIFetcher().callAPI(`/relogin`, "POST");
     B.working.clear(working)
     user.value = fetcher.resp;
+    applyTheme()
     // console.log(JSON.stringify(user.value, null, 2))
     meta.value = fetcher.meta;
     issue.value = fetcher.issue;
 
     const msgStore = appMessageStore()
     msgStore.getMessages()
-
     return user.value;
   }
+
+  function applyTheme(value:string | null = null) {
+    const rootElement = document.documentElement
+    if (value) {
+      rootElement.setAttribute('data-theme', value.toLowerCase())
+      return
+    }
+    if (user.value == null) {
+      // rootElement.removeAttribute('data-theme')
+    } else if (user.value.config.settings?.theme) {
+      const code = user.value.config.settings.theme.toLowerCase()
+      rootElement.setAttribute('data-theme', code)
+      localStorage.setItem('bq-ui-theme', code)
+    }
+  }
+
+
   function logout() {
     if (!user.value) return;
     B.working.set(working, "Logout...")
@@ -79,12 +97,75 @@ export const appUserStore = defineStore("appUserStore", () => {
     }
   }
 
+  async function addRole(code:string) {
+    B.working.set(working, "...")
+
+    const fetcher = await new BQAPIFetcher().callAPI(`/user/role/${code}`, "POST")
+    B.working.clear(working)
+    if (fetcher.resp != null) {
+      user.value = fetcher.resp;
+      useToast().addToast(`Added role ${code}`, "info")
+    } else {
+      useToast().addToast(fetcher.issue, "error")
+    }
+  }
+  async function deleteRole(code:string) {
+    B.working.set(working, "...")
+
+    const fetcher = await new BQAPIFetcher().callAPI(`/user/role/${code}`, "DELETE")
+    B.working.clear(working)
+    if (fetcher.resp != null) {
+      user.value = fetcher.resp;
+      useToast().addToast(`Removed role ${code}`, "info")
+    } else {
+      useToast().addToast(fetcher.issue, "error")
+    }
+  }
+
+  const saveTheme = async (code:string) => {
+    B.working.set(working, "...")
+
+    const fetcher = await new BQAPIFetcher().callAPI(`/user/config/theme/${code}`, "PUT")
+    B.working.clear(working)
+    if (fetcher.resp != null) {
+      user.value = fetcher.resp;
+      applyTheme()
+      localStorage.setItem('bq-ui-theme', code)
+    }
+  }
+
+
   const getUserRightValue = (code:string):string => {
     if (!user.value) return "ERROR"
     if (!user.value.rights) return "ERROR"
     const right = user.value.rights[code.trim().toUpperCase()]
     if (!right) return "ERROR"
     return right.value
+  }
+
+  async function setUserRightValue(code:string, value:string) {
+    B.working.set(working, "...")
+
+    const fetcher = await new BQAPIFetcher().callAPI(`/user/right/${code}/${value}`, "PUT")
+    B.working.clear(working)
+    if (fetcher.resp != null) {
+      user.value = fetcher.resp;
+      useToast().addToast(`Set right override for ${code} to ${value}`, "info")
+    } else {
+      useToast().addToast(fetcher.issue, "error")
+    }
+  }
+  async function deleteUserRight(code:string) {
+    B.working.set(working, "...")
+
+    const fetcher = await new BQAPIFetcher().callAPI(`/user/right/${code}`, "DELETE")
+    B.working.clear(working)
+    if (fetcher.resp != null) {
+      user.value = fetcher.resp;
+      useToast().addToast(`Removed override for ${code}`, "info")
+    } else {
+      useToast().addToast(fetcher.issue, "error")
+    }
   }
 
   async function clearRecents() {
@@ -104,8 +185,9 @@ export const appUserStore = defineStore("appUserStore", () => {
 
 
   return { isLoading: working,
-    relogin, login, logout,
-    user, getUserRightValue, working,
+    relogin, login, logout, saveTheme, applyTheme,
+    addRole, deleteRole,
+    user, getUserRightValue, setUserRightValue, deleteUserRight, working,
     clearRecents,
     getAPIHistory, apiHistory,
     meta, issue

@@ -140,7 +140,7 @@ const searchHandler = ref({
 
 function getProspectName():string {
   if (!prospStore.prospect) return ""
-  if (prospStore.prospWorking) return "Loading..."
+  if (!prospStore.prospect.id) return "Loading..."
   if (prospStore.prospect.id) return prospStore.prospect.name
   return 'Unknown'
 }

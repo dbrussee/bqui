@@ -10,7 +10,7 @@ const emit = defineEmits(["continue","abort"])
 const effdatRef = ref()
 
 const props = defineProps({
-  id: { // For confirm popover
+  popupid: { // For confirm popover
     type: String,
     required: true
   },
@@ -33,7 +33,7 @@ const doContinue = () => {
 </script>
 
 <template>
-  <dialog :id="id">
+  <dialog :id="popupid">
   <div class="titlebar">New {{ B.codeToText.qtype(props.qtype) }} Quote</div>
   <form @submit.stop.prevent="doContinue()">
   <table class="form-table">

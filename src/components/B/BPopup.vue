@@ -64,7 +64,7 @@ function isOpen():boolean {
 }
 
 defineExpose({
-  open, close, isOpen
+  open, close, isOpen, popid
 })
 
 
