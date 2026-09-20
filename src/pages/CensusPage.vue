@@ -228,7 +228,7 @@ const updateCensusDirty = () => {
       margin: 'auto 0',
       position: 'relative',
       height: cfgCensus.height,
-      'overflow-y': 'scroll',
+      'overflow-y': 'auto',
     }"
   >
     <form @submit.prevent="" @keyup="updateCensusDirty()">

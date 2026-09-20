@@ -218,9 +218,9 @@ export const B = {
   statusIcon: (statusCode:string) => {
     if ('INPROG'.indexOf(statusCode) >= 0) return "#red hand_"
     if ('RATEREQ,PENDING'.indexOf(statusCode) >= 0) return "#sienna solid pause_"
-    if ('READY'.indexOf(statusCode) >= 0) return "#forestgreen solid check_"
+    if ('READY'.indexOf(statusCode) >= 0) return "solid check_"
     if ('ENROLLED'.indexOf(statusCode) >= 0) return "#forestgreen solid thumbs-up_"
-    if ('EXPIRED'.indexOf(statusCode) >= 0) return "#red solid x_"
+    if ('EXPIRED'.indexOf(statusCode) >= 0) return "#red rectangle-xmark_"
     return "circle_"
   },
 

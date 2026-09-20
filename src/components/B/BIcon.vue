@@ -107,6 +107,9 @@ const getStyle_fa = () => {
   return stuff
 }
 
+const handleClick = () => {
+  if (!props.disabled) emit('click')
+}
 </script>
 
 <template>
@@ -114,7 +117,7 @@ const getStyle_fa = () => {
   <i v-if="props.icon != '' && working == null"
     :class="[getClasses, attrs.classes]"
     :style="[getStyle, attrs.style]"
-    @click="emit('click')"
+    @click="handleClick()"
   /><slot/>
 </template>
 

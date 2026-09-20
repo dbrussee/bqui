@@ -10,6 +10,7 @@ import BInfo from "./B/BInfo.vue";
 import BPopup from "./B/BPopup.vue";
 import BConfirm from "./B/BConfirm.vue";
 import BPopupMenuItem from "./B/BPopupMenuItem.vue";
+import ClipboardIcon from "./ClipboardIcon.vue";
 
 const menuPopup = ref()
 
@@ -93,7 +94,9 @@ const handleRefresh = () => {
         <tbody>
           <tr><td>{{prospStore.prospect.contact}}</td></tr>
           <tr><td><a v-if="prospStore.prospect.email" style="cursor: pointer"
-            :href="'mailto:' + encodeURI(`${prospStore.prospect.contact} <${prospStore.prospect.email}>`)">{{prospStore.prospect.email}}</a></td></tr>
+            :href="'mailto:' + encodeURI(`${prospStore.prospect.contact} <${prospStore.prospect.email}>`)">{{prospStore.prospect.email}}</a>
+            <ClipboardIcon :cliptext="prospStore.prospect.email"/>
+          </td></tr>
           <tr><td>{{prospStore.prospect.phone}}</td></tr>
         </tbody>
       </table>

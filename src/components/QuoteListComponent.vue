@@ -29,6 +29,7 @@ const quoteHandler = ref({
   startFromQuote: () => {
     // quoteStore.quote = {}
     const q = cfgQuotesList.value.pickedRow
+    cfgQuotesList.value.pickedRow = null
     quoteStore.initializeFromQuote(q)
     const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
     popup?.showModal()
@@ -66,10 +67,13 @@ const quoteHandler = ref({
     popup2?.showModal()
   },
   revertToINPROG: () => {
+    const tempDescr = quoteStore.quote.descr
     quoteStore.quote = {...cfgQuotesList.value.pickedRow} // copy of data
     quoteStore.quote.status = 'INPROG'
     quoteStore.updateQuote(quoteStore.quote, "set back to In Progress").then((updatedQuote:any) => {
       if (updatedQuote) {
+        // cfgQuotesList.value.pickedRow.descr = tempDescr
+        quoteStore.quote.descr = tempDescr
         // prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
         cfgQuotesList.value.pickedRow.status = 'INPROG'
       }
@@ -88,8 +92,20 @@ const quoteHandler = ref({
     popup2?.close()
   },
   submit: () => {
-    quoteStore.quote.status = quoteStore.quote.nonstd == 'N' ? 'READY' : 'RATEREQ'
-    const toastMessage = quoteStore.quote.status == 'READY' ? 'submitted' : ' rates requested'
+    let toastMessage = 'unchanged'
+    switch(quoteStore.quote.nonstd) {
+      case 'N':
+        quoteStore.quote.status = 'READY'
+        toastMessage = 'submitted'
+        break
+      case 'Y':
+        quoteStore.quote.status = 'RATEREQ'
+        toastMessage = 'rates requested'
+        break
+      case 'C':
+        quoteStore.quote.status = 'PENDING'
+        toastMessage = 'pending approval'
+    }
     quoteStore.updateQuote(quoteStore.quote, toastMessage).then((updatedQuote:any) => {
       if (updatedQuote) {
         prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}

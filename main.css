@@ -11,7 +11,7 @@
 
   /* --- MAIN APP BODY SYSTEM --- */
   --body-bg: light-dark(oklch(100% 0 0), oklch(0.31 0 0));
-  --body-text: light-dark(var(--bcbs-dark-blue), oklch(95% 0 0));
+  --body-text: light-dark(var(--bcbs-dark-blue), white);
   --body-muted: light-dark(oklch(45% 0.01 240), oklch(72% 0.02 226));
 
   /* --- HEADER & FOOTER SYSTEM (RENAMED, NO BORDERS) --- */
@@ -64,12 +64,12 @@
   --Xui-disabled-bg: light-dark(oklch(94% 0 0), oklch(25% 0 0));
   --Xui-disabled-text: light-dark(oklch(60% 0 0), oklch(50% 0 0));
   --ui-disabled-bg: transparent;
-  --ui-disabled-text: grey;
+  --ui-disabled-text: light-dark(silver, grey);
   --ui-disabled-border: light-dark(oklch(85% 0 0), oklch(30% 0 0));
 
   /* --- Special CSS for BlueQuote --- */
   --anchor-color: oklch(62% 0.22 250); /*light-dark(royalblue, dodgerblue); */
-  --form-prompt-color: light-dark(sienna, bisque);
+  --form-prompt-color: light-dark(lch(44% 46 50), bisque);
   --separator-color: light-dark(sienna, gainsboro);
   --info-text: light-dark(sienna, sienna);
 }

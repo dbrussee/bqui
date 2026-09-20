@@ -11,6 +11,7 @@ import { ref, useId, computed } from "vue";
 import BButton from "@/components/B/BButton.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
 import { useDark } from '@vueuse/core';
+import ClipboardIcon from "@/components/ClipboardIcon.vue";
 const isDark = useDark({
   storageKey: null // 🚫 Disables reading and writing to localStorage
 })
@@ -108,7 +109,7 @@ const decodeValue = (configRight:any):string => {
 
 
 const agencyDetails = () => {
-  if (!userStore.user.agency_id || userStore.user.agency_id == -1) return "<span style='color: var(--ui-disabled-text)'>No agency assigned</span>"
+  if (!userStore.user.agency_id || userStore.user.agency_id == -1) return "<span style='color: var(--ui-disabled-text)'>None</span>"
   if (userStore.user.agency_descr == null) return `<span style='color: red'>Unknown agency (${userStore.user.agency_id})</span>`
   return `${userStore.user.agency_descr}`
 }
@@ -154,7 +155,7 @@ const getUserTheme = computed(():string => {
   const config = userStore.user.config
   if ("settings" in config) {
     if ("theme" in config.settings) {
-      console.log("User Theme:", config.settings.theme)
+      // console.log("User Theme:", config.settings.theme)
       return config.settings.theme.toLowerCase()
     }
   }
@@ -175,7 +176,11 @@ const saveTheme = (value:string):void => {
             <tr><th>User ID:</th><td>{{ userStore.user.id }}</td></tr>
             <tr><th>Name:</th><td>{{ userStore.user.lstnam }}, {{ userStore.user.fstnam }}</td></tr>
             <tr><th>Status:</th><td>{{ userStore.user.status }}</td></tr>
-            <tr><th>Email:</th><td>{{ userStore.user.email }}</td></tr>
+            <tr><th>Email:</th><td>
+              <a v-if="userStore.user.email != ''" style="cursor: pointer"
+                :href="'mailto:' + encodeURI(`${userStore.user.fstnam} ${userStore.user.lstnam} <${userStore.user.email}>`)">{{userStore.user.email}}</a>
+                <ClipboardIcon :cliptext="userStore.user.email"/>
+            </td></tr>
             <tr><th>Agency:</th><td :innerHTML="agencyDetails()"/></tr>
             <tr><th>Last Login:</th><td>{{ B.format.ts(userStore.user.lst_login) }}</td></tr>
             <tr><td colspan="2"><div class="buttonbar"/></td></tr>

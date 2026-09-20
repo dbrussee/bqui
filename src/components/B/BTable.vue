@@ -76,34 +76,30 @@ const getCellValueInSlot = computed(() => {
   }
 })
 
-const handleTableClick = (event:MouseEvent) => {
+const handleTableHeadClick = (event:MouseEvent) => {
+  event.stopImmediatePropagation()
   const el = event.target as HTMLElement // could be anything
-  let celltype = ''
-  let cell = el.closest('td') as HTMLTableCellElement | null
-  if (cell) {
-    celltype = 'td'
-  } else {
-    cell = el.closest('th') as HTMLTableCellElement
-    if (cell) {
-      celltype = 'th'
-    }
-  }
-  if (celltype == '') return
+  const cell = el.closest('th') as HTMLTableCellElement | null
+  if (!cell) return
   const col = props.config.columns[cell.cellIndex]
-  if (celltype == 'th') {
-    emit("hdrclick", col)
-  } else {
-    const tr = cell.closest('tr') as HTMLTableRowElement
-    const row = props.rows[tr.rowIndex - 1] // Skip thead row
-    if (props.togglePick) {
-      if (row == props.config.pickedRow) {
-        emit('pick', null)
-      } else {
-        emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
-      }
+  emit("hdrclick", col)
+}
+const handleTableBodyClick = (event:MouseEvent) => {
+  event.stopImmediatePropagation()
+  const el = event.target as HTMLElement // could be anything
+  const cell = el.closest('td') as HTMLTableCellElement | null
+  if (!cell) return
+  const col = props.config.columns[cell.cellIndex]
+  const tr = cell.closest('tr') as HTMLTableRowElement
+  const row = props.rows[tr.rowIndex - 1] // Skip thead row
+  if (props.togglePick) {
+    if (row == props.config.pickedRow) {
+      emit('pick', null)
     } else {
-        emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
+      emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
     }
+  } else {
+      emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
   }
 }
 const handleTableDblClick = (event:MouseEvent) => {
@@ -113,21 +109,9 @@ const handleTableDblClick = (event:MouseEvent) => {
   const col = props.config.columns[cell.cellIndex]
   const tr = cell.closest('tr') as HTMLTableRowElement
   const row = props.rows[tr.rowIndex - 1] // Skip thead row
-  emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
+  // emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
   emit('dblpick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
 }
-
-// const handleClick = (row:any, col:any, cn:any) => {
-//   if (row == props.config.pickedRow) {
-//     emit('pick', null)
-//   } else {
-//     emit('pick', row, col, cn as number)
-//   }
-// }
-// const handleDblClick = (row:any, col:any, cn:any) => {
-//   emit('pick', row, col, cn as number)
-//   emit('dblpick', row, col, cn as number)
-// }
 
 const getCellRef = (rn:any, cn:any) => {
   const rownum = rn as number
@@ -145,21 +129,21 @@ const getCellRef = (rn:any, cn:any) => {
   <div class="b-table-container"
     :style="{
       height: 'calc(' + props.config.height + (props.nofooter ? ')' : ' - 1.3em)'),
-      'overflow-y': props.config.height == '' ? 'visible' : 'scroll',
+      'overflow-y': props.config.height == '' ? 'hidden' : 'auto',
     }"
   >
-    <table :style="{ width: props.config.width }"
-        @click.stop="handleTableClick($event)"
-        @dblclick.stop="handleTableDblClick($event)"
+    <table :style="{ width: props.config.width }">
+    <thead @click="handleTableHeadClick($event)">
+      <tr>
+        <th v-for="col in props.config.columns" :key="col.id" :style="deduceTHStyle(col)">
+          {{ col.heading }}
+        </th>
+      </tr>
+    </thead>
+    <tbody v-if="Array.isArray(props.rows)"
+        @click="handleTableBodyClick($event)"
+        @dblclick="handleTableDblClick($event)"
         >
-      <thead>
-        <tr>
-          <th v-for="col in props.config.columns" :key="col.id" :style="deduceTHStyle(col)">
-            {{ col.heading }}
-          </th>
-        </tr>
-      </thead>
-      <tbody v-if="Array.isArray(props.rows)">
         <tr v-for="(row,rn) in props.rows" :key="row" :class="{picked : props.config.pickedRow == row}">
           <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
             ref="tdRef"
@@ -175,7 +159,10 @@ const getCellRef = (rn:any, cn:any) => {
           </td>
         </tr>
       </tbody>
-      <tbody v-if="!Array.isArray(props.rows)">
+      <tbody v-if="!Array.isArray(props.rows)"
+        @click="handleTableBodyClick($event)"
+        @dblclick="handleTableDblClick($event)"
+        >
         <tr v-for="(value,objProp,rn) in props.rows" :key="objProp" :class="{picked : props.config.pickedRow == props.rows[objProp]}">
           <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
             ref="tdRef"
@@ -188,7 +175,7 @@ const getCellRef = (rn:any, cn:any) => {
       </tbody>
     </table>
   </div>
-  <div v-if="!props.nofooter" class="b-table-footer"><slot name="buttons"/>&nbsp;</div>
+  <div v-if="!props.nofooter" class="b-table-footer" @click.self="emit('pick',null)"><slot name="buttons"/>&nbsp;</div>
   </div>
 </template>
 
@@ -214,9 +201,8 @@ div.b-table-container {
   overscroll-behavior: none;
 }
 div.b-table-heading {
-  padding-bottom: 0.2rem;
   padding-left: .3rem;
-  padding-bottom: .4rem;
+  padding-bottom: .3rem;
   font-style: italic;
   font-size: 1.2em;
   color: var(--form-prompt-color) !important;

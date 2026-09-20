@@ -37,8 +37,7 @@ const props = defineProps({
         <tr><th>Product:</th><td colspan="3" class="info">{{ B.codeToText.rlob(quoteStore.quote.rlob) }} ({{ quoteStore.quote.rlob }})</td></tr>
         <tr><th>Effective:</th><td class="info">{{ B.format.effdat(quoteStore.quote.effdat) }}</td>
             <th>Status:</th><td class="info">
-              <BIcon :icon="B.statusIcon(quoteStore.quote.status)"/>
-              {{ B.codeToText.quoteStatus(quoteStore.quote.status) }}
+              <BIcon :icon="B.statusIcon(quoteStore.quote.status)"/>{{ B.codeToText.quoteStatus(quoteStore.quote.status) }}
             </td></tr>
         <tr v-if="quoteStore.quote.status != 'INPROG'">
             <th>Design:</th><td class="info">{{ B.codeToText.nonstd(quoteStore.quote.nonstd) }}</td>
@@ -116,13 +115,12 @@ const props = defineProps({
         <p>Are you sure you want to delete this quote?</p>
       </template>
     </BConfirm>
-    <BConfirm v-if="userStore.getUserRightValue('FORCE_INPROG') && quoteStore.quote.status != 'INPROG'" class="anchor" gapright icon="solid backward-step" pos="T" @confirm="emit('force')">
+    <BConfirm v-if="userStore.getUserRightValue('FORCE_INPROG') == 'Y' && quoteStore.quote.status != 'INPROG'" style="float:left;" class="anchor" gapright pos="T2R" @confirm="emit('force')">π
       <template #message>
-        <div class="titlebar">Force quote {{quoteStore.quote?.id}} back to 'In Progress'?</div>
-        <b style="color: red;">This is not something typically done.</b> Please be sure you
-        are clear that any documents seen by a prospect and possibly rated
-        may no longer be valid if you change plans or any other features
-        of the quote.
+        <div class="titlebar">Force quote #{{quoteStore.quote?.id}} to 'In Progress' status?</div>
+        <BIcon icon="#red solid octagon_"/><b style="color: red;">This is not something typically done.</b>
+        <p>Please be sure you are clear that any documents seen by a prospect and possibly rated
+        may no longer be valid if you change plans or any other features of the quote.</p>
       </template>
     </BConfirm>
 
@@ -143,19 +141,31 @@ const props = defineProps({
         After submitting this quote, you will no longer be able to edit anything other than the name.
       </template>
     </BConfirm>
-    <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd != 'N'"
+    <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd == 'Y'"
       class="modern"
       icon="solid coins_"
-      heading="Request Rates"
+      heading="Non-Standard Quote Submission"
       pos="T"
       :disabled="quoteStore.working != null"
-      @confirm="emit('submit')">Request Rates
+      @confirm="emit('submit')">Request Rates?
       <template #message>
         After requesting rates for this quote, you will no longer be able to edit anything other than the name.
+        <p>Once rates are available, the quote will move to Ready status.</p>
       </template>
     </BConfirm>
-    <!-- <BButton v-if="quoteStore.quote.nonstd == 'N'" class="modern" @click="emit('submit')" :disabled="quoteStore.quote.descr == ''">Submit</BButton>
-    <BButton v-if="quoteStore.quote.nonstd != 'N'" class="modern" @click="emit('submit')" :disabled="quoteStore.quote.descr == ''">Request Rates</BButton> -->
+    <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd == 'C'"
+      class="modern"
+      icon="solid user-check_"
+      heading="Custom Quote Submission"
+      pos="T"
+      :disabled="quoteStore.working != null"
+      @confirm="emit('submit')">Submit for Approval?
+      <template #message>
+        After submitting this quote for approval, you will no longer be able to edit anything other than the name.
+        <p>When the quote is approved and rates are available, the quote will move to Ready status.</p>
+      </template>
+    </BConfirm>
+
   </div>
   </dialog>
 </template>
