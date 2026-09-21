@@ -253,9 +253,9 @@ const flattenCensus = ():any => {
         'Suffix':dep.sufnam,
         'DOB':dep.dob,
         'Sex':dep.sex,
-        'MED':sub.dep ? 'Y' : '',
-        'DEN':sub.dep ? 'Y' : '',
-        'VIS':sub.dep ? 'Y' : '',
+        'MED':dep.med ? 'Y' : '',
+        'DEN':dep.den ? 'Y' : '',
+        'VIS':dep.vis ? 'Y' : '',
         'COBRA': '',
         'Disabled':sub.dis ? 'Y' : '',
       })

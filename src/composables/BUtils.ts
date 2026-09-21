@@ -216,7 +216,7 @@ export const B = {
     return hashHex.toString();
   },
   statusIcon: (statusCode:string) => {
-    if ('INPROG'.indexOf(statusCode) >= 0) return "#red hand_"
+    if ('INPROG'.indexOf(statusCode) >= 0) return "##FFBF00 solid hand_"
     if ('RATEREQ,PENDING'.indexOf(statusCode) >= 0) return "#sienna solid pause_"
     if ('READY'.indexOf(statusCode) >= 0) return "solid check_"
     if ('ENROLLED'.indexOf(statusCode) >= 0) return "#forestgreen solid thumbs-up_"
