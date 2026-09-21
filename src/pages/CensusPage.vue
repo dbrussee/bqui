@@ -6,6 +6,7 @@ import { appProspectStore } from '@/stores/ProspectStore';
 const prospStore = appProspectStore()
 import BButton from '@/components/B/BButton.vue';
 import BConfirm from '@/components/B/BConfirm.vue';
+import * as XLSX from "xlsx";
 
 const deduceTHStyle = (col:any) => {
   const style = {} as Record<string, string>;
@@ -202,6 +203,68 @@ const updateCensusDirty = () => {
   prospStore.setCensusDirty()
 }
 
+const exportToXLSX = () => {
+  const census = flattenCensus()
+  const worksheet = XLSX.utils.json_to_sheet(census)
+  worksheet['!cols'] = [
+    { wch: 4 }, // Sub number
+    { wch: 7 }, // Relation
+    { wch: 19 }, // Last
+    { wch: 19 }, // First
+    { wch: 4 }, // MI
+    { wch: 5 }, // Suffix
+    { wch: 11 }, // DOB
+    { wch: 4 }, // Sex
+    { wch: 4 }, // MED
+    { wch: 4 }, // DEN
+    { wch: 4 }, // VIS
+    { wch: 7 }, // Sub COBRA
+    { wch: 9 }  // Dep Disabled
+];
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Census")
+  XLSX.writeFile(workbook, `BQ Census - ${prospStore.prospect.id}.xlsx`)
+}
+const flattenCensus = ():any => {
+  const flat = [] as any[]
+  prospStore.prospect.census.forEach((sub: any, rn:number) => {
+    flat.push({
+      'Sub':rn+1,
+      'Relation':'',
+      'Last Name':sub.lstnam,
+      'First Name':sub.fstnam,
+      'MI':sub.midnam,
+      'Suffix':sub.sufnam,
+      'DOB':sub.dob,
+      'Sex':sub.sex,
+      'MED':sub.med ? 'Y' : '',
+      'DEN':sub.den ? 'Y' : '',
+      'VIS':sub.vis ? 'Y' : '',
+      'COBRA':sub.cobra ? 'Y' : '',
+      'Disabled':''
+    })
+    sub.deps.forEach((dep: any) => {
+      flat.push({
+        'Sub':'',
+        'Relation':dep.relation,
+        'Last Name':dep.lstnam,
+        'First Name':dep.fstnam,
+        'MI':dep.midnam,
+        'Suffix':dep.sufnam,
+        'DOB':dep.dob,
+        'Sex':dep.sex,
+        'MED':sub.dep ? 'Y' : '',
+        'DEN':sub.dep ? 'Y' : '',
+        'VIS':sub.dep ? 'Y' : '',
+        'COBRA': '',
+        'Disabled':sub.dis ? 'Y' : '',
+      })
+    })
+    // console.log(JSON.stringify(flat, null, 2))
+  });
+  return flat
+}
+
 </script>
 
 <template>
@@ -213,6 +276,7 @@ const updateCensusDirty = () => {
       </template>
     </BConfirm>&nbsp;
     <BButton v-if="prospStore.prospect" class="modern" icon="solid user-plus_" @click="newSub()">Add Subscriber</BButton>&nbsp;
+    <BButton @click="exportToXLSX()">Export</BButton>&nbsp;
     <span style='float: right;'>
       <BButton class="anchor"
         :disabled="!prospStore.censusDirty"
