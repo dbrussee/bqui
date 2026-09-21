@@ -1,12 +1,26 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 // import BTable from '@/components/BTable.vue';
-import { ref } from 'vue';
+import { ref, useId } from 'vue';
 import { appProspectStore } from '@/stores/ProspectStore';
 const prospStore = appProspectStore()
 import BButton from '@/components/B/BButton.vue';
 import BConfirm from '@/components/B/BConfirm.vue';
 import * as XLSX from "xlsx";
+import { useToast } from '@/composables/useToast'
+import BIcon from '@/components/B/BIcon.vue';
+
+const censusHandler = {
+  popId: ref(useId()),
+  show: () => {
+    const popup = document.getElementById(censusHandler.popId.value) as HTMLDialogElement
+    popup?.showModal()
+  },
+  close: () => {
+    const popup = document.getElementById(censusHandler.popId.value) as HTMLDialogElement
+    popup?.close()
+  }
+}
 
 const deduceTHStyle = (col:any) => {
   const style = {} as Record<string, string>;
@@ -234,7 +248,7 @@ const flattenCensus = ():any => {
       'Last Name':sub.lstnam,
       'First Name':sub.fstnam,
       'MI':sub.midnam,
-      'Suffix':sub.sufnam,
+      'Suffix':sub.suffnam,
       'DOB':sub.dob,
       'Sex':sub.sex,
       'MED':sub.med ? 'Y' : '',
@@ -250,7 +264,7 @@ const flattenCensus = ():any => {
         'Last Name':dep.lstnam,
         'First Name':dep.fstnam,
         'MI':dep.midnam,
-        'Suffix':dep.sufnam,
+        'Suffix':dep.suffnam,
         'DOB':dep.dob,
         'Sex':dep.sex,
         'MED':dep.med ? 'Y' : '',
@@ -265,6 +279,76 @@ const flattenCensus = ():any => {
   return flat
 }
 
+const loadData = (event:Event) => {
+  const target = event.currentTarget as HTMLInputElement
+  if (target.files && target.files.length > 0) {
+    const file = target.files[0] as File
+
+    const reader = new FileReader();
+
+    // Define what happens once the file is completely read into memory
+    reader.onload = function(e) {
+      if (!e.target) {
+        useToast().addToast("No data in census reader", "error")
+        return
+      }
+      const data = e.target.result; // This is the ArrayBuffer containing file data
+
+      /* Parse file data and generate a SheetJS workbook object */
+      const workbook = XLSX.read(data, { type: 'array' });
+
+      /* Get the name of the first worksheet */
+      const firstSheetName:string = workbook.SheetNames[0] as string
+
+      /* Get the actual worksheet object */
+      const worksheet:XLSX.WorkSheet = workbook.Sheets[firstSheetName] as XLSX.WorkSheet;
+
+      /* Convert the worksheet rows into a readable array of JSON objects */
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      // Display the formatted JSON on the page
+      mapImportJSONToCensus(jsonData)
+      prospStore.setCensusDirty()
+      target.value = ''
+      target.blur()
+    }
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+const mapImportJSONToCensus = (json:any) => {
+  const census:any[] = []
+  let sub:any = null
+  for(let rn = 0; rn < json.length; rn++) {
+    const mem = json[rn]
+    const relation = mem["Relation"]
+    if (relation == '') {
+      sub = {
+        relation: mem["Relation"],
+        lstnam: mem["Last Name"], fstnam: mem["First Name"], midnam: mem["MI"], suffnam: mem["Suffix"],
+        dob: mem["DOB"], sex: mem["Sex"],
+        med: mem["MED"] != "", den: mem["DEN"] != "", vis: mem["VIS"] != "",
+        cobra: mem["COBRA"] != "", dis: mem["DIS"] != "",
+        deps: []
+      }
+      census.push(sub)
+    } else {
+      if (sub != null) {
+        sub.deps.push({
+          relation: mem["Relation"],
+          lstnam: mem["Last Name"], fstnam: mem["First Name"], midnam: mem["MI"], sufnam: mem["Suffix"],
+          dob: mem["DOB"], sex: mem["Sex"],
+          med: mem["MED"] != "", den: mem["DEN"] != "", vis: mem["VIS"] != "",
+          cobra: mem["COBRA"] != "", dis: mem["DIS"] != ""
+        })
+      }
+    }
+  }
+  prospStore.prospect.census = [...census]
+  censusHandler.close()
+  useToast().addToast("Census imported", "success")
+}
+
 </script>
 
 <template>
@@ -276,6 +360,7 @@ const flattenCensus = ():any => {
       </template>
     </BConfirm>&nbsp;
     <BButton v-if="prospStore.prospect" class="modern" icon="solid user-plus_" @click="newSub()">Add Subscriber</BButton>&nbsp;
+    <BButton @click="censusHandler.show()">Import</BButton>&nbsp;
     <BButton @click="exportToXLSX()">Export</BButton>&nbsp;
     <span style='float: right;'>
       <BButton class="anchor"
@@ -316,13 +401,13 @@ const flattenCensus = ():any => {
             <td style="text-align: center;"><button @click="(e:Event) => setSex(Number(rn), -1)" class="clear sex mono">{{ sub.sex }}</button></td>
             <td style="text-align: center;">
               <BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'med')" :icon="sub.med ? 'square-check' : 'square'" />
-              <BButton class="clear gapleft gapright" @click="(sub) => setSubBoolean(Number(rn), 'den')" :icon="sub.den ? 'square-check' : 'square'" />
+              <BButton class="clear" gapleft gapright @click="(sub) => setSubBoolean(Number(rn), 'den')" :icon="sub.den ? 'square-check' : 'square'" />
               <BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'vis')" :icon="sub.vis ? 'square-check' : 'square'" />
             </td>
             <td class="cobra"><BButton class="clear" @click="(sub) => setSubBoolean(Number(rn), 'cobra')" :icon="sub.cobra ? 'square-check' : 'square'" /></td>
             <td class="dis">&nbsp;</td>
             <td>
-              <BButton class="clear" @click="delSub(Number(rn))" icon="#firebrick trash-can" />
+              <BButton class="clear" @click="delSub(Number(rn))" icon="#firebrick rectangle-xmark" />
               <BButton class="clear" @click="newDep(Number(rn))" icon="solid user-plus" />
             </td>
           </tr>
@@ -342,20 +427,32 @@ const flattenCensus = ():any => {
             <td style="text-align: center;">
               <BButton class="clear" v-if="sub.med" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'med')" :icon="dep.med ? 'square-check' : 'square'"/>
               <BButton disabled class="clear" v-else icon="solid ban"/>
-              <BButton class="clear gapleft gapright" v-if="sub.den" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'den')" :icon="dep.den ? 'square-check' : 'square'"/>
-              <BButton disabled class="clear gapleft gapright" v-else icon="solid ban"/>
+              <BButton gapleft gapright class="clear" v-if="sub.den" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'den')" :icon="dep.den ? 'square-check' : 'square'"/>
+              <BButton disabled gapleft gapright class="clear" v-else icon="solid ban"/>
               <BButton class="clear" v-if="sub.vis" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'vis')" :icon="dep.vis ? 'square-check' : 'square'"/>
               <BButton disabled class="clear" v-else icon="solid ban"/>
             </td>
             <td class="cobra">&nbsp;</td>
             <td class="dis"><BButton class="clear" v-if="dep.relation == 'CHD'" @click="(sub) => setDepBoolean(Number(rn), Number(dn), 'dis')" :icon="dep.dis ? 'square-check' : 'square'"/></td>
-            <td><BButton class="clear" @click="delDep(Number(rn), Number(dn))" icon="#firebrick trash-can"/></td>
+            <td><BButton class="clear" @click="delDep(Number(rn), Number(dn))" icon="#firebrick rectangle-xmark"/></td>
           </tr>
       </template>
       </tbody>
     </table>
     </form>
   </div>
+  <dialog style="width: 38em;" :id="censusHandler.popId.value">
+    <div class="titlebar">Import Census From Spreadsheet</div>
+    Use the input below to select a file. As soon as you do that, the
+    census will change to reflect the contents of that file.
+    <p><b>Note: </b>This does NOT save the census. You must click the
+    [<BIcon icon='floppy-disk'/>&nbsp;Save&nbsp;Changes&nbsp;] link at the top right to save the census just imported.</p>
+    <br/>
+    <input @change="loadData($event)" type="file" accept=".xlsx, .xls, .csv, .numbers" />
+    <div class="buttonbar">
+      <BButton @click="censusHandler.close()" class="modern" icon="#red x">Cancel</BButton>
+    </div>
+  </dialog>
 </div>
 
 </template>
