@@ -43,6 +43,7 @@ const quoteHandler = {
   step2() {
     quoteStore.createQuote().then(() => {
       cfgQuotesList.value.pickedRow = quoteStore.quote
+      cfgQuotesList.value.pickedRowNumber = prospStore.quotes.length - 1
       this.closeStart()
       this.openEdit()
     })

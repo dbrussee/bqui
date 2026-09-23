@@ -16,16 +16,16 @@ const menuPopup = ref()
 
 const handler = {
   popId: useId(),
-  temp: {} as any,
+  temp: ref<any>({}),
   open() { (document.getElementById(this.popId) as HTMLDialogElement).showModal() },
   close() { (document.getElementById(this.popId) as HTMLDialogElement).close() },
   edit() {
-    this.temp = {...prospStore.prospect}
+    this.temp.value = {...prospStore.prospect}
     // B.deleteProperties(this.temp);
     this.open()
   },
   save() {
-    prospStore.prospect = {...this.temp}
+    prospStore.prospect = {...this.temp.value}
     prospStore.updateProspect(prospStore.prospect)
     this.close()
   },
@@ -179,27 +179,27 @@ const handleDeleteProspect = () => {
     </div>
     <table class="form-table">
       <tbody>
-        <tr><th>Created:</th><td class="info">{{ B.format.ts(handler.temp.crttms) }} by {{ handler.temp.crtusr }}</td></tr>
-        <tr><th>Updated:</th><td class="info">{{ B.format.ts(handler.temp.updtms) }} by {{ handler.temp.updusr }}</td></tr>
-        <tr><th>Agent of Record:</th><td class="info">{{ handler.temp.agent_id }}</td></tr>
+        <tr><th>Created:</th><td class="info">{{ B.format.ts(handler.temp.value.crttms) }} by {{ handler.temp.value.crtusr }}</td></tr>
+        <tr><th>Updated:</th><td class="info">{{ B.format.ts(handler.temp.value.updtms) }} by {{ handler.temp.value.updusr }}</td></tr>
+        <tr><th>Agent of Record:</th><td class="info">{{ handler.temp.value.agent_id }}</td></tr>
 
         <tr><td colspan="2"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
 
-        <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="handler.temp.name"></td></tr>
-        <tr><th>Contact:</th><td><input name="grpcontact" style="width: 30em;" v-model="handler.temp.contact"></td></tr>
-        <tr><th>Email:</th><td><input name="grpemail" style="width: 30em;" v-model="handler.temp.email"></td></tr>
-        <tr><th>Phone:</th><td><input name="grpphone" style="width: 12em;" v-model="handler.temp.phone"></td></tr>
-        <tr><th>Eligible:</th><td><input name="estimate" style="width: 5em;" v-model="handler.temp.subs_estimate">
+        <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="handler.temp.value.name"></td></tr>
+        <tr><th>Contact:</th><td><input name="grpcontact" style="width: 30em;" v-model="handler.temp.value.contact"></td></tr>
+        <tr><th>Email:</th><td><input name="grpemail" style="width: 30em;" v-model="handler.temp.value.email"></td></tr>
+        <tr><th>Phone:</th><td><input name="grpphone" style="width: 12em;" v-model="handler.temp.value.phone"></td></tr>
+        <tr><th>Eligible:</th><td><input name="estimate" style="width: 5em;" v-model="handler.temp.value.subs_estimate">
           <span class="info">(estimate) - Census has {{ B.format.valueWithUnits(prospStore.prospect.census?.length, 'subscriber') }}</span>
         </td></tr>
-        <tr><th>Address:</th><td><input name="grpaddr1" style="width: 30em;" v-model="handler.temp.addr1"></td></tr>
-        <tr><th></th><td><input name="grpaddr2" style="width: 30em;" v-model="handler.temp.addr2"></td></tr>
+        <tr><th>Address:</th><td><input name="grpaddr1" style="width: 30em;" v-model="handler.temp.value.addr1"></td></tr>
+        <tr><th></th><td><input name="grpaddr2" style="width: 30em;" v-model="handler.temp.value.addr2"></td></tr>
         <tr><th></th><td>
-          <input name="grpcity" style="width: 12em; margin-right: .3em;" v-model="handler.temp.city">
-          <input name="grpstate" style="width: 3em; margin-right: .3em;" v-model="handler.temp.state_cd">
-          <input name="grpzip" style="width: 6em;" v-model="handler.temp.zip_cd">
+          <input name="grpcity" style="width: 12em; margin-right: .3em;" v-model="handler.temp.value.city">
+          <input name="grpstate" style="width: 3em; margin-right: .3em;" v-model="handler.temp.value.state_cd">
+          <input name="grpzip" style="width: 6em;" v-model="handler.temp.value.zip_cd">
         </td></tr>
-        <tr><th>Enroll Date:</th><td><input name="enrollDate" style="width: 10em;" v-model="handler.temp.enroll_date"></td></tr>
+        <tr><th>Enroll Date:</th><td><input name="enrollDate" style="width: 10em;" v-model="handler.temp.value.enroll_date"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton type="button" class="anchor" style="margin-right: .6em;" @click="handler.close()" icon="#red solid x">Cancel</BButton>
