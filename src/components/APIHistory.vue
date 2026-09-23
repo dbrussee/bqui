@@ -82,15 +82,6 @@ const setTimestamp = (row:any, td:any):void => {
     tr.style.borderBottom = "3px solid sienna"
   }
 }
-// const getResultCodex = (row:any, td:any) => {
-//   if (!row || !td) return
-//   const code = row.category.split("-")[1].trim()
-//   if (code == "ERROR") {
-//     const cell = td as HTMLTableCellElement
-//     cell.style.color = "red"
-//   }
-//   return code
-// }
 const getResultIcon = (row:any):string => {
   if (!row) return ""
   const code = row.category.split("-")[1].trim()

@@ -6,19 +6,18 @@ import { appProspectStore } from '@/stores/ProspectStore';
 const prospStore = appProspectStore()
 import BButton from '@/components/B/BButton.vue';
 import BConfirm from '@/components/B/BConfirm.vue';
-import * as XLSX from "xlsx";
-import { useToast } from '@/composables/useToast'
 import BIcon from '@/components/B/BIcon.vue';
 
-const censusHandler = {
-  popId: ref(useId()),
-  show: () => {
-    const popup = document.getElementById(censusHandler.popId.value) as HTMLDialogElement
-    popup?.showModal()
+const handler = {
+  popId: useId(),
+  open() { (document.getElementById(this.popId) as HTMLDialogElement).showModal() },
+  close() { (document.getElementById(this.popId) as HTMLDialogElement).close() },
+  import(e:Event) {
+    prospStore.importCensus(e)
+    this.close()
   },
-  close: () => {
-    const popup = document.getElementById(censusHandler.popId.value) as HTMLDialogElement
-    popup?.close()
+  export() {
+    prospStore.exportCensus()
   }
 }
 
@@ -155,28 +154,22 @@ const setRelation = (subnum:number, depnum:number, e:Event) => {
   const sub = prospStore.prospect.census[subnum] as any
   if (sub) {
     if (depnum < 0) {
+      // Trying to set relation on Sub... should never really get here
       sub.relation = relation
     } else {
       const dep = sub.deps[depnum] as any
       if (relation == "CHD") {
+        // Changing from DOM or SPS to Child
         dep.relation = relation
+        dep.dis = false
       } else if (relation == 'SUB') {
-        // Make a dependent a Subscriber
-        // {'Joe', deps[
-        //   'Jane',
-        //   'Jimmy'
-        // ]
-        // ...
-        // {'Jane', deps [
-        //   'Joe',
-        //   'Jimmy'
-        // ]}
-        // Clone the sub
         const oldSub = JSON.stringify(sub)
         const oldDeps = JSON.stringify(sub.deps)
         const newSub = JSON.parse(JSON.stringify(sub.deps[depnum]))
         newSub.deps = JSON.parse(oldDeps)
         newSub.relation = 'SUB'
+        newSub.dis = false // Subscriber cannot be disabled
+        newSub.cobra = false // Default just in case
 
         newSub.deps[depnum] = JSON.parse(oldSub)
         delete newSub.deps[depnum].deps
@@ -185,15 +178,22 @@ const setRelation = (subnum:number, depnum:number, e:Event) => {
         prospStore.prospect.census.splice(subnum, 1, newSub)
         // deps cannot have what some does not take
         prospStore.prospect.census[subnum].deps.forEach((dep:any) => {
+          dep.cobra = false // Fixes the one that was SUB before
           if (!sub.med) dep.med = false
           if (!sub.den) dep.den = false
           if (!sub.vis) dep.vis = false
         });
       } else { // SPS or DOM ... set all others to CHD and then set new value
-        sub.deps.forEach((dep:any)=> {
-          dep.relation = 'CHD'
+        sub.deps.forEach((curdep:any)=> {
+          if (curdep.relation != 'CHD') {
+            curdep.cobra = false
+            curdep.dis = false
+            curdep.relation = 'CHD'
+          }
         })
-        dep.relation = relation
+        dep.relation = relation // SPS or DOM
+        dep.dis = false
+        dep.cobra = false
       }
     }
   }
@@ -217,138 +217,10 @@ const updateCensusDirty = () => {
   prospStore.setCensusDirty()
 }
 
-const exportToXLSX = () => {
-  const census = flattenCensus()
-  const worksheet = XLSX.utils.json_to_sheet(census)
-  worksheet['!cols'] = [
-    { wch: 4 }, // Sub number
-    { wch: 7 }, // Relation
-    { wch: 19 }, // Last
-    { wch: 19 }, // First
-    { wch: 4 }, // MI
-    { wch: 5 }, // Suffix
-    { wch: 11 }, // DOB
-    { wch: 4 }, // Sex
-    { wch: 4 }, // MED
-    { wch: 4 }, // DEN
-    { wch: 4 }, // VIS
-    { wch: 7 }, // Sub COBRA
-    { wch: 9 }  // Dep Disabled
-];
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Census")
-  XLSX.writeFile(workbook, `BQ Census - ${prospStore.prospect.id}.xlsx`)
+
+const hardSpace = (txt:string):string => {
+  return txt.split(' ').join('&nbsp;')
 }
-const flattenCensus = ():any => {
-  const flat = [] as any[]
-  prospStore.prospect.census.forEach((sub: any, rn:number) => {
-    flat.push({
-      'Sub':rn+1,
-      'Relation':'',
-      'Last Name':sub.lstnam,
-      'First Name':sub.fstnam,
-      'MI':sub.midnam,
-      'Suffix':sub.suffnam,
-      'DOB':sub.dob,
-      'Sex':sub.sex,
-      'MED':sub.med ? 'Y' : '',
-      'DEN':sub.den ? 'Y' : '',
-      'VIS':sub.vis ? 'Y' : '',
-      'COBRA':sub.cobra ? 'Y' : '',
-      'Disabled':''
-    })
-    sub.deps.forEach((dep: any) => {
-      flat.push({
-        'Sub':'',
-        'Relation':dep.relation,
-        'Last Name':dep.lstnam,
-        'First Name':dep.fstnam,
-        'MI':dep.midnam,
-        'Suffix':dep.suffnam,
-        'DOB':dep.dob,
-        'Sex':dep.sex,
-        'MED':dep.med ? 'Y' : '',
-        'DEN':dep.den ? 'Y' : '',
-        'VIS':dep.vis ? 'Y' : '',
-        'COBRA': '',
-        'Disabled':sub.dis ? 'Y' : '',
-      })
-    })
-    // console.log(JSON.stringify(flat, null, 2))
-  });
-  return flat
-}
-
-const loadData = (event:Event) => {
-  const target = event.currentTarget as HTMLInputElement
-  if (target.files && target.files.length > 0) {
-    const file = target.files[0] as File
-
-    const reader = new FileReader();
-
-    // Define what happens once the file is completely read into memory
-    reader.onload = function(e) {
-      if (!e.target) {
-        useToast().addToast("No data in census reader", "error")
-        return
-      }
-      const data = e.target.result; // This is the ArrayBuffer containing file data
-
-      /* Parse file data and generate a SheetJS workbook object */
-      const workbook = XLSX.read(data, { type: 'array' });
-
-      /* Get the name of the first worksheet */
-      const firstSheetName:string = workbook.SheetNames[0] as string
-
-      /* Get the actual worksheet object */
-      const worksheet:XLSX.WorkSheet = workbook.Sheets[firstSheetName] as XLSX.WorkSheet;
-
-      /* Convert the worksheet rows into a readable array of JSON objects */
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-      // Display the formatted JSON on the page
-      mapImportJSONToCensus(jsonData)
-      prospStore.setCensusDirty()
-      target.value = ''
-      target.blur()
-    }
-    reader.readAsArrayBuffer(file);
-  }
-}
-
-const mapImportJSONToCensus = (json:any) => {
-  const census:any[] = []
-  let sub:any = null
-  for(let rn = 0; rn < json.length; rn++) {
-    const mem = json[rn]
-    const relation = mem["Relation"]
-    if (relation == '') {
-      sub = {
-        relation: mem["Relation"],
-        lstnam: mem["Last Name"], fstnam: mem["First Name"], midnam: mem["MI"], suffnam: mem["Suffix"],
-        dob: mem["DOB"], sex: mem["Sex"],
-        med: mem["MED"] != "", den: mem["DEN"] != "", vis: mem["VIS"] != "",
-        cobra: mem["COBRA"] != "", dis: mem["DIS"] != "",
-        deps: []
-      }
-      census.push(sub)
-    } else {
-      if (sub != null) {
-        sub.deps.push({
-          relation: mem["Relation"],
-          lstnam: mem["Last Name"], fstnam: mem["First Name"], midnam: mem["MI"], sufnam: mem["Suffix"],
-          dob: mem["DOB"], sex: mem["Sex"],
-          med: mem["MED"] != "", den: mem["DEN"] != "", vis: mem["VIS"] != "",
-          cobra: mem["COBRA"] != "", dis: mem["DIS"] != ""
-        })
-      }
-    }
-  }
-  prospStore.prospect.census = [...census]
-  censusHandler.close()
-  useToast().addToast("Census imported", "success")
-}
-
 </script>
 
 <template>
@@ -360,8 +232,8 @@ const mapImportJSONToCensus = (json:any) => {
       </template>
     </BConfirm>&nbsp;
     <BButton v-if="prospStore.prospect" class="modern" icon="solid user-plus_" @click="newSub()">Add Subscriber</BButton>&nbsp;
-    <BButton @click="censusHandler.show()">Import</BButton>&nbsp;
-    <BButton @click="exportToXLSX()">Export</BButton>&nbsp;
+    <BButton @click="handler.open()">Import</BButton>&nbsp;
+    <BButton @click="handler.export()">Export</BButton>&nbsp;
     <span style='float: right;'>
       <BButton class="anchor"
         :disabled="!prospStore.censusDirty"
@@ -384,9 +256,7 @@ const mapImportJSONToCensus = (json:any) => {
     <table style="margin: auto;" class="CENSUS_TABLE">
       <thead>
         <tr>
-          <th v-for="col in cfgCensus.columns" :key="col.id" :style="deduceTHStyle(col)">
-            {{ col.heading }}
-          </th>
+          <th v-for="col in cfgCensus.columns" :key="col.id" :style="deduceTHStyle(col)" :innerHTML="hardSpace(col.heading)" />
         </tr>
       </thead>
       <tbody v-if="prospStore.prospect">
@@ -441,16 +311,16 @@ const mapImportJSONToCensus = (json:any) => {
     </table>
     </form>
   </div>
-  <dialog style="width: 38em;" :id="censusHandler.popId.value">
+  <dialog style="width: 38em;" :id="handler.popId">
     <div class="titlebar">Import Census From Spreadsheet</div>
     Use the input below to select a file. As soon as you do that, the
     census will change to reflect the contents of that file.
     <p><b>Note: </b>This does NOT save the census. You must click the
     [<BIcon icon='floppy-disk'/>&nbsp;Save&nbsp;Changes&nbsp;] link at the top right to save the census just imported.</p>
     <br/>
-    <input @change="loadData($event)" type="file" accept=".xlsx, .xls, .csv, .numbers" />
+    <input @change="handler.import($event)" type="file" accept=".xlsx, .xls, .csv, .numbers" />
     <div class="buttonbar">
-      <BButton @click="censusHandler.close()" class="modern" icon="#red x">Cancel</BButton>
+      <BButton @click="handler.close()" class="modern" icon="#red x">Cancel</BButton>
     </div>
   </dialog>
 </div>

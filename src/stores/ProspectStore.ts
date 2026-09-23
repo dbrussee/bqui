@@ -5,6 +5,7 @@ import { ref } from "vue";
 import { B } from "@/composables/BUtils";
 import { appUserStore } from "./AppUserStore";
 import { useToast } from '../composables/useToast'
+import * as XLSX from "xlsx";
 
 export const appProspectStore = defineStore("appProspectStore", () => {
   const prospect = ref<any>(null);
@@ -35,6 +36,28 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         useToast().addToast(`Error removing prospect ${pid} from Recents`, "error")
       } else {
         useToast().addToast(`Removed prospect ${pid} from Recents`, "info")
+        if (userStore.user.recents.length > 1) {
+          getProspect(userStore.user.recents[1]?.pid, true)
+        } else {
+          prospect.value = null
+        }
+      }
+      meta.value = fetcher.meta
+      issue.value = fetcher.issue
+    })
+  }
+
+  async function deleteProspect() {
+    const fetcher = new BQAPIFetcher()
+    const userStore = appUserStore()
+    const pid = prospect.value.id
+    B.working.set(prospWorking, "Deleting...");
+    fetcher.callAPI(`/prospect/${pid}`, "DELETE").then(() => {
+      B.working.clear(prospWorking);
+      if (fetcher.issue) {
+        useToast().addToast(`Error deleting prospect ${pid}`, "error")
+      } else {
+        useToast().addToast(`Deleted prospect ${pid}`, "info")
         if (userStore.user.recents.length > 1) {
           getProspect(userStore.user.recents[1]?.pid, true)
         } else {
@@ -167,10 +190,12 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
 
   async function createProspect(data:any) {
+    prospWorking.value = true
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'POST', data)
+    prospWorking.value = false
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp.prosp
-      useToast().addToast("Added prospect number " + prospect.value.id, "success")
+      quotes.value.length = 0
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
         censusHash.value = hash
         censusDirty.value = false
@@ -224,7 +249,8 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
   async function updateCensus(data:any) {
     B.working.set(censusWorking, "Saving...")
-    // console.log(JSON.stringify(data, null, 2))
+    console.log("Saving...")
+    console.log(data)
     const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'PUT', data)
     B.working.clear(censusWorking)
     if (fetcher.resp != null) {
@@ -239,13 +265,169 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     meta.value = fetcher.meta
     issue.value = fetcher.issue
   }
+  const exportCensus = async () => {
+    const census = flattenCensus()
+    const worksheet = XLSX.utils.json_to_sheet(census)
+    worksheet['!cols'] = [
+      { wch: 4 },  // Sub number
+      { wch: 7 },  // Relation
+      { wch: 19 }, // Last
+      { wch: 19 }, // First
+      { wch: 4 },  // MI
+      { wch: 5 },  // Suffix
+      { wch: 11 }, // DOB
+      { wch: 4 },  // Sex
+      { wch: 4 },  // MED
+      { wch: 4 },  // DEN
+      { wch: 4 },  // VIS
+      { wch: 7 },  // Sub COBRA
+      { wch: 9 }   // Dep Disabled
+    ];
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Census")
 
+    try {
+      // 1. Prompt the user with the native blocking save dialog
+      const handle = await (window as any).showSaveFilePicker({
+        suggestedName: `BQ Census for Prospect ${prospect.value.id}.xlsx`,
+        types: [{
+          description: 'Excel Workbook',
+          accept: {
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+          }
+        }]
+      });
+
+      // --- The code cleanly pauses here until the user clicks "Save" ---
+
+      // 2. Generate the raw Excel file bytes using SheetJS
+      const rawData = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+      // 3. Write the data directly to the chosen file handle
+      const writable = await handle.createWritable();
+      await writable.write(rawData);
+      await writable.close();
+
+      // 4. Runs strictly AFTER the file is successfully saved
+      useToast().addToast("Census exported successfully", "success");
+
+    } catch (err: any) {
+      // Suppress notifications if the user intentionally closes/cancels the native window
+      if (err.name !== 'AbortError') {
+        useToast().addToast(`Error while exporting: ${err.message || err}`, "error");
+      }
+    }
+  }
+
+  const flattenCensus = ():any => {
+    const flat = [] as any[]
+    prospect.value.census.forEach((sub: any, rn:number) => {
+      flat.push({
+        'Sub':rn+1, 'Relation':'',
+        'Last Name':sub.lstnam, 'First Name':sub.fstnam, 'MI':sub.midnam, 'Suffix':sub.suffnam,
+        'DOB':sub.dob, 'Sex':sub.sex,
+        'MED':sub.med ? 'Y' : '', 'DEN':sub.den ? 'Y' : '', 'VIS':sub.vis ? 'Y' : '',
+        'COBRA':sub.cobra ? 'Y' : '', 'Disabled':''
+      })
+      if (sub.deps && Array.isArray(sub.deps)) {
+        sub.deps.forEach((dep: any) => {
+          flat.push({
+            'Sub':'', 'Relation':dep.relation,
+            'Last Name':dep.lstnam, 'First Name':dep.fstnam, 'MI':dep.midnam, 'Suffix':dep.suffnam,
+            'DOB':dep.dob, 'Sex':dep.sex,
+            'MED':dep.med ? 'Y' : '', 'DEN':dep.den ? 'Y' : '', 'VIS':dep.vis ? 'Y' : '',
+            'COBRA': '', 'Disabled':dep.dis ? 'Y' : '',
+          })
+        })
+      }
+      // console.log(JSON.stringify(flat, null, 2))
+    });
+    return flat
+  }
+
+  const importCensus = (event:Event) => {
+    console.log("Before Import")
+    console.log(prospect.value.census)
+    const target = event.currentTarget as HTMLInputElement
+    if (target.files && target.files.length > 0) {
+      const file = target.files[0] as File
+
+      const reader = new FileReader();
+
+      // Define what happens once the file is completely read into memory
+      reader.onload = function(e) {
+        if (!e.target) {
+          useToast().addToast("No data in census reader", "error")
+          return
+        }
+        const data = e.target.result; // This is the ArrayBuffer containing file data
+
+        /* Parse file data and generate a SheetJS workbook object */
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        /* Get the name of the first worksheet */
+        const firstSheetName:string = workbook.SheetNames[0] as string
+
+        /* Get the actual worksheet object */
+        const worksheet:XLSX.WorkSheet = workbook.Sheets[firstSheetName] as XLSX.WorkSheet;
+
+        /* Convert the worksheet rows into a readable array of JSON objects */
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        // Display the formatted JSON on the page
+        mapImportJSONToCensus(jsonData)
+        setCensusDirty()
+        target.value = ''
+        target.blur()
+
+        console.log("After Import")
+        console.log(prospect.value.census)
+      }
+      reader.readAsArrayBuffer(file);
+    }
+  }
+  const addNodeIfNotNull = (parent:any, nodeName:string, value:any) => {
+    if (value) parent[nodeName] = value
+  }
+  const mapImportJSONToCensus = (json:any) => {
+    prospect.value.census.length = 0
+    let sub:any = null
+    for(let rn = 0; rn < json.length; rn++) {
+      const mem = json[rn]
+      const relation = mem["Relation"]
+      if (relation == '') {
+        sub = {
+          relation: mem["Relation"],
+          lstnam: mem["Last Name"], fstnam: mem["First Name"], midnam: mem["MI"],
+          dob: mem["DOB"], sex: mem["Sex"],
+          med: mem["MED"] != "", den: mem["DEN"] != "", vis: mem["VIS"] != "",
+          cobra: mem["COBRA"] != "", dis: mem["DIS"] != "",
+          deps: []
+        }
+        addNodeIfNotNull(sub, "suffnam", mem["Suffix"])
+        prospect.value.census.push(sub)
+      } else {
+        if (sub != null) {
+          const dep = {
+            relation: mem["Relation"],
+            lstnam: mem["Last Name"], fstnam: mem["First Name"], midnam: mem["MI"],
+            dob: mem["DOB"], sex: mem["Sex"],
+            med: mem["MED"] != "", den: mem["DEN"] != "", vis: mem["VIS"] != "",
+            cobra: mem["COBRA"] != "", dis: mem["DIS"] != ""
+          }
+          addNodeIfNotNull(dep, "suffnam", mem["Suffix"])
+          sub.deps.push(dep)
+        }
+      }
+    }
+    useToast().addToast("Census imported", "success")
+  }
 
   return {
     prospWorking, censusWorking, meta, issue,
-    censusDirty,
+    censusDirty, getCensus, updateCensus, importCensus, exportCensus,
     quotes,
-    getCensus, updateCensus,
-    prospect, createProspect, updateProspect, getProspect, searchProspects, searchResults,
+    prospect, createProspect, updateProspect, getProspect, searchProspects, searchResults, deleteProspect,
     removeMeFromRecents, setFavorite, isCurrentlyFavorite, setCensusDirty };
-});
+  }
+);

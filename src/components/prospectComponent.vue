@@ -14,27 +14,22 @@ import ClipboardIcon from "./ClipboardIcon.vue";
 
 const menuPopup = ref()
 
-const prospHandler = ref({
-  id: useId(),
+const handler = {
+  popId: useId(),
   temp: {} as any,
-  edit: () => {
-    console.log(JSON.stringify(prospStore.prospect, null, 2))
-    prospHandler.value.temp = {...prospStore.prospect}
-    B.deleteProperties(prospHandler.value.temp)
-    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
-    popup?.showModal()
+  open() { (document.getElementById(this.popId) as HTMLDialogElement).showModal() },
+  close() { (document.getElementById(this.popId) as HTMLDialogElement).close() },
+  edit() {
+    this.temp = {...prospStore.prospect}
+    // B.deleteProperties(this.temp);
+    this.open()
   },
-  save: () => {
-    prospStore.prospect = {...prospHandler.value.temp}
+  save() {
+    prospStore.prospect = {...this.temp}
     prospStore.updateProspect(prospStore.prospect)
-    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
-    popup?.close()
+    this.close()
   },
-  abort: () => {
-    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
-    popup?.close()
-  }
-})
+}
 const prospectCSZ = (prosp:any) => {
   let cnty = prosp.county
   if (!cnty) cnty = "<span style='color:silver;'>No County</span>"
@@ -54,6 +49,10 @@ const handleBookmark = (isFav:boolean) => {
 }
 const handleRefresh = () => {
   prospStore.getProspect(prospStore.prospect.id, false)
+}
+const handleDeleteProspect = () => {
+  menuPopup.value?.close()
+  prospStore.deleteProspect()
 }
 </script>
 
@@ -77,13 +76,13 @@ const handleRefresh = () => {
   <div v-if="!prospStore.prospect?.id && prospStore.prospWorking" class="prospect_info" style="text-align: center; padding-top: 3em;">
     <div class="spinner" />Loading...
   </div>
-  <div v-if="!prospStore.issue?.severity && !prospStore.prospWorking && prospStore.prospect" class="prospect_info AAA">
+  <div v-if="!prospStore.issue?.severity && prospStore.prospect" class="prospect_info AAA">
     <div style="display: flex; align-items: flex-start;">
       <table class="form-table">
         <tbody>
           <tr><td>
             <BButton v-if="prospStore.prospect" class="anchor"
-              @click="prospHandler.edit()"
+              @click="handler.edit()"
               icon="solid pen_">Edit Prospect Details</BButton>
           </td></tr>
           <tr><td>{{ prospStore.prospect.addr1 }}{{ prospStore.prospect.addr2 ? ', ' + prospStore.prospect.addr2 : '' }}</td></tr>
@@ -148,6 +147,14 @@ const handleRefresh = () => {
                 </template>
               </BConfirm>
             </BPopupMenuItem>
+            <BPopupMenuItem :disabled="prospStore.quotes.length > 0" icon="#red trash-can">
+              <BConfirm :disabled="prospStore.quotes.length > 0" @confirm="handleDeleteProspect()" pos="L2B" class="anchor" heading="Delete Prospect">Delete Prospect?
+                <template #message>
+                  This will permanently delete this prospect.
+                  <p style="color:red">This cannot be undone!</p>
+                </template>
+              </BConfirm>
+            </BPopupMenuItem>
           </template>
         </BPopup>
 
@@ -165,37 +172,37 @@ const handleRefresh = () => {
     </ul>
   </div>
   <Teleport to="body">
-  <dialog v-if="prospStore.prospect" :id="prospHandler.id">
-    <form @submit.prevent="prospHandler.save()">
+  <dialog v-if="prospStore.prospect" :id="handler.popId">
+    <form @submit.stop.prevent="handler.save()">
     <div class="titlebar">
       Edit Prospect #{{ prospStore.prospect.id }}
     </div>
     <table class="form-table">
       <tbody>
-        <tr><th>Created:</th><td class="info">{{ B.format.ts(prospHandler.temp.crttms) }} by {{ prospHandler.temp.crtusr }}</td></tr>
-        <tr><th>Updated:</th><td class="info">{{ B.format.ts(prospHandler.temp.updtms) }} by {{ prospHandler.temp.updusr }}</td></tr>
-        <tr><th>Agent of Record:</th><td class="info">{{ prospHandler.temp.agent_id }}</td></tr>
+        <tr><th>Created:</th><td class="info">{{ B.format.ts(handler.temp.crttms) }} by {{ handler.temp.crtusr }}</td></tr>
+        <tr><th>Updated:</th><td class="info">{{ B.format.ts(handler.temp.updtms) }} by {{ handler.temp.updusr }}</td></tr>
+        <tr><th>Agent of Record:</th><td class="info">{{ handler.temp.agent_id }}</td></tr>
 
         <tr><td colspan="2"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
 
-        <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="prospHandler.temp.name"></td></tr>
-        <tr><th>Contact:</th><td><input name="grpcontact" style="width: 30em;" v-model="prospHandler.temp.contact"></td></tr>
-        <tr><th>Email:</th><td><input name="grpemail" style="width: 30em;" v-model="prospHandler.temp.email"></td></tr>
-        <tr><th>Phone:</th><td><input name="grpphone" style="width: 12em;" v-model="prospHandler.temp.phone"></td></tr>
-        <tr><th>Eligible:</th><td><input name="estimate" style="width: 5em;" v-model="prospHandler.temp.subs_estimate">
+        <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="handler.temp.name"></td></tr>
+        <tr><th>Contact:</th><td><input name="grpcontact" style="width: 30em;" v-model="handler.temp.contact"></td></tr>
+        <tr><th>Email:</th><td><input name="grpemail" style="width: 30em;" v-model="handler.temp.email"></td></tr>
+        <tr><th>Phone:</th><td><input name="grpphone" style="width: 12em;" v-model="handler.temp.phone"></td></tr>
+        <tr><th>Eligible:</th><td><input name="estimate" style="width: 5em;" v-model="handler.temp.subs_estimate">
           <span class="info">(estimate) - Census has {{ B.format.valueWithUnits(prospStore.prospect.census?.length, 'subscriber') }}</span>
         </td></tr>
-        <tr><th>Address:</th><td><input name="grpaddr1" style="width: 30em;" v-model="prospHandler.temp.addr1"></td></tr>
-        <tr><th></th><td><input name="grpaddr2" style="width: 30em;" v-model="prospHandler.temp.addr2"></td></tr>
+        <tr><th>Address:</th><td><input name="grpaddr1" style="width: 30em;" v-model="handler.temp.addr1"></td></tr>
+        <tr><th></th><td><input name="grpaddr2" style="width: 30em;" v-model="handler.temp.addr2"></td></tr>
         <tr><th></th><td>
-          <input name="grpcity" style="width: 12em; margin-right: .3em;" v-model="prospHandler.temp.city">
-          <input name="grpstate" style="width: 3em; margin-right: .3em;" v-model="prospHandler.temp.state_cd">
-          <input name="grpzip" style="width: 6em;" v-model="prospHandler.temp.zip_cd">
+          <input name="grpcity" style="width: 12em; margin-right: .3em;" v-model="handler.temp.city">
+          <input name="grpstate" style="width: 3em; margin-right: .3em;" v-model="handler.temp.state_cd">
+          <input name="grpzip" style="width: 6em;" v-model="handler.temp.zip_cd">
         </td></tr>
-        <tr><th>Enroll Date:</th><td><input name="enrollDate" style="width: 10em;" v-model="prospHandler.temp.enroll_date"></td></tr>
+        <tr><th>Enroll Date:</th><td><input name="enrollDate" style="width: 10em;" v-model="handler.temp.enroll_date"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
-            <BButton type="button" class="anchor" style="margin-right: .6em;" @click="prospHandler.abort()" icon="#red solid x">Cancel</BButton>
+            <BButton type="button" class="anchor" style="margin-right: .6em;" @click="handler.close()" icon="#red solid x">Cancel</BButton>
             <BButton type="submit" class="action" icon="floppy-disk_"> Save Changes</BButton>
           </div>
         </td></tr>

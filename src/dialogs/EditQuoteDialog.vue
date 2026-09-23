@@ -159,7 +159,7 @@ const props = defineProps({
       heading="Custom Quote Submission"
       pos="T"
       :disabled="quoteStore.working != null"
-      @confirm="emit('submit')">Submit for Approval?
+      @confirm="emit('submit')">Request Approval?
       <template #message>
         After submitting this quote for approval, you will no longer be able to edit anything other than the name.
         <p>When the quote is approved and rates are available, the quote will move to Ready status.</p>

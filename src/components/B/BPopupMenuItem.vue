@@ -20,14 +20,14 @@ const doClick = () => {
 <template>
   <div :class="{item:true, disabled:props.disabled}" style="margin-bottom: .3em;" @click.stop="doClick">
     <div class="icon_container">
-      <BIcon :icon="props.icon" />
+      <BIcon :disabled="props.disabled" :icon="props.icon" />
     </div>
-    <span :class="{disabled:props.disabled, 'my-anchor':!props.disabled}"><slot/></span>
+    <span :class="{'my-disabled':props.disabled, 'anchor':!props.disabled}"><slot/></span>
   </div>
 </template>
 
 <style lang="css" scoped>
-.disabled {
+.my-disabled {
   cursor: default;
   color: silver;
   & * {

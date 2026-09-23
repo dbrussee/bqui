@@ -20,31 +20,24 @@ const reloadMessageList = () => {
 }
 
 
-const msgHandler = ref({
+const msgHandler = {
   id: useId(),
   msg: { sendto: "", subject: "", body: "" } as any,
-  show: () => {
-    const popup = document.getElementById(msgHandler.value.id) as HTMLDialogElement
-    popup?.showModal()
+  show() { (document.getElementById(this.id) as HTMLDialogElement).showModal() },
+  close() { (document.getElementById(this.id) as HTMLDialogElement).close() },
+  send() {
+    if (this.msg.sendto == '') return false
+    if (this.msg.body == '') return false
+    messageStore.sendNewMessage(this.msg.sendto, this.msg.subject, this.msg.body)
+    this.msg = { sendto: '', subject: '', body: '' }
+    this.close()
   },
-  send: () => {
-    if (msgHandler.value.msg.sendto == '') return false
-    if (msgHandler.value.msg.body == '') return false
-    messageStore.sendNewMessage(msgHandler.value.msg.sendto, msgHandler.value.msg.subject, msgHandler.value.msg.body)
-    msgHandler.value.msg = { sendto: '', subject: '', body: '' }
-    const popup = document.getElementById(msgHandler.value.id) as HTMLDialogElement
-    popup?.close()
-  },
-  delete: () => {
+  delete() {
     if (!currentMessage.value) return
     messageStore.deleteMessage(currentMessage.value.id)
     currentMessage.value = null
-  },
-  abort: () => {
-    const popup = document.getElementById(msgHandler.value.id) as HTMLDialogElement
-    popup?.close()
   }
-})
+}
 
 </script>
 <template>
@@ -115,7 +108,7 @@ const msgHandler = ref({
         </td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
-            <BButton class="anchor" @click="msgHandler.abort()" icon="#red solid x">Cancel</BButton>&nbsp;
+            <BButton class="anchor" @click="msgHandler.close()" icon="#red solid x">Cancel</BButton>&nbsp;
             <BButton class="modern" @click="msgHandler.send()" icon="solid share_">Send Message</BButton>
           </div>
         </td></tr>

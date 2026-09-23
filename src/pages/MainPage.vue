@@ -46,8 +46,8 @@ import BInfo from "@/components/B/BInfo.vue";
             <td style="text-align: center">
               &nbsp;
             </td>
-            <td style="text-align: right; width: 10em">
-              <div v-if="counters.apiCalls.active > 0" class="spinner"></div>{{counters.apiCalls.active > 1 ? ':' + counters.apiCalls.active : ''}}&nbsp;
+            <td style="text-align: right; width: 15em; color:goldenrod;">
+              {{counters.apiCalls.active > 0 ? '.'.repeat(counters.apiCalls.active) + 'Working' : ''}}&nbsp;
             </td>
           </tr>
         </tbody>

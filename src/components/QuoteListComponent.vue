@@ -22,76 +22,63 @@ watch(() => prospStore.prospect, () => {
   }
 )
 
-const quoteHandler = ref({
+const quoteHandler = {
   startPopid: useId(),
   editPopid: useId(),
   lastQtype: '',
-  startFromQuote: () => {
-    // quoteStore.quote = {}
+  openStart() { (document.getElementById(this.startPopid) as HTMLDialogElement).showModal() },
+  closeStart() { (document.getElementById(this.startPopid) as HTMLDialogElement).close() },
+  openEdit() { (document.getElementById(this.editPopid) as HTMLDialogElement).showModal() },
+  closeEdit() { (document.getElementById(this.editPopid) as HTMLDialogElement).close() },
+  startFromQuote() {
     const q = cfgQuotesList.value.pickedRow
     cfgQuotesList.value.pickedRow = null
     quoteStore.initializeFromQuote(q)
-    const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
-    popup?.showModal()
+    this.openStart()
   },
-  start: (qtype:string) => {
-    // quoteStore.quote = {}
-    // if (qtype != quoteHandler.value.lastQtype)
+  start(qtype:string) {
     quoteStore.initializeNewQuoteOptions(qtype, cfgQuotesList.value.pickedRow)
-    const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
-    popup?.showModal()
+    this.openStart()
   },
-  step2: () => {
+  step2() {
     quoteStore.createQuote().then(() => {
-      // quoteStore.quote = newquote
       cfgQuotesList.value.pickedRow = quoteStore.quote
-      // console.log(JSON.stringify(quoteStore.quote, null, 2))
-      const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
-      popup?.close()
-      const popup2 = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
-      popup2?.showModal()
+      this.closeStart()
+      this.openEdit()
     })
   },
-  delete: () => {
+  delete() {
     quoteStore.deleteQuote(quoteStore.quote.id)
-    // quoteStore.clearQuote()
     cfgQuotesList.value.pickedRow = null
-    const popup = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
-    popup?.close()
+    this.closeEdit()
   },
-  edit: () => {
+  edit() {
     quoteStore.quote = {...cfgQuotesList.value.pickedRow} // copy of data
-    const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
-    popup?.close()
-    const popup2 = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
-    popup2?.showModal()
+    this.closeStart()
+    this.openEdit()
   },
-  revertToINPROG: () => {
+  revertToINPROG() {
     const tempDescr = quoteStore.quote.descr
     quoteStore.quote = {...cfgQuotesList.value.pickedRow} // copy of data
     quoteStore.quote.status = 'INPROG'
     quoteStore.updateQuote(quoteStore.quote, "set back to In Progress").then((updatedQuote:any) => {
       if (updatedQuote) {
-        // cfgQuotesList.value.pickedRow.descr = tempDescr
         quoteStore.quote.descr = tempDescr
-        // prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
         cfgQuotesList.value.pickedRow.status = 'INPROG'
       }
     })
   },
-  save: () => {
+  save() {
     quoteStore.updateQuote(quoteStore.quote, "updated").then((updatedQuote:any) => {
       if (updatedQuote) {
         prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
         cfgQuotesList.value.pickedRow = null
       }
     })
-    const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
-    popup?.close()
-    const popup2 = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
-    popup2?.close()
+    this.closeStart()
+    this.closeEdit()
   },
-  submit: () => {
+  submit() {
     let toastMessage = 'unchanged'
     switch(quoteStore.quote.nonstd) {
       case 'N':
@@ -112,18 +99,14 @@ const quoteHandler = ref({
         cfgQuotesList.value.pickedRow = null
       }
     })
-    const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
-    popup?.close()
-    const popup2 = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
-    popup2?.close()
+    this.closeStart()
+    this.closeEdit()
   },
-  abort: () => {
-    const popup = document.getElementById(quoteHandler.value.startPopid) as HTMLDialogElement
-    popup?.close()
-    const popup2 = document.getElementById(quoteHandler.value.editPopid) as HTMLDialogElement
-    popup2?.close()
+  abort() {
+    this.closeStart()
+    this.closeEdit()
   }
-})
+}
 
 
 const cfgQuotesList = ref({
@@ -136,8 +119,8 @@ const cfgQuotesList = ref({
     { id: "id", heading: "Quote", width: "4em", flags: "R" },
     { id: "effdat", heading: "Effective", width: "5em", flags: "C" },
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
-    { id: "product", heading: "Product", width: "6em", cellclass: "mono" },
     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
+    { id: "product", heading: "Product", width: "6em", cellclass: "mono" },
     // { id: "nonstd", heading: "NS", width: "3em", flags: "C" },
     { id: "status", heading: "Status", width: "11em" },
     { id: "descr", heading: "Description" },

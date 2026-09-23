@@ -520,12 +520,12 @@ a, .anchor {
     color: var(--ui-disabled-text) !important;
   }
   & * {
-    background: none !important;
-    border: none !important;
+    /* background: none !important; */
+    /* border: none !important; */
     /* color: var(--body-text) !important; */
     &:disabled {
-      background: none !important;
-      border: none !important;
+      /* background: none !important; */
+      /* border: none !important; */
       color: var(--ui-disabled-text) !important;
     }
   }

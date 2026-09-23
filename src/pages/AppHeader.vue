@@ -13,7 +13,7 @@ import BIcon from '@/components/B/BIcon.vue';
 import APIHistory from '@/components/APIHistory.vue';
 const apiHistoryRef = ref<InstanceType<typeof APIHistory> | null>(null)
 
-const prospHandler = ref({
+const handler = {
   id: useId(),
   temp: {
     id: -1, grpnum: null, name: "", dba: null, agent_id: "",
@@ -29,20 +29,14 @@ const prospHandler = ref({
       return d.toLocaleDateString()
     })()
   } as any,
-  edit: () => {
-    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
-    popup?.showModal()
-  },
-  save: () => {
-    prospStore.createProspect(prospHandler.value.temp)
-    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
-    popup?.close()
-  },
-  abort: () => {
-    const popup = document.getElementById(prospHandler.value.id) as HTMLDialogElement
-    popup?.close()
+  open() { (document.getElementById(this.id) as HTMLDialogElement).showModal() },
+  close() { (document.getElementById(this.id) as HTMLDialogElement).close() },
+  async save() {
+    if (prospStore.prospWorking != null) return
+    await prospStore.createProspect(this.temp);
+    this.close()
   }
-})
+}
 const fave = (pid: number, isFavorite: boolean) => {
   if (pid) {
     prospStore.setFavorite(pid, isFavorite);
@@ -211,7 +205,7 @@ const openHistory = () => {
               </BPopup>&nbsp;
               <BButton
                 class="modern" icon="solid magnifying-glass_" @click="searchHandler.show()">Search&hellip;</BButton>&nbsp;<BButton
-                @click="prospHandler.edit()" class="action" icon="square-plus_">New Prospect&hellip;</BButton>
+                @click="handler.open()" class="action" icon="square-plus_">New Prospect&hellip;</BButton>
             </td>
           </tr>
         </tbody>
@@ -239,29 +233,29 @@ const openHistory = () => {
     </div>
   </dialog>
 
-  <dialog :id="prospHandler.id">
+  <dialog :id="handler.id">
     <div class="titlebar">New Prospect</div>
-    <form @submit.prevent="prospHandler.save()">
+    <form @submit.prevent="handler.save()">
     <table class="form-table">
       <tbody>
-        <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="prospHandler.temp.name"></td></tr>
-        <tr><th>Contact:</th><td><input name="grpcontact" style="width: 30em;" v-model="prospHandler.temp.contact"></td></tr>
-        <tr><th>Email:</th><td><input name="grpemail" style="width: 30em;" v-model="prospHandler.temp.email"></td></tr>
-        <tr><th>Phone:</th><td><input name="grpphone" style="width: 12em;" v-model="prospHandler.temp.phone"></td></tr>
-        <tr><th>Eligible:</th><td><input name="estimate" style="width: 5em;" v-model="prospHandler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
-        <tr><th>Address:</th><td><input name="grpaddr1" style="width: 30em;" v-model="prospHandler.temp.addr1"></td></tr>
-        <tr><th></th><td><input name="grpaddr2" style="width: 30em;" v-model="prospHandler.temp.addr2"></td></tr>
+        <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="handler.temp.name"></td></tr>
+        <tr><th>Contact:</th><td><input name="grpcontact" style="width: 30em;" v-model="handler.temp.contact"></td></tr>
+        <tr><th>Email:</th><td><input name="grpemail" style="width: 30em;" v-model="handler.temp.email"></td></tr>
+        <tr><th>Phone:</th><td><input name="grpphone" style="width: 12em;" v-model="handler.temp.phone"></td></tr>
+        <tr><th>Eligible:</th><td><input name="estimate" style="width: 5em;" v-model="handler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
+        <tr><th>Address:</th><td><input name="grpaddr1" style="width: 30em;" v-model="handler.temp.addr1"></td></tr>
+        <tr><th></th><td><input name="grpaddr2" style="width: 30em;" v-model="handler.temp.addr2"></td></tr>
         <tr><th></th><td>
-          <input name="grpcity" style="width: 12em; margin-right: .3em;" v-model="prospHandler.temp.city">
-          <input name="grpstate" style="width: 3em; margin-right: .3em;" v-model="prospHandler.temp.state_cd">
-          <input name="grpzip" style="width: 6em;" v-model="prospHandler.temp.zip_cd">
+          <input name="grpcity" style="width: 12em; margin-right: .3em;" v-model="handler.temp.city">
+          <input name="grpstate" style="width: 3em; margin-right: .3em;" v-model="handler.temp.state_cd">
+          <input name="grpzip" style="width: 6em;" v-model="handler.temp.zip_cd">
         </td></tr>
-        <tr><th>Enroll Date:</th><td><input name="enrollDate" style="width: 10em;" v-model="prospHandler.temp.enroll_date"></td></tr>
+        <tr><th>Enroll Date:</th><td><input name="enrollDate" style="width: 10em;" v-model="handler.temp.enroll_date"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
             <span v-if="prospStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
-            <BButton type="button" class="anchor" icon="#red solid x" @click="prospHandler.abort()">Cancel</BButton>&nbsp;
-            <BButton type="submit" class="action" icon="square-plus_">Create Prospect</BButton>
+            <BButton :disabled="prospStore.prospWorking != null" type="button" class="anchor" icon="#red solid x" @click="handler.close()">Cancel</BButton>&nbsp;
+            <BButton :disabled="prospStore.prospWorking != null" type="submit" class="action" icon="square-plus_">Create Prospect</BButton>
           </div>
         </td></tr>
       </tbody>
