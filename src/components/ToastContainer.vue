@@ -7,7 +7,7 @@
         :key="toast.id"
         :class="['toast-item', toast.type]"
       >
-        <span class="toast-message">{{ toast.message }}</span>
+        <span class="toast-message" :innerHTML="toast.message"/>
         <button class="toast-close" @click="removeToast(toast.id)">&times;</button>
       </div>
     </TransitionGroup>

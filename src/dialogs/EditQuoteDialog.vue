@@ -103,7 +103,7 @@ const props = defineProps({
     </table>
   </form>
   <div class="buttonbar">
-    <BConfirm v-if="quoteStore.quote.status == 'INPROG'" style="float: left;" class="anchor" gapright @confirm="emit('delete')"
+    <BConfirm v-if="userStore.getUserRightValue('QUOTE_DELETE') == 'Y' && quoteStore.quote.status == 'INPROG'" style="float: left;" class="anchor" gapright @confirm="emit('delete')"
       pos="T2R"
       tabindex="-1"
       heading="Permanently Delete Quote"

@@ -2,6 +2,8 @@
 <script setup lang="ts">
 import { appProspectStore } from "../stores/ProspectStore.ts";
 const prospStore = appProspectStore();
+import { appUserStore } from "@/stores/AppUserStore.ts";
+const userStore = appUserStore()
 import { B } from "@/composables/BUtils";
 import { useId, ref } from "vue";
 import BIcon from "./B/BIcon.vue";
@@ -147,7 +149,8 @@ const handleDeleteProspect = () => {
                 </template>
               </BConfirm>
             </BPopupMenuItem>
-            <BPopupMenuItem :disabled="prospStore.quotes.length > 0" icon="#red trash-can">
+            <BPopupMenuItem v-if="userStore.getUserRightValue('GROUP_DELETE') == 'Y'"
+                :disabled="prospStore.quotes.length > 0" icon="#red trash-can">
               <BConfirm :disabled="prospStore.quotes.length > 0" @confirm="handleDeleteProspect()" pos="L2B" class="anchor" heading="Delete Prospect">Delete Prospect?
                 <template #message>
                   This will permanently delete this prospect.

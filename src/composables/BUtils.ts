@@ -66,6 +66,25 @@ export const B = {
       }
     },
     /**
+     * converts user status code to descriptive text
+     *
+     * @param code - The code to translate from
+     * @returns The descriptive text, or the passed code if not found
+     *
+     * @example
+     * ```typescript
+     * const desc = B.codeToText.quoteStatus('ACTIVE') // returns "Active"
+     * ```
+     */
+    userStatus: (code: string) => {
+      switch (code) {
+        case "ACTIVE": return "Active";
+        case "TERM": return "Terminated";
+        case "INACTIVE": return "Inactive";
+        default: return code;
+      }
+    },
+    /**
      * converts quote nonstandard code to descriptive text
      *
      * @param code - The code to translate from

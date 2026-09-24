@@ -6,12 +6,12 @@ import { countersStore } from "../stores/CountersStore";
 const counters = countersStore();
 import { appStore } from "@/stores/AppStore.ts";
 const app = appStore()
-import { appUserStore } from "../stores/AppUserStore";
-const userStore = appUserStore();
-import { appProspectStore } from "@/stores/ProspectStore";
-const prospStore = appProspectStore();
-import BConfirm from "@/components/B/BConfirm.vue";
 import BInfo from "@/components/B/BInfo.vue";
+// import { appUserStore } from "../stores/AppUserStore";
+// const userStore = appUserStore();
+// import { appProspectStore } from "@/stores/ProspectStore";
+// const prospStore = appProspectStore();
+// import BConfirm from "@/components/B/BConfirm.vue";
 
 </script>
 <template>
@@ -35,13 +35,17 @@ import BInfo from "@/components/B/BInfo.vue";
                   <li>{{app.vers.release.getTime() < new Date().getTime() ? 'Released: ' : 'Scheduled Release: '}}{{app.vers.release.toLocaleDateString('en-US')}}</li>
                 </ul>
               </BInfo>
-              &nbsp;&nbsp;
-              <BConfirm v-if="userStore.user" :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''" class="anchor" style="color:white;" pos="T" @confirm="userStore.logout()">
-                Logout?
+              <!-- &nbsp;&nbsp;
+              <BConfirm v-if="userStore.user"
+                  icon="solid arrow-right-from-bracket_"
+                  :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
+                  class="anchor"
+                  pos="T"
+                  @confirm="userStore.logout()">Logout?
                 <template #message>
                   Log out user '{{ userStore.user.id }}'
                 </template>
-              </BConfirm>
+              </BConfirm> -->
             </td>
             <td style="text-align: center">
               &nbsp;

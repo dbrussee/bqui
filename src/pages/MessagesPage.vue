@@ -3,10 +3,11 @@
 import { B } from "@/composables/BUtils";
 import { ref, useId } from "vue";
 import { appMessageStore } from "../stores/MessagesStore";
+const messageStore = appMessageStore();
 import BIcon from "@/components/B/BIcon.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
 import BButton from "@/components/B/BButton.vue";
-const messageStore = appMessageStore();
+import { useMarkdown } from "@/composables/UseMarkdown";
 
 const currentMessage = ref<any>(null)
 const showMessage = (index:number) => {
@@ -19,17 +20,22 @@ const reloadMessageList = () => {
   messageStore.getMessages()
 }
 
-
 const msgHandler = {
   id: useId(),
-  msg: { sendto: "", subject: "", body: "" } as any,
+  previewId: useId(),
+  msg: { sendto: ref<string>(""), subject: ref<string>(''), body: ref<string>(''), format: 'text' },
   show() { (document.getElementById(this.id) as HTMLDialogElement).showModal() },
   close() { (document.getElementById(this.id) as HTMLDialogElement).close() },
+  showPreview() { (document.getElementById(this.previewId) as HTMLDialogElement).showModal() },
+  closePreview() { (document.getElementById(this.previewId) as HTMLDialogElement).close() },
   send() {
-    if (this.msg.sendto == '') return false
-    if (this.msg.body == '') return false
-    messageStore.sendNewMessage(this.msg.sendto, this.msg.subject, this.msg.body)
-    this.msg = { sendto: '', subject: '', body: '' }
+    if (this.msg.sendto.value == '') return false
+    if (this.msg.body.value == '') return false
+    messageStore.sendNewMessage(this.msg.sendto.value, this.msg.subject.value, htmlContent.value)
+    this.msg.sendto.value = ''
+    this.msg.subject.value = ''
+    this.msg.body.value = ''
+    this.closePreview()
     this.close()
   },
   delete() {
@@ -38,6 +44,7 @@ const msgHandler = {
     currentMessage.value = null
   }
 }
+const { htmlContent } = useMarkdown(msgHandler.msg.body)
 
 </script>
 <template>
@@ -87,7 +94,7 @@ const msgHandler = {
       </table>
     </div>
     <hr/>
-    <pre><p>{{ currentMessage.msgtxt }}</p></pre>
+    <div :innerHTML="currentMessage.msgtxt"/>
     <!-- <p>{{ JSON.stringify(currentMessage) }}</p> -->
   </div>
   <div v-else class="message info">
@@ -100,20 +107,33 @@ const msgHandler = {
     <div class="titlebar">New Internal Message</div>
     <table class="form-table">
       <tbody>
-        <tr><th>Send To:</th><td><input v-model="msgHandler.msg.sendto"></td></tr>
-        <tr><th>Subject:</th><td><input style="width: 30em;" v-model="msgHandler.msg.subject"></td></tr>
+        <tr><th>Send To:</th><td><input v-model="msgHandler.msg.sendto.value"></td></tr>
+        <tr><th>Subject:</th><td><input style="width: 30em;" v-model="msgHandler.msg.subject.value"></td></tr>
+        <tr><th>Format:</th><td>
+          <label><input type='radio' name='msg_format' value='text' v-model="msgHandler.msg.format">Text / Markdown</label>&nbsp;&nbsp;
+          <label><input type='radio' name='msg_format' value='html' v-model="msgHandler.msg.format">HTML</label>
+        </td></tr>
         <tr><th>Message:</th><td>
-          <textarea style="width: 100%; height: 10em; font-size: 1em;" v-model="msgHandler.msg.body"></textarea>
+          <textarea style="width: 100%; height: 10em; font-size: 1em;" v-model="msgHandler.msg.body.value"></textarea>
            <!-- <div contenteditable style="width: 100%; height: 10em;"/> -->
         </td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton class="anchor" @click="msgHandler.close()" icon="#red solid x">Cancel</BButton>&nbsp;
-            <BButton class="modern" @click="msgHandler.send()" icon="solid share_">Send Message</BButton>
+            <BButton class="modern" @click="msgHandler.showPreview()" icon="solid share_">Preview</BButton>
           </div>
         </td></tr>
       </tbody>
     </table>
+  </dialog>
+  <dialog :id="msgHandler.previewId">
+    <div style="width: 5in; height: 30em; overflow-y: scroll;">
+      <span :innerHTML = "htmlContent"></span>
+    </div>
+    <div class="buttonbar">
+      <BButton class="anchor" @click="msgHandler.closePreview()" icon="#red solid x">Cancel</BButton>&nbsp;
+      <BButton class="modern" @click="msgHandler.send()" icon="solid share_">Send Message</BButton>
+    </div>
   </dialog>
 </template>
 <style lang="css" scoped>

@@ -15,7 +15,10 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@types/dompurify": "^3.0.5",
     "@vueuse/core": "^15.0.0",
+    "dompurify": "^3.4.16",
+    "marked": "^18.0.14",
     "pinia": "^3.0.4",
     "vue": "^3.5.32",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"

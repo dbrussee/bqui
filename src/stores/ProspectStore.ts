@@ -55,7 +55,8 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     fetcher.callAPI(`/prospect/${pid}`, "DELETE").then(() => {
       B.working.clear(prospWorking);
       if (fetcher.issue) {
-        useToast().addToast(`Error deleting prospect ${pid}`, "error")
+        useToast().addToast(`Error deleting prospect ${pid}:<p>${fetcher.issue.message}</p?`, "error")
+        fetcher.issue = null
       } else {
         useToast().addToast(`Deleted prospect ${pid}`, "info")
         if (userStore.user.recents.length > 1) {

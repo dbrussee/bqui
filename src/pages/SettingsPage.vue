@@ -3,6 +3,8 @@
 import BTable from "@/components/B/BTable.vue";
 import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
+import { appProspectStore } from "@/stores/ProspectStore";
+const prospStore = appProspectStore()
 import { appStore } from "@/stores/AppStore";
 const app = appStore()
 import { B } from "@/composables/BUtils.ts";
@@ -12,6 +14,8 @@ import BButton from "@/components/B/BButton.vue";
 import BIcon from "@/components/B/BIcon.vue";
 import { useDark } from '@vueuse/core';
 import ClipboardIcon from "@/components/ClipboardIcon.vue";
+import BConfirm from "@/components/B/BConfirm.vue";
+
 const isDark = useDark({
   storageKey: null // 🚫 Disables reading and writing to localStorage
 })
@@ -84,8 +88,8 @@ const rightsConfig = ref({
   pickedRow: null as any,
   columns: [
     { id: "descr", heading: "Activity Description" },
-    { id: "value", heading: "Value", flags: "C", width: "5em" },
-    { id: "source", heading: "Source" },
+    { id: "value", heading: "Value", flags: "C", width: "5em", cellclass: 'mono' },
+    { id: "source", heading: "Source", cellclass: 'mono' },
   ]
 })
 
@@ -173,22 +177,33 @@ const saveTheme = (value:string):void => {
       <td style="vertical-align: top; padding-right: 2em; width: 50%;">
         <table class="form-table" style="margin-bottom: 1em; width: 100%;">
           <tbody>
-            <tr><th>User ID:</th><td>{{ userStore.user.id }}</td></tr>
+            <tr><th>Logged In User:</th><td class="mono">{{ userStore.user.id }}</td></tr>
             <tr><th>Name:</th><td>{{ userStore.user.lstnam }}, {{ userStore.user.fstnam }}</td></tr>
-            <tr><th>Status:</th><td>{{ userStore.user.status }}</td></tr>
+            <tr><th>Status:</th><td>{{ B.codeToText.userStatus(userStore.user.status) }}</td></tr>
             <tr><th>Email:</th><td>
               <a v-if="userStore.user.email != ''" style="cursor: pointer"
-                :href="'mailto:' + encodeURI(`${userStore.user.fstnam} ${userStore.user.lstnam} <${userStore.user.email}>`)">{{userStore.user.email}}</a>
-                <ClipboardIcon :cliptext="userStore.user.email"/>
+              :href="'mailto:' + encodeURI(`${userStore.user.fstnam} ${userStore.user.lstnam} <${userStore.user.email}>`)">{{userStore.user.email}}</a>
+              <ClipboardIcon :cliptext="userStore.user.email"/>
             </td></tr>
             <tr><th>Agency:</th><td :innerHTML="agencyDetails()"/></tr>
-            <tr><th>Last Login:</th><td>{{ B.format.ts(userStore.user.lst_login) }}</td></tr>
+            <!-- <tr><th>Last Login:</th><td>{{ B.format.ts(userStore.user.lst_login) }}</td></tr> -->
+            <tr><td colspan="2" style="text-align: center; padding-top: .5em;">
+              <BConfirm
+                icon="solid arrow-right-from-bracket_"
+                :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
+                class="anchor"
+                pos="T" @confirm="userStore.logout()">Logout?
+                <template #message>
+                  Log out user '{{ userStore.user.id }}'
+                </template>
+              </BConfirm>
+            </td></tr>
             <tr><td colspan="2"><div class="buttonbar"/></td></tr>
             <tr><th>Assigned Roles:</th><td>
               <BButton class="anchor"
-                @click="roleHandler.open()"
-                icon="solid pen_" />
-              {{ userStore.user.config.roles.join(", ") }}
+              @click="roleHandler.open()"
+              icon="solid pen_" />
+              <span class="mono">{{ userStore.user.config.roles.join(", ") }}</span>
             </td></tr>
             <tr><th>Theme:</th><td>
               <label><input @click="saveTheme('auto')" type='radio' name='user_theme' :checked="getUserTheme == 'auto'" value=''> Auto ({{ isDark ? 'Dark' : 'Light' }})</label>&nbsp;&nbsp;
