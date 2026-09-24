@@ -11,8 +11,7 @@ import { appProspectStore } from "@/stores/ProspectStore";
 const prospStore = appProspectStore();
 // import { QuoteStore } from "@/stores/QuoteStore";
 // const quoteStore = QuoteStore()
-import { onRenderTriggered } from "vue";
-import BIcon from "@/components/B/BIcon.vue";
+import { computed, onRenderTriggered } from "vue";
 
 onRenderTriggered(() => {
   if (userStore.user && userStore.user.recents) {
@@ -77,33 +76,47 @@ function getCensusCount():string {
   // if (prospectStore.censusDirty) msg += " <i class='fa-solid fa-floppy-disk' style='color: red; font-size: 1.2em;' />"
   return msg
 }
+const getUserSidebar = computed(():string => {
+  return userStore.getUserSetting('sidebar', 'full')
+})
+
 </script>
 
 <template>
   <div v-if="userStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
-      ><BIcon :working="prospStore.prospWorking" icon='solid shop_' />Prospect<span style='font-size: .8em;'>{{ getProspectID() }}</span>
-      <p style='font-size: .8em;'>{{ getProspectName() }}</p>
-    </SidebarItem>
+        :mode="getUserSidebar"
+        icon="solid shop_"
+        :working="prospStore.prospWorking"
+        :shortname="`Prospect<span style='font-size: .8em;'>${ getProspectID() }</span>`"
+        :longname="getProspectName()" />
     <SidebarItem @click="pageStore.page = 'PROPOSALS'" :current="pageStore.page == 'PROPOSALS'"
-      ><BIcon icon='file-pdf_' />Proposals
-      <p style="font-size: .8em;" v-html="getProposalsCount()"></p>
-    </SidebarItem>
+        :mode="getUserSidebar"
+        icon="file-pdf_"
+        shortname="Proposals"
+        :longname="getProposalsCount()" />
     <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
-      ><BIcon :working="prospStore.censusWorking" :icon="prospStore.censusDirty ? '#red solid people-group_' : 'solid people-group_'" />Census
-      <p style='font-size: .8em;' v-html="getCensusCount()"></p>
-    </SidebarItem>
+        :mode="getUserSidebar"
+        :icon="prospStore.censusDirty ? '#red solid people-group_' : 'solid people-group_'"
+        :working="prospStore.censusWorking"
+        shortname="Census"
+        :longname="getCensusCount()" />
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
-      ><BIcon :working="messageStore.working" icon='envelope_' />Messages
-      <p style="font-size: .8em;" v-html="getUnreadMessageCounts()"></p>
-    </SidebarItem>
+        :mode="getUserSidebar"
+        :badge="messageStore.unreadCount()"
+        icon="envelope_"
+        :working="messageStore.working"
+        shortname="Messages"
+        :longname="getUnreadMessageCounts()" />
     <SidebarItem @click="pageStore.page = 'SETTINGS'" :current="pageStore.page == 'SETTINGS'"
-      ><BIcon :working="userStore.working" icon='circle-user_' />User: <span style="font-size: .8em;">{{ userStore.user.id }}</span>
-      <p style="font-size: .8em;">{{ (userStore.user.fstnam + ' ' + userStore.user.lstnam).trim() }}</p>
-    </SidebarItem>
+        :mode="getUserSidebar"
+        icon="circle-user_"
+        :working="userStore.working"
+        :shortname="userStore.user.id"
+        :longname="(userStore.user.fstnam + ' ' + userStore.user.lstnam).trim()" />
   </div>
   <data v-else>
-    <SidebarItem>Login</SidebarItem>
+    <!-- <SidebarItem>Login</SidebarItem> -->
   </data>
 </template>
 

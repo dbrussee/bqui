@@ -238,7 +238,7 @@ export const B = {
     if ('INPROG'.indexOf(statusCode) >= 0) return "##FFBF00 solid hand_"
     if ('RATEREQ,PENDING'.indexOf(statusCode) >= 0) return "#sienna solid pause_"
     if ('READY'.indexOf(statusCode) >= 0) return "solid check_"
-    if ('ENROLLED'.indexOf(statusCode) >= 0) return "#forestgreen solid thumbs-up_"
+    if ('ENROLLED'.indexOf(statusCode) >= 0) return "#lime solid thumbs-up_"
     if ('EXPIRED'.indexOf(statusCode) >= 0) return "#red rectangle-xmark_"
     return "circle_"
   },

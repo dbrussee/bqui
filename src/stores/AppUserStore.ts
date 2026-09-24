@@ -48,7 +48,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     })
   }
   async function relogin() {
-    B.working.set(working, "Relogin...")
+    B.working.set(working, "Reload...")
     const fetcher = await new BQAPIFetcher().callAPI(`/relogin`, "POST");
     B.working.clear(working)
     user.value = fetcher.resp;
@@ -111,7 +111,6 @@ export const appUserStore = defineStore("appUserStore", () => {
   }
   async function deleteRole(code:string) {
     B.working.set(working, "...")
-
     const fetcher = await new BQAPIFetcher().callAPI(`/user/role/${code}`, "DELETE")
     B.working.clear(working)
     if (fetcher.resp != null) {
@@ -122,18 +121,28 @@ export const appUserStore = defineStore("appUserStore", () => {
     }
   }
 
-  const saveTheme = async (code:string) => {
+  const saveUserSetting = async (thing:string, code:string) => {
     B.working.set(working, "...")
-
-    const fetcher = await new BQAPIFetcher().callAPI(`/user/config/theme/${code}`, "PUT")
+    const fetcher = await new BQAPIFetcher().callAPI(`/user/config/${thing}/${code}`, "PUT")
     B.working.clear(working)
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
-      applyTheme()
       localStorage.setItem('bq-ui-theme', code)
     }
   }
 
+  const getUserSetting = (thing:string, ifNotFound:string):string => {
+    let rslt = ifNotFound
+    const config = user.value.config
+    if ("settings" in config) {
+      if (thing in config.settings) {
+        rslt = config.settings[thing].toLowerCase()
+      }
+    }
+    console.log("User Setting", thing, rslt)
+    return rslt
+
+  }
 
   const getUserRightValue = (code:string):string => {
     if (!user.value) return "ERROR"
@@ -185,7 +194,8 @@ export const appUserStore = defineStore("appUserStore", () => {
 
 
   return { isLoading: working,
-    relogin, login, logout, saveTheme, applyTheme,
+    relogin, login, logout,
+    saveSetting: saveUserSetting, applyTheme, getUserSetting,
     addRole, deleteRole,
     user, getUserRightValue, setUserRightValue, deleteUserRight, working,
     clearRecents,

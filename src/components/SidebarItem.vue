@@ -1,16 +1,60 @@
 <script setup lang="ts">
+import BIcon from './B/BIcon.vue';
+// import { appUserStore } from '@/stores/AppUserStore';
+// const userStore = appUserStore()
+
 const props = defineProps({
   current: {
     type: Boolean,
     required: false,
     default: false
-  }
+  },
+  working: {
+    type: String,
+    required: false,
+    default: null
+  },
+  mode: {
+    type: String,
+    required: false,
+    default: 'full'
+  },
+  icon: {
+    type: String,
+    required: true
+  },
+  badge: {
+    type: Number,
+    required: false,
+    default: 0
+  },
+  shortname: {
+    type: String,
+    required: true
+  },
+  longname: {
+    type: String,
+    required: false,
+    default: ''
+  },
+
 })
+
+const getIconColor = () => {
+  let rslt = ''
+  if (props.mode == 'icons') {
+    if (props.badge > 0) {
+      rslt = 'red'
+    }
+  }
+  return rslt
+}
 </script>
 
 <template>
   <div class="content" :class="{'picked': props.current}">
-    <slot />
+    <BIcon :color="getIconColor()" :style="{'font-size': props.mode == 'icons' ? '1.5em' : '1em'}" :working="props.working" :icon='props.icon' /><span v-if="props.mode == 'full'" v-html="props.shortname"/>
+      <p v-if="props.mode == 'full'" style="font-size: .8em;" v-html="props.longname"></p>
   </div>
 </template>
 

@@ -120,7 +120,7 @@ const { htmlContent } = useMarkdown(msgHandler.msg.body)
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton class="anchor" @click="msgHandler.close()" icon="#red solid x">Cancel</BButton>&nbsp;
-            <BButton class="modern" @click="msgHandler.showPreview()" icon="solid share_">Preview</BButton>
+            <BButton class="modern" @click="msgHandler.showPreview()" icon="solid share_">Preview...</BButton>
           </div>
         </td></tr>
       </tbody>
