@@ -519,15 +519,3 @@ td.statusREADYX {
 div[popover]::backdrop {
   background-color: rgba(0, 0, 0, 0.15);
 }
-
-/* Responsive collapse for small screens */
-/* @media (max-width: 768px) {
-  .page-container {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "header"
-      "sidebar"
-      "main"
-      "footer";
-  }
-} */

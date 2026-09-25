@@ -14,11 +14,6 @@ const props = defineProps({
     required: false,
     default: null
   },
-  mode: {
-    type: String,
-    required: false,
-    default: 'full'
-  },
   icon: {
     type: String,
     required: true
@@ -40,21 +35,12 @@ const props = defineProps({
 
 })
 
-const getIconColor = () => {
-  let rslt = ''
-  if (props.mode == 'icons') {
-    if (props.badge > 0) {
-      rslt = 'red'
-    }
-  }
-  return rslt
-}
 </script>
 
 <template>
   <div class="content" :class="{'picked': props.current}">
-    <BIcon :color="getIconColor()" :style="{'font-size': props.mode == 'icons' ? '1.5em' : '1em'}" :working="props.working" :icon='props.icon' /><span v-if="props.mode == 'full'" v-html="props.shortname"/>
-      <p v-if="props.mode == 'full'" style="font-size: .8em;" v-html="props.longname"></p>
+    <BIcon :working="props.working" :icon='props.icon' /><span v-html="props.shortname"/>
+      <p style="font-size: .8em;" v-html="props.longname"></p>
   </div>
 </template>
 

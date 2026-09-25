@@ -112,7 +112,7 @@ const quoteHandler = {
 
 const cfgQuotesList = ref({
   height: "calc(100vh - 12em)",
-  width: "calc(100vw - 200px - 2em)",
+  width: "calc(100vw - 200px - 1em)",
   pickedRow: null as any,
   pickedRowNumber: -1,
   no_rows_text: 'No quotes to display',

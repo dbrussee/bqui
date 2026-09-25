@@ -7,11 +7,6 @@ const counters = countersStore();
 import { appStore } from "@/stores/AppStore.ts";
 const app = appStore()
 import BInfo from "@/components/B/BInfo.vue";
-// import { appUserStore } from "../stores/AppUserStore";
-// const userStore = appUserStore();
-// import { appProspectStore } from "@/stores/ProspectStore";
-// const prospStore = appProspectStore();
-// import BConfirm from "@/components/B/BConfirm.vue";
 
 </script>
 <template>

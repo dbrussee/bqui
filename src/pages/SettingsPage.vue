@@ -34,12 +34,12 @@ const roleHandler = {
   },
   add(rolecode:string):void {
     userStore.addRole(rolecode);
-    rolesConfig.value.pickedRow = null
+    // rolesConfig.value.pickedRow = null
     // this.close()
   },
   delete(rolecode:string) {
     userStore.deleteRole(rolecode) // The row is just the role code
-    rolesConfig.value.pickedRow = null
+    // rolesConfig.value.pickedRow = null
     // this.close()
   }
 }
@@ -70,21 +70,21 @@ const rightHandler = {
   },
 }
 
-const rolesConfig = ref({
-  // height: "calc(100vh - 17em)",
-  height: "7em",
-  width: "25em",
-  pickedRow: null as any,
-  columns: [
-    { id: "role", heading: "Role", flags: "C", width: "4em"},
-    { id: "descr", heading: "Description" }
-  ]
-})
+// const rolesConfig = ref({
+//   // height: "calc(100vh - 17em)",
+//   height: "7em",
+//   width: "25em",
+//   pickedRow: null as any,
+//   columns: [
+//     { id: "role", heading: "Role", flags: "C", width: "4em"},
+//     { id: "descr", heading: "Description" }
+//   ]
+// })
 
 const rightsConfig = ref({
   // height: "calc(100vh - 9em)",
   height: "calc(100vh - 10.5em)",
-  width: "25em",
+  width: "calc((100vw - 200px) / 2)",
   pickedRow: null as any,
   columns: [
     { id: "descr", heading: "Activity Description" },
@@ -158,9 +158,6 @@ const inspectRight = ():string => {
 const getUserTheme = computed(():string => {
   return userStore.getUserSetting('theme','auto')
 })
-// const getUserSidebar = computed(():string => {
-//   return userStore.getUserSetting('sidebar','full')
-// })
 </script>
 
 <template>
@@ -203,13 +200,6 @@ const getUserTheme = computed(():string => {
               <label><input @click="userStore.saveSetting('theme','light').then(() => { userStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'light'" value='light'> Light</label>&nbsp;&nbsp;
               <label><input @click="userStore.saveSetting('theme','dark').then(() => { userStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'dark'" value='dark'> Dark</label>
             </td></tr>
-            <!--
-            TODO: Recode width of sidebar based on this setting. Currently it is using
-              a hard-coded flex value. This needs to change to be data driven
-            <tr><th>Sidebar Mode:</th><td>
-              <label><input @click="userStore.saveSetting('sidebar','full')" type='radio' name='sidebar_mode' :checked="getUserSidebar == 'full'" value='full'> Full</label>&nbsp;&nbsp;
-              <label><input @click="userStore.saveSetting('sidebar','icons')" type='radio' name='sidebar_mode' :checked="getUserSidebar == 'icons'" value='icons'> Icons Only</label>&nbsp;&nbsp;
-            </td></tr> -->
           </tbody>
         </table>
         <p style="color:orange"><i>Editing of roles / rights will move to the Maintenance app in time</i></p>
