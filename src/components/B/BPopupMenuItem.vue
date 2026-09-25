@@ -7,6 +7,14 @@ const props = defineProps({
     required: false,
     default: "#green solid checkmark"
   },
+  separator: {
+    type: String,
+    required: false,
+    default: 'none',
+    validator(value: string) {
+      return [ 'none', 'top', 'bottom', 'both' ].includes(value)
+    }
+  },
   disabled: {
     type: Boolean,
     required: false,
@@ -18,7 +26,15 @@ const doClick = () => {
 }
 </script>
 <template>
-  <div :class="{item:true, disabled:props.disabled}" style="margin-bottom: .3em;" @click.stop="doClick">
+  <div
+      :class="{
+        item:true,
+        disabled:props.disabled,
+        'separator-above':props.separator == 'top' || props.separator == 'both',
+        'separator-below':props.separator == 'bottom' || props.separator == 'both',
+      }"
+      style="margin-bottom: .3em;"
+      @click.stop="doClick">
     <div class="icon_container">
       <BIcon :disabled="props.disabled" :icon="props.icon" />
     </div>
@@ -43,6 +59,15 @@ const doClick = () => {
 div.item {
   min-width: 8em;
   cursor: pointer;
+}
+.separator-above {
+  border-top: 1px solid var(--separator-color);
+  margin-top: .25em;
+  padding-top: .25em;
+}
+.separator-below {
+  border-bottom: 1px solid var(--separator-color);
+  margin-bottom: .25em;
 }
 div.icon_container {
   display: inline-block;

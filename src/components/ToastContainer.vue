@@ -3,9 +3,10 @@
   <div class="toast-container">
     <TransitionGroup name="toast-list">
       <div
+        @click="lockToast(toast.id)"
         v-for="toast in toasts"
         :key="toast.id"
-        :class="['toast-item', toast.type]"
+        :class="['toast-item', toast.type, {locked: toast.duration == 0}]"
       >
         <span class="toast-message" :innerHTML="toast.message"/>
         <button class="toast-close" @click="removeToast(toast.id)">&times;</button>
@@ -17,7 +18,7 @@
 <script setup lang="ts">
 import { useToast } from '../composables/useToast'
 
-const { toasts, removeToast } = useToast()
+const { toasts, removeToast, lockToast } = useToast()
 </script>
 
 <!-- Update the <style> section in components/ToastContainer.vue -->
@@ -51,6 +52,7 @@ const { toasts, removeToast } = useToast()
 .error { background-color: #d32f2f; }
 .info { background-color: #0288d1; }
 .warning { background-color: #ed6c02; }
+.locked { border: 3px solid black;}
 
 .toast-close {
   background: none;

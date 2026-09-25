@@ -72,6 +72,8 @@
   --form-prompt-color: light-dark(lch(44% 46 50), bisque);
   --separator-color: light-dark(sienna, gainsboro);
   --info-text: light-dark(sienna, sienna);
+  --popover-gap: 5px;
+
 }
 
 html[data-theme="light"] {
@@ -568,7 +570,7 @@ div[popover] {
 div[popover]:popover-open {
   color-scheme: light;
   /* 1. Reset default popover centering styles */
-  margin: 0;
+  margin: 0 first;
   inset: auto;
   padding: .4em;
   border: 1px solid var(--body-text);
@@ -581,36 +583,47 @@ div.B[popover]:popover-open {
 }
 div.B2R[popover]:popover-open {
   position-area: bottom span-right;
+  margin-top: var(--popover-gap)
 }
 div.B2L[popover]:popover-open {
   position-area: bottom span-left;
+  margin-top: var(--popover-gap)
 }
 div.T[popover]:popover-open {
   position-area: top;
+  margin-bottom: var(--popover-gap)
 }
 div.T2R[popover]:popover-open {
   position-area: top span-right;
+  margin-bottom: var(--popover-gap)
 }
 div.T2L[popover]:popover-open {
   position-area: top span-left;
+  margin-bottom: var(--popover-gap)
 }
 div.L[popover]:popover-open {
   position-area: left span-all;
+  margin-right: var(--popover-gap)
 }
 div.L2B[popover]:popover-open {
   position-area: left span-bottom;
+  margin-right: var(--popover-gap)
 }
 div.L2T[popover]:popover-open {
   position-area: left span-top;
+  margin-right: var(--popover-gap)
 }
 div.R[popover]:popover-open {
   position-area: right span-all;
+  margin-left: var(--popover-gap)
 }
 div.R2B[popover]:popover-open {
   position-area: right span-bottom;
+  margin-left: var(--popover-gap)
 }
 div.R2T[popover]:popover-open {
   position-area: right span-top;
+  margin-left: var(--popover-gap)
 }
 div.TL[popover]:popover-open {
   position-area: top left ;

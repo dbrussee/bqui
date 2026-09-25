@@ -3,7 +3,6 @@
 import { useId, useAttrs } from 'vue';
 const attrs = useAttrs()
 
-import BIcon from './BIcon.vue';
 const popid = useId()
 defineOptions({
   inheritAttrs: false
@@ -11,15 +10,14 @@ defineOptions({
 // const emit = defineEmits(['buttonClicked'])
 
 const props = defineProps({
+  src: {
+    type: String,
+    required: true,
+  },
   disabled: {
     type: Boolean,
     required: false,
     default: false
-  },
-  icon: {
-    type: String,
-    required: false,
-    default: ""
   },
   width: {
     type: String,
@@ -66,12 +64,18 @@ defineExpose({
 </script>
 
 <template>
-  <button :popovertarget="popid" :disabled="props.disabled" :style="attrs.style" :class="attrs.class"
-    ><BIcon v-if="props.icon != ''" :icon="icon"/><slot/></button>
+  <input type="image"
+      tabindex="-1"
+      onmousedown="event.preventDefault()"
+      @click.stop="() => { return false; }"
+      :src="props.src"
+      :disabled="props.disabled"
+      :popovertarget="popid"
+      :style="attrs.style" :class="attrs.class" />
   <div popover="auto" :id="popid" :class="props.pos" :style="{'max-width': props.width}">
     <div style="width: fit-content">
       <div v-if="props.heading != ''" class="titlebar" v-html="props.heading" />
-      <slot name="body"/>
+      <slot/>
     </div>
   </div>
 

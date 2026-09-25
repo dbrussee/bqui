@@ -45,9 +45,9 @@ import BInfo from "@/components/B/BInfo.vue";
             <td style="text-align: center">
               &nbsp;
             </td>
-            <td style="text-align: right; width: 15em; color:goldenrod;">
+            <td style="text-align: right; width: 15em;">
               <span v-if="counters.apiCalls.active > 0" class="working-message" role="status" aria-live="polite">
-                Working<span class="working-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>
+                {{ ".".repeat(counters.apiCalls.active)}}Working
               </span>&nbsp;
             </td>
           </tr>
@@ -63,48 +63,22 @@ import BInfo from "@/components/B/BInfo.vue";
   animation: working-pulse 1.4s ease-in-out infinite;
 }
 
-.working-dots {
-  display: inline-flex;
-  width: 1.25em;
-  overflow: hidden;
-}
-
-.working-dots span {
-  animation: working-dot 1.2s steps(1, end) infinite;
-  opacity: 0.2;
-}
-
-.working-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.working-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
 @keyframes working-pulse {
   0%, 100% {
+    color: goldenrod;
     opacity: 0.65;
   }
   50% {
-    opacity: 1;
-  }
-}
-
-@keyframes working-dot {
-  0%, 100% {
-    opacity: 0.2;
-  }
-  50% {
+    color: white;
     opacity: 1;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .working-message,
-  .working-dots span {
+  .working-message {
     animation: none;
     opacity: 1;
+    color: white;
   }
 }
 </style>

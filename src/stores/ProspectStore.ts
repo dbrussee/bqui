@@ -55,10 +55,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     fetcher.callAPI(`/prospect/${pid}`, "DELETE").then(() => {
       B.working.clear(prospWorking);
       if (fetcher.issue) {
-        useToast().addToast(`Error deleting prospect ${pid}:<p>${fetcher.issue.message}</p?`, "error")
+        useToast().addToast(`Error deleting prospect ${pid}:<p>${fetcher.issue.message}</p?`, "error", 0)
         fetcher.issue = null
       } else {
-        useToast().addToast(`Deleted prospect ${pid}`, "info")
+        useToast().addToast(`Deleted prospect ${pid}`, "success")
         if (userStore.user.recents.length > 1) {
           getProspect(userStore.user.recents[1]?.pid, true)
         } else {

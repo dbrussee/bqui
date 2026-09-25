@@ -11,7 +11,10 @@ import { appUserStore } from "../stores/AppUserStore";
 const userStore = appUserStore();
 import BIcon from '@/components/B/BIcon.vue';
 import APIHistory from '@/components/APIHistory.vue';
+import BPopupMenuItem from '@/components/B/BPopupMenuItem.vue';
+import BPopupImage from '@/components/B/BPopupImage.vue';
 const apiHistoryRef = ref<InstanceType<typeof APIHistory> | null>(null)
+const sysmenuRef = ref<InstanceType<typeof BPopupImage> | null>(null)
 
 const handler = {
   id: useId(),
@@ -158,7 +161,20 @@ const openHistory = () => {
   <APIHistory ref="apiHistoryRef"/>
   <div class="container">
     <div style="padding-left: 2.5em; color: white;">
-      <img @click="openHistory()" src="../bcbc_logo.png" style="position: absolute; height: 2.5em; top: .5em; left: .8em;"/>
+      <BPopupImage ref="sysmenuRef" :disabled="!userStore.user" pos="B2R" heading="System Menu" src="/src/bcbc_logo.png"  style="position: absolute; height: 2.7em; top: .5em; left: .8em;">
+        <BPopupMenuItem icon="solid list" @click="openHistory()">API History</BPopupMenuItem>
+        <BPopupMenuItem separator="top" icon="solid arrow-right-from-bracket_">
+          <BConfirm
+            :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
+            class="anchor"
+            pos="R" @confirm="sysmenuRef?.close(); userStore.logout()">Logout?
+            <template #message>
+              Log out user '{{ userStore.user?.id }}'
+            </template>
+          </BConfirm>
+        </BPopupMenuItem>
+      </BPopupImage>
+
       <i style="font-size:1.5em">B<b></b>lueQuote</i>
     </div>
     <div>

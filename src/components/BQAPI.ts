@@ -62,7 +62,7 @@ export default class BQAPIFetcher {
       if (!response.ok) {
         this.status = 'ERROR'
         historyEntry.result = "ERROR " + response.status
-        useToast().addToast(`HTTP error! status: ${response.status} for ${method} ${endpoint}`, "error")
+        useToast().addToast(`HTTP error! status: ${response.status} for ${method} ${endpoint}`, "error", 0)
         counters.apiCalls.active--
         counters.apiCalls.error++
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -106,7 +106,7 @@ export default class BQAPIFetcher {
       const msg = msg_list[0]
       const stack = msg_list.length > 1 ? msg_list[1] : ''
       counters.lastError.unshift({path: endpoint, method: method, msg: msg, stack: stack, ts: B.format.ts(new Date)})
-      useToast().addToast(`System error! Message: ${msg}`, "error")
+      useToast().addToast(`System error! Message: ${msg}`, "error", 0)
       this.status = 'ERROR'
       historyEntry.result = "ERROR " + msg
       // try {

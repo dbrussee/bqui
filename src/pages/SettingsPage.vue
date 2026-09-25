@@ -83,7 +83,7 @@ const rightHandler = {
 
 const rightsConfig = ref({
   // height: "calc(100vh - 9em)",
-  height: "calc(100vh - 10.5em)",
+  height: "calc(100vh - 9.5em)",
   width: "calc((100vw - 200px) / 2)",
   pickedRow: null as any,
   columns: [
