@@ -15,37 +15,14 @@ import BPopupMenuItem from '@/components/B/BPopupMenuItem.vue';
 import BPopupImage from '@/components/B/BPopupImage.vue';
 const apiHistoryRef = ref<InstanceType<typeof APIHistory> | null>(null)
 const sysmenuRef = ref<InstanceType<typeof BPopupImage> | null>(null)
+import { useNewProspectPopup } from "@/popups/NewProspect/useNewProspectPopup";
+import { useSearchProspectPopup } from '@/popups/SearchProspect/useSearchProspectPopup';
 
-const handler = {
-  id: useId(),
-  temp: {
-    id: -1, grpnum: null, name: "", dba: null, agent_id: "",
-    addr1: "", addr2: "", city: "", state_cd: "NC", zip_cd: "", county: null,
-    size_cd: "", group_type: "", subs_estimate: 1,
-    created_ts: "", created_by: "",
-    last_quoted_ts: null, enrolled_ts: null,
-    contact: "", phone: "", email: "",
-    enroll_date: (() => {
-      const d = new Date()
-      d.setMonth(d.getMonth() + 3)
-      d.setDate(1)
-      return d.toLocaleDateString()
-    })()
-  } as any,
-  open() { (document.getElementById(this.id) as HTMLDialogElement).showModal() },
-  close() { (document.getElementById(this.id) as HTMLDialogElement).close() },
-  async save() {
-    if (prospStore.prospWorking != null) return
-    await prospStore.createProspect(this.temp);
-    this.close()
-  }
-}
 const fave = (pid: number, isFavorite: boolean) => {
   if (pid) {
     prospStore.setFavorite(pid, isFavorite);
   }
 };
-
 
 const favesPopover = ref()
 const recentPopover = ref()
@@ -220,64 +197,19 @@ const openHistory = () => {
                 </template>
               </BPopup>&nbsp;
               <BButton
-                class="modern" icon="solid magnifying-glass_" @click="searchHandler.show()">Search&hellip;</BButton>&nbsp;<BButton
-                @click="handler.open()" class="action" icon="square-plus_">New Prospect&hellip;</BButton>
+                @click="useSearchProspectPopup().openSearch()"
+                class="modern"
+                icon="solid magnifying-glass_">Search&hellip;</BButton>&nbsp;
+              <BButton
+                @click="useNewProspectPopup().openNewProspect()"
+                class="action"
+                icon="square-plus_">New Prospect&hellip;</BButton>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
-
-  <dialog :id="searchHandler.id">
-    <form @submit.prevent="searchHandler.search()">
-    <table class="form-table centerme">
-      <tbody>
-        <tr><th><BIcon icon="solid magnifying-glass"/>Search Text:</th>
-            <td><input name="searchQuery" style="width: 30em;" v-model="searchHandler.temp.query"><BButton>Search</BButton></td></tr>
-      </tbody>
-    </table>
-    </form>
-    <BTable nofooter :config="cfgSearchResults" :rows="prospStore.searchResults"
-      @pick="(row) => searchHandler.pick(row)"
-      @dblpick="(row) => searchHandler.load(row)"
-    />
-    <div class="buttonbar">
-      <span v-if="prospStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
-      <BButton class="anchor gapright" icon="#red solid x" @click="searchHandler.abort()">Cancel</BButton>
-      <BButton :disabled="!cfgSearchResults.pickedRow" class="modern" icon="solid check" @click="searchHandler.load(cfgSearchResults.pickedRow)">Load</BButton>
-    </div>
-  </dialog>
-
-  <dialog :id="handler.id">
-    <div class="titlebar">New Prospect</div>
-    <form @submit.prevent="handler.save()">
-    <table class="form-table">
-      <tbody>
-        <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="handler.temp.name"></td></tr>
-        <tr><th>Contact:</th><td><input name="grpcontact" style="width: 30em;" v-model="handler.temp.contact"></td></tr>
-        <tr><th>Email:</th><td><input name="grpemail" style="width: 30em;" v-model="handler.temp.email"></td></tr>
-        <tr><th>Phone:</th><td><input name="grpphone" style="width: 12em;" v-model="handler.temp.phone"></td></tr>
-        <tr><th>Eligible:</th><td><input name="estimate" style="width: 5em;" v-model="handler.temp.subs_estimate"> <span class="info">(estimate)</span></td></tr>
-        <tr><th>Address:</th><td><input name="grpaddr1" style="width: 30em;" v-model="handler.temp.addr1"></td></tr>
-        <tr><th></th><td><input name="grpaddr2" style="width: 30em;" v-model="handler.temp.addr2"></td></tr>
-        <tr><th></th><td>
-          <input name="grpcity" style="width: 12em; margin-right: .3em;" v-model="handler.temp.city">
-          <input name="grpstate" style="width: 3em; margin-right: .3em;" v-model="handler.temp.state_cd">
-          <input name="grpzip" style="width: 6em;" v-model="handler.temp.zip_cd">
-        </td></tr>
-        <tr><th>Enroll Date:</th><td><input name="enrollDate" style="width: 10em;" v-model="handler.temp.enroll_date"></td></tr>
-        <tr><td colspan="2">
-          <div class="buttonbar">
-            <span v-if="prospStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
-            <BButton :disabled="prospStore.prospWorking != null" type="button" class="anchor" icon="#red solid x" @click="handler.close()">Cancel</BButton>&nbsp;
-            <BButton :disabled="prospStore.prospWorking != null" type="submit" class="action" icon="square-plus_">Create Prospect</BButton>
-          </div>
-        </td></tr>
-      </tbody>
-    </table>
-    </form>
-  </dialog>
 
 </template>
 

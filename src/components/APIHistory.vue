@@ -13,12 +13,12 @@ const cfgHistory = ref({
   pickedRow: null as any,
   height: "50vh",
   columns: [
-    { id: "ts", heading: "Timestamp", width: "12em" },
-    { id: "category", heading: "", width: "2em", flags: "C" },
+    { id: "ts", heading: "Timestamp", width: "fit-content", cellclass:'mono mini' },
+    { id: "category", heading: "", width: "2em", flags: "C", cellclass:'mono mini' },
     // { id: "body", heading: "Body", width: "2em", flags: "C" },
     // { id: "issue", heading: "Err", width: "2em", flags: "C" },
-    { id: "response.meta.request.httpMethod", heading: "", width: "4em", flags: "R"},
-    { id: "endpoint", heading: "Endpoint", width: "35em" },
+    { id: "response.meta.request.httpMethod", heading: "", width: "4em", flags: "R", cellclass:'mono mini'},
+    { id: "endpoint", heading: "Endpoint", width: "35em", cellclass:'mono mini' },
   ]
 })
 const popid = useId()
@@ -147,6 +147,9 @@ const simplifyEndpoint = (row:any) => {
 </template>
 
 <style scoped>
+.mini {
+  font-size: .75em;
+}
 /* pre {
   padding: .3em;
   background-color: gainsboro;

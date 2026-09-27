@@ -139,7 +139,7 @@ export const appUserStore = defineStore("appUserStore", () => {
         rslt = config.settings[thing].toLowerCase()
       }
     }
-    console.log("User Setting", thing, rslt)
+    // console.log("User Setting", thing, rslt)
     return rslt
 
   }

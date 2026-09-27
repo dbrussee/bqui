@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import ToastContainer from './components/ToastContainer.vue'
 import MainPage from './pages/MainPage.vue'
+import NewProspectPopup from './popups/NewProspect/NewProspectPopup.vue';
+import SearchProspectPopup from './popups/SearchProspect/SearchProspectPopup.vue';
 import { appStore } from './stores/AppStore.ts';
 import { appUserStore } from './stores/AppUserStore.ts';
 const userStore = appUserStore()
@@ -18,4 +20,7 @@ if (theme) {
 <template>
   <MainPage />
   <ToastContainer />
+  <NewProspectPopup />
+  <SearchProspectPopup />
+
 </template>

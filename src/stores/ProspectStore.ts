@@ -24,8 +24,8 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     },
   });
   const issue = ref<any>({});
-  const prospWorking = ref<any>(null)
-  const censusWorking = ref<any>(null)
+  const prospWorking = ref<string|null>(null)
+  const censusWorking = ref<string|null>(null)
 
   async function removeMeFromRecents() {
     const fetcher = new BQAPIFetcher()
@@ -59,8 +59,9 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         fetcher.issue = null
       } else {
         useToast().addToast(`Deleted prospect ${pid}`, "success")
-        if (userStore.user.recents.length > 1) {
-          getProspect(userStore.user.recents[1]?.pid, true)
+        userStore.user = fetcher.resp;
+        if (userStore.user.recents && userStore.user.recents.length > 0) {
+          getProspect(userStore.user.recents[0]?.pid, true)
         } else {
           prospect.value = null
         }
@@ -191,9 +192,9 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
 
   async function createProspect(data:any) {
-    prospWorking.value = true
+    B.working.set(prospWorking, "Creating...")
     const fetcher = await new BQAPIFetcher().callAPI(`/prospect`, 'POST', data)
-    prospWorking.value = false
+    B.working.clear(prospWorking)
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp.prosp
       quotes.value.length = 0
@@ -347,8 +348,8 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
 
   const importCensus = (event:Event) => {
-    console.log("Before Import")
-    console.log(prospect.value.census)
+    // console.log("Before Import")
+    // console.log(prospect.value.census)
     const target = event.currentTarget as HTMLInputElement
     if (target.files && target.files.length > 0) {
       const file = target.files[0] as File
@@ -381,8 +382,8 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         target.value = ''
         target.blur()
 
-        console.log("After Import")
-        console.log(prospect.value.census)
+        // console.log("After Import")
+        // console.log(prospect.value.census)
       }
       reader.readAsArrayBuffer(file);
     }

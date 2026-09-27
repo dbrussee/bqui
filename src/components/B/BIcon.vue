@@ -8,7 +8,7 @@ defineOptions({
 
 const props = defineProps({
   working: {
-    type: String,
+    type: [String,null],
     required: false,
     default: null
   },

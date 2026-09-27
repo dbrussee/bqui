@@ -22,8 +22,11 @@ const props = defineProps({
 </script>
 
 <template>
-  <dialog :id="props.popupid">
+  <dialog :id="props.popupid" style="position:relative">
   <div class="titlebar">Edit {{ B.codeToText.qtype(quoteStore.quote.qtype)}} Quote #{{ quoteStore.quote.id }}</div>
+  <div style="position: absolute; top: .5em; right: .5em;" class="info">
+    Status: <BIcon :icon="B.statusIcon(quoteStore.quote.status)"/>{{ B.codeToText.quoteStatus(quoteStore.quote.status) }}
+  </div>
   <form @submit.stop.prevent="emit('save')">
     <table class="form-table">
       <tbody>
@@ -35,10 +38,7 @@ const props = defineProps({
         <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
 
         <tr><th>Product:</th><td colspan="3" class="info">{{ B.codeToText.rlob(quoteStore.quote.rlob) }} ({{ quoteStore.quote.rlob }})</td></tr>
-        <tr><th>Effective:</th><td class="info">{{ B.format.effdat(quoteStore.quote.effdat) }}</td>
-            <th>Status:</th><td class="info">
-              <BIcon :icon="B.statusIcon(quoteStore.quote.status)"/>{{ B.codeToText.quoteStatus(quoteStore.quote.status) }}
-            </td></tr>
+        <tr><th>Effective:</th><td colspan="3" class="info">{{ B.format.effdat(quoteStore.quote.effdat) }}</td></tr>
         <tr v-if="quoteStore.quote.status != 'INPROG'">
             <th>Design:</th><td class="info">{{ B.codeToText.nonstd(quoteStore.quote.nonstd) }}</td>
             <th>Funding:</th><td class="info">{{ B.codeToText.funding(quoteStore.quote.funding) }}</td></tr>
@@ -107,7 +107,7 @@ const props = defineProps({
       pos="T2R"
       tabindex="-1"
       heading="Permanently Delete Quote"
-      icon="trash-can_">Delete...
+      icon="trash-can_">Delete?
       <template #message>
         Since this quote has a status of 'In Progress',
         you are allowed to permanently delete it. However:

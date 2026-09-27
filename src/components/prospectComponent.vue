@@ -14,6 +14,9 @@ import BConfirm from "./B/BConfirm.vue";
 import BPopupMenuItem from "./B/BPopupMenuItem.vue";
 import ClipboardIcon from "./ClipboardIcon.vue";
 
+import { useNewProspectPopup } from "@/popups/NewProspect/useNewProspectPopup.ts";
+import { useSearchProspectPopup } from "@/popups/SearchProspect/useSearchProspectPopup.ts";
+
 const menuPopup = ref()
 
 const handler = {
@@ -31,6 +34,12 @@ const handler = {
     prospStore.updateProspect(prospStore.prospect)
     this.close()
   },
+  search() {
+
+  },
+  createProspect() {
+
+  }
 }
 const prospectCSZ = (prosp:any) => {
   let cnty = prosp.county
@@ -56,6 +65,7 @@ const handleDeleteProspect = () => {
   menuPopup.value?.close()
   prospStore.deleteProspect()
 }
+
 </script>
 
 <style scoped>
@@ -168,10 +178,16 @@ const handleDeleteProspect = () => {
   <div v-if="!prospStore.issue?.severity && !prospStore.prospWorking && !prospStore.prospect" class="prospect_info BBB">
     No prospect is currently selected.
     <ul style="margin-top: .5em">
-      <li>Use the [ <BIcon icon="square-plus_">New Prospect...</BIcon>] button to create a new Prospect</li>
-      <li>Use the [ <BIcon icon="solid list-ul_">Recent</BIcon> ] link to show a history of your recent Prospects</li>
-      <li>Use the [ <BIcon icon="bookmark_">Bookmarked</BIcon> ] link to pick from one of your bookmarked Prospects</li>
-      <li>Use the [ <BIcon icon="solid magnifying-glass_">Search...</BIcon> ] Search button above to find prospects by ID or by name</li>
+      <li>
+        Use the <BButton class="modern" icon="solid magnifying-glass_" @click="useSearchProspectPopup().openSearch()">Search&hellip;</BButton>
+        button to find prospects by ID, Name, etc
+      </li>
+      <li>
+        Use the <BButton class="action" icon="square-plus_" @click="useNewProspectPopup().openNewProspect()">New Prospect&hellip;</BButton>
+        button to create a new Prospect
+      </li>
+      <li v-if="userStore.user.recents && userStore.user.recents.length > 0">Use the [ <BIcon icon="solid list-ul_">Recent</BIcon> ] link to show a history of your recent Prospects</li>
+      <li v-if="userStore.user.faves && userStore.user.faves.length > 0">Use the [ <BIcon icon="bookmark_">Bookmarks</BIcon> ] link to pick from one of your bookmarked Prospects</li>
     </ul>
   </div>
   <Teleport to="body">

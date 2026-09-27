@@ -10,7 +10,7 @@ const props = defineProps({
     default: false
   },
   working: {
-    type: String,
+    type: [String,null],
     required: false,
     default: null
   },
