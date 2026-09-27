@@ -11,11 +11,9 @@ import BButton from "./B/BButton.vue";
 import BInfo from "./B/BInfo.vue";
 import BPopup from "./B/BPopup.vue";
 import BConfirm from "./B/BConfirm.vue";
-import BPopupMenuItem from "./B/BPopupMenuItem.vue";
+// import BPopupMenuItem from "./B/BPopupMenuItem.vue";
 import ClipboardIcon from "./ClipboardIcon.vue";
 
-import { useNewProspectPopup } from "@/popups/NewProspect/useNewProspectPopup.ts";
-import { useSearchProspectPopup } from "@/popups/SearchProspect/useSearchProspectPopup.ts";
 
 const menuPopup = ref()
 
@@ -34,11 +32,9 @@ const handler = {
     prospStore.updateProspect(prospStore.prospect)
     this.close()
   },
-  search() {
-
-  },
-  createProspect() {
-
+  deleteProspect() {
+    this.close()
+    prospStore.deleteProspect()
   }
 }
 const prospectCSZ = (prosp:any) => {
@@ -47,24 +43,20 @@ const prospectCSZ = (prosp:any) => {
   return `${prosp.city}, ${prosp.state_cd}&nbsp; ${prosp.zip_cd} <i style='font-size: .9em'>(${cnty})</i>`
 }
 
-const removeMeFromRecents = () => {
-  if (!prospStore.prospect) return
-  menuPopup.value?.close()
-  prospStore.removeMeFromRecents()
-}
+// const removeMeFromRecents = () => {
+//   if (!prospStore.prospect) return
+//   menuPopup.value?.close()
+//   prospStore.removeMeFromRecents()
+// }
 
-const handleBookmark = (isFav:boolean) => {
-  menuPopup.value?.close()
-  if (!prospStore.prospect) return
-  prospStore.setFavorite(prospStore.prospect.id, isFav)
-}
-const handleRefresh = () => {
-  prospStore.getProspect(prospStore.prospect.id, false)
-}
-const handleDeleteProspect = () => {
-  menuPopup.value?.close()
-  prospStore.deleteProspect()
-}
+// const handleBookmark = (isFav:boolean) => {
+//   menuPopup.value?.close()
+//   if (!prospStore.prospect) return
+//   prospStore.setFavorite(prospStore.prospect.id, isFav)
+// }
+// const handleRefresh = () => {
+//   prospStore.getProspect(prospStore.prospect.id, false)
+// }
 
 </script>
 
@@ -139,35 +131,39 @@ const handleDeleteProspect = () => {
       <div style="position: absolute; right: 0;">
         <BPopup ref="menuPopup" class="anchor" icon="solid bars" style="font-size:1.5em" pos="L2B">
           <template #body>
-            <BPopupMenuItem icon="solid repeat" @click="handleRefresh()">Refresh Prospect</BPopupMenuItem>
-            <BPopupMenuItem :icon="prospStore.isCurrentlyFavorite() ? '#goldenrod bookmark' : '#goldenrod solid bookmark'" @click="handleBookmark(!prospStore.isCurrentlyFavorite())">
+            <div class="titlebar">Prospect Actions</div>
+            <!-- <BPopupMenuItem icon="solid repeat" @click="handleRefresh()">Refresh Prospect</BPopupMenuItem> -->
+            <!-- <BPopupMenuItem :icon="prospStore.isCurrentlyFavorite() ? '#goldenrod bookmark' : '#goldenrod solid bookmark'" @click="handleBookmark(!prospStore.isCurrentlyFavorite())">
               {{ prospStore.isCurrentlyFavorite() ? 'Un-Bookmark Prospect' : 'Bookmark Prospect' }}
-            </BPopupMenuItem>
-            <BPopupMenuItem icon="solid eject">
+            </BPopupMenuItem> -->
+            <!-- <BPopupMenuItem icon="solid eject">
               <BConfirm @confirm="removeMeFromRecents()" width="30em" pos="L2B" class="anchor" heading="Forget Prospect">
                 Forget Recent?
                 <template #message>
                   <ul>
                     <li class="info">Remove this prospect from your Recents list</li>
-                    <li class="info">Load the next most recent prospect in the list.</li>
+                    <li v-if="userStore.user.recents && userStore.user.recents.length > 1" class="info">Load the next most recent prospect in the list.</li>
+                    <li v-else class="info">There are no other prospects in your Recents list, so you will need to
+                      create a new prospect, search for existing prospects or use your Bookmarks list.
+                    </li>
                   </ul>
                   <p>
-                    This will <b style="color:red"><u>NOT</u></b> change the prospect in any way,
-                    so if it was bookmarked it will still be there, and you can search for and
+                    This prospect will <b style="color:red"><u>NOT</u></b> be changed in any way.
+                    If it was bookmarked it will still be there, and you can search for and
                     find it again at any time.
                   </p>
                 </template>
               </BConfirm>
-            </BPopupMenuItem>
-            <BPopupMenuItem v-if="userStore.getUserRightValue('GROUP_DELETE') == 'Y'"
+            </BPopupMenuItem> -->
+            <!-- <BPopupMenuItem v-if="userStore.getUserRightValue('GROUP_DELETE') == 'Y'"
                 :disabled="prospStore.quotes.length > 0" icon="#red trash-can">
-              <BConfirm :disabled="prospStore.quotes.length > 0" @confirm="handleDeleteProspect()" pos="L2B" class="anchor" heading="Delete Prospect">Delete Prospect?
+              <BConfirm :disabled="prospStore.quotes.length > 0" @confirm="handler.deleteProspect()" pos="L2B" class="anchor" heading="Delete Prospect">Delete Prospect?
                 <template #message>
                   This will permanently delete this prospect.
                   <p style="color:red">This cannot be undone!</p>
                 </template>
               </BConfirm>
-            </BPopupMenuItem>
+            </BPopupMenuItem> -->
           </template>
         </BPopup>
 
@@ -175,7 +171,7 @@ const handleDeleteProspect = () => {
     </div>
     <!-- </div> -->
   </div>
-  <div v-if="!prospStore.issue?.severity && !prospStore.prospWorking && !prospStore.prospect" class="prospect_info BBB">
+  <!-- <div v-if="!prospStore.issue?.severity && !prospStore.prospWorking && !prospStore.prospect" class="prospect_info BBB">
     No prospect is currently selected.
     <ul style="margin-top: .5em">
       <li>
@@ -189,13 +185,31 @@ const handleDeleteProspect = () => {
       <li v-if="userStore.user.recents && userStore.user.recents.length > 0">Use the [ <BIcon icon="solid list-ul_">Recent</BIcon> ] link to show a history of your recent Prospects</li>
       <li v-if="userStore.user.faves && userStore.user.faves.length > 0">Use the [ <BIcon icon="bookmark_">Bookmarks</BIcon> ] link to pick from one of your bookmarked Prospects</li>
     </ul>
-  </div>
+  </div> -->
   <Teleport to="body">
   <dialog v-if="prospStore.prospect" :id="handler.popId">
-    <form @submit.stop.prevent="handler.save()">
     <div class="titlebar">
       Edit Prospect #{{ prospStore.prospect.id }}
     </div>
+    <div v-if="userStore.getUserRightValue('GROUP_DELETE') == 'Y'" style="position: absolute; top: .5em; right: .5em;" class="info">
+      <BConfirm
+      :disabled="prospStore.quotes.length > 0"
+      icon="trash-can"
+      @confirm="handler.deleteProspect()"
+      pos="L2B"
+      class="anchor"
+      :heading="'Delete Prospect #' + prospStore.prospect.id"
+      ><template #message>
+        <ul>
+          <li>You are granted the right to delete prospects</li>
+          <li>There are no quotes related to this prospect</li>
+        </ul>
+        <p>This prospect will be <b style="color:red"><u>permanently</u></b> deleted!.</p>
+        <p style="color:sienna"><BIcon icon="#red solid warning">This cannot be undone!</BIcon></p>
+      </template>
+      </BConfirm>
+    </div>
+    <form @submit.stop.prevent="handler.save()">
     <table class="form-table">
       <tbody>
         <tr><th>Created:</th><td class="info">{{ B.format.ts(handler.temp.value.crttms) }} by {{ handler.temp.value.crtusr }}</td></tr>
