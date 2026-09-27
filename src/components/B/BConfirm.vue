@@ -105,10 +105,10 @@ const doBlur = ():void => {
 
 <template>
   <button v-if="props.bypass" :disabled="props.disabled" :class="attrs.class" :style="[attrs.style, {marginRight: props.gapright ? '.4em' : '', marginLeft: props.gapleft ? '.4em' : ''}]" @click="doBlur(); emit('confirm')">
-    <BIcon :icon="props.icon" :source="props.source"><slot/></BIcon>
+    <BIcon :icon="props.icon" :disabled="props.disabled" :source="props.source"><slot/></BIcon>
   </button>
   <button v-if="!props.bypass" :popovertarget="popid" :disabled="props.disabled" :class="attrs.class" :style="[attrs.style, {marginRight: props.gapright ? '.4em' : '', marginLeft: props.gapleft ? '.4em' : ''}]" @click="doBlur()">
-    <BIcon :icon="props.icon" :source="props.source"><slot/></BIcon>
+    <BIcon :icon="props.icon" :source="props.source" :disabled="props.disabled"><slot/></BIcon>
   </button>
   <div :id="popid" popover :class="props.pos" :style="{maxWidth:props.width}">
     <div v-if="props.heading != ''" class="titlebar" v-html="props.heading" /><slot

@@ -35,12 +35,17 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       if (fetcher.issue) {
         useToast().addToast(`Error removing prospect ${pid} from Recents`, "error")
       } else {
-        useToast().addToast(`Removed prospect ${pid} from Recents`, "info")
-        if (userStore.user.recents.length > 1) {
-          getProspect(userStore.user.recents[1]?.pid, true)
-        } else {
+        if (fetcher.resp == null) {
+          userStore.user.recents = null
           prospect.value = null
+          censusHash.value = ''
+          censusDirty.value = false
+        } else {
+          userStore.user.recents = [...fetcher.resp]
+          getProspect(userStore.user.recents[0]?.pid, true)
         }
+
+        useToast().addToast(`Removed prospect ${pid} from Recents`, "info")
       }
       meta.value = fetcher.meta
       issue.value = fetcher.issue

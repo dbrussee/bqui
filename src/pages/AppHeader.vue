@@ -45,8 +45,15 @@ function clearRecents() {
   pickedRecent.value = "";
   recentPopover.value?.close();
 }
+const removeMeFromRecents = () => {
+  prospStore.removeMeFromRecents().then(() => {
+    pickedRecent.value = "";
+    recentPopover.value?.close();
+  })
+}
 const cfgFaves = ref({
   width: "25em",
+  no_rows_text: 'No bookmarked prospects',
   columns: [
     { id: "pid", heading: "Prosp", width: "4em", flags: "R" },
 
@@ -55,6 +62,7 @@ const cfgFaves = ref({
 })
 const cfgRecents = ref({
   width: "25em",
+  no_rows_text: 'No recent prospects',
   columns: [
     { id: "pid", heading: "Prosp", width: "4em", flags: "R" },
     { id: "name", heading: "Name", width: "20em" },
@@ -168,16 +176,48 @@ const openHistory = () => {
               <BPopup class="anchor anchor-in-header" pos="B" icon="solid list-ul_" ref="recentPopover">Recent
                 <template #body>
                   <BTable nofooter
-                    heading="Recently Accessed Prospects"
+                    heading="Recently Viewed Prospects"
                     :rows="userStore.user.recents"
                     :config="cfgRecents"
                     @pick="(row: any) => pickRecent(row.pid)"
                   />
-                  <div v-if="userStore.user.recents && userStore.user.recents.length > 0" class="buttonbar">
-                    <span v-if="prospStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
-                    <BConfirm icon="#red solid x" class="anchor" @confirm="clearRecents()">Clear List
+                  <div class="buttonbar">
+                    <BConfirm
+                        @confirm="removeMeFromRecents()"
+                        :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
+                        icon="solid eject"
+                        width="30em"
+                        pos="L2B"
+                        class="anchor"
+                        heading="Forget This Prospect"
+                        :disabled="!userStore.user.recents || userStore.user.recents.length < 1"
+                      >Forget This?
                       <template #message>
-                        Permanently clear your recent prospects?
+                        <ul>
+                          <li class="info">Remove the current prospect from your Recents list</li>
+                          <li v-if="userStore.user.recents && userStore.user.recents.length > 1" class="info">Load the next most recent prospect in the list.</li>
+                          <li v-else class="info">There are no other prospects in your Recents list, so you will need to
+                            create a new prospect, search for existing prospects or use your Bookmarks list.
+                          </li>
+                        </ul>
+                        <p>
+                          This prospect will <b><u>NOT</u></b> be changed in any way.
+                          If it was bookmarked it will still be there, and you can search for and
+                          find it again at any time.
+                        </p>
+                      </template>
+                    </BConfirm>&nbsp;
+
+                    <BConfirm
+                      @confirm="clearRecents()"
+                      icon="solid minimize"
+                      class="anchor"
+                      :disabled="!userStore.user.recents || userStore.user.recents.length < 2"
+                    >Clear Others?
+                      <template #message>
+                        All but the currently showing prospect will be forgotten. They can
+                        still be searched for, and if they are in your bookmarks they
+                        will remain there.
                         <p style="color: red">This cannot be undone!</p>
                       </template>
                     </BConfirm>&nbsp;

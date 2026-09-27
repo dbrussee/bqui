@@ -12,7 +12,7 @@ export function useNewProspectPopup() {
   function closeNewProspect() {
     popRef.value?.close()
   }
-  async function saveNewProspect(data:any):Promise<void> {
+  async function createProspect(data:any):Promise<void> {
     if (appProspectStore().prospWorking != null) return
     await appProspectStore().createProspect(data).then(() => {
       closeNewProspect()
@@ -21,6 +21,6 @@ export function useNewProspectPopup() {
 
   return {
     popRef,
-    openNewProspect, closeNewProspect, saveNewProspect
+    openNewProspect, closeNewProspect, createProspect
   }
 }

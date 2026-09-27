@@ -179,14 +179,11 @@ export const appUserStore = defineStore("appUserStore", () => {
 
   async function clearRecents() {
     B.working.set(working, "...")
-    const userStore = appUserStore()
-    delete userStore.user.recents
-
     const fetcher = new BQAPIFetcher()
     fetcher.callAPI(`/recents`, "DELETE").then(() => {
-    B.working.clear(working)
-    // meta.value = fetcher.meta
-    // issue.value = fetcher.issue
+      B.working.clear(working)
+      const userStore = appUserStore()
+      userStore.user.recents = [...fetcher.resp]
       useToast().addToast("Cleared Recents List", "info")
 
     })

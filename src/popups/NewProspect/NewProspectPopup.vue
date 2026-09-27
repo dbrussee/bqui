@@ -4,7 +4,7 @@ import BButton from '@/components/B/BButton.vue'
 import { appProspectStore } from '@/stores/ProspectStore'
 const prospStore = appProspectStore()
 import { useNewProspectPopup } from './useNewProspectPopup'
-const { popRef, closeNewProspect, saveNewProspect } = useNewProspectPopup()
+const { popRef, closeNewProspect, createProspect } = useNewProspectPopup()
 import { reactive } from 'vue'
 
 const prosp = reactive({
@@ -18,7 +18,7 @@ const prosp = reactive({
 <template>
   <dialog ref="popRef" popover="manual">
     <div class="titlebar">Create New Prospect</div>
-    <form @submit.prevent="saveNewProspect(prosp)">
+    <form @submit.prevent="createProspect(prosp)">
       <table class="form-table">
         <tbody>
           <tr><th>Group Name:</th><td><input name="grpname" style="width: 30em;" v-model="prosp.name"></td></tr>
