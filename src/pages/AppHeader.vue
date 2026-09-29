@@ -162,8 +162,8 @@ const openHistory = () => {
 
       <i style="font-size:1.5em">B<b></b>lueQuote</i>
     </div>
-    <div>
 
+    <div>
       <table style="width: 100%;">
         <tbody>
           <tr>
@@ -241,6 +241,7 @@ const openHistory = () => {
                 class="modern"
                 icon="solid magnifying-glass_">Search&hellip;</BButton>&nbsp;
               <BButton
+                v-if="!userStore.isUserReadOnly()"
                 @click="useNewProspectPopup().openNewProspect()"
                 class="action"
                 icon="square-plus_">New Prospect&hellip;</BButton>

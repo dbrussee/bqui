@@ -232,8 +232,8 @@ const hardSpace = (txt:string):string => {
       </template>
     </BConfirm>&nbsp;
     <BButton v-if="prospStore.prospect" class="modern" icon="solid user-plus_" @click="newSub()">Add Subscriber</BButton>&nbsp;
-    <BButton v-if="prospStore.prospect" @click="handler.open()">Import</BButton>&nbsp;
-    <BButton v-if="prospStore.prospect" @click="handler.export()">Export</BButton>&nbsp;
+    <BButton v-if="prospStore.prospect" @click="handler.open()" icon="file-excel">Import...</BButton>&nbsp;
+    <BButton v-if="prospStore.prospect" @click="handler.export()" icon="file-excel">Export...</BButton>&nbsp;
     <span style='float: right;'>
       <BButton class="anchor"
         :disabled="!prospStore.censusDirty"

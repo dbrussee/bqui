@@ -65,39 +65,39 @@ const props = defineProps({
 
         <tr>
           <th :style="{color:quoteStore.quote.descr == '' ? 'red' : ''}">Name:</th>
-          <td colspan="3"><input v-model="quoteStore.quote.descr" style="width: 25em;" autofocus required></td>
+          <td colspan="3"><input :readonly="userStore.isUserReadOnly()" v-model="quoteStore.quote.descr" style="width: 25em;" autofocus required></td>
         </tr>
 
         <!-- In Progress editable plan coded-->
         <tr v-if="quoteStore.quote.status == 'INPROG'">
           <th>Design:</th>
           <td colspan="3">
-            <label><input type='radio' name="nonstd_value" v-model="quoteStore.quote.nonstd" value='N'> Standard</label>&nbsp;
-            <label><input type='radio' name="nonstd_value" v-model="quoteStore.quote.nonstd" value='Y'> Non-Std</label>&nbsp;
-            <label><input type='radio' name="nonstd_value" v-model="quoteStore.quote.nonstd" value='C'> Custom</label>
+            <label><input :disabled="userStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="quoteStore.quote.nonstd" value='N'> Standard</label>&nbsp;
+            <label><input :disabled="userStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="quoteStore.quote.nonstd" value='Y'> Non-Std</label>&nbsp;
+            <label><input :disabled="userStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="quoteStore.quote.nonstd" value='C'> Custom</label>
           </td>
         </tr>
         <tr v-if="quoteStore.quote.status == 'INPROG'">
           <th>Funding:</th>
           <td colspan="3">
-            <label><input type="radio" name="funding_option" value="FI" v-model="quoteStore.quote.funding"> Fully Insured</label>&nbsp;&nbsp;
-            <label><input type="radio" name="funding_option" value="ASO" v-model="quoteStore.quote.funding"> ASO</label>&nbsp;&nbsp;
-            <label><input type="radio" name="funding_option" value="BF" v-model="quoteStore.quote.funding"> Balanced</label>
+            <label><input :disabled="userStore.isUserReadOnly()" type="radio" name="funding_option" value="FI" v-model="quoteStore.quote.funding"> Fully Insured</label>&nbsp;&nbsp;
+            <label><input :disabled="userStore.isUserReadOnly()" type="radio" name="funding_option" value="ASO" v-model="quoteStore.quote.funding"> ASO</label>&nbsp;&nbsp;
+            <label><input :disabled="userStore.isUserReadOnly()" type="radio" name="funding_option" value="BF" v-model="quoteStore.quote.funding"> Balanced</label>
           </td>
         </tr>
         <tr v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.qtype == 'MED'">
           <th :style="{color:!quoteStore.quote.med_plan ? 'red' : ''}">Medical Plan:</th>
-          <td><input v-model="quoteStore.quote.med_plan" style="width: 7em;" maxlength="7" required></td>
+          <td><input :readonly="userStore.isUserReadOnly()" v-model="quoteStore.quote.med_plan" style="width: 7em;" maxlength="7" required></td>
           <th :style="{color:!quoteStore.quote.dru_plan ? 'red' : ''}">Drug Plan:</th>
-          <td><input v-model="quoteStore.quote.dru_plan" style="width: 7em;" maxlength="7" required></td>
+          <td><input :readonly="userStore.isUserReadOnly()" v-model="quoteStore.quote.dru_plan" style="width: 7em;" maxlength="7" required></td>
         </tr>
         <tr v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.qtype == 'DEN'">
           <th :style="{color:!quoteStore.quote.den_plan ? 'red' : ''}">Dental Plan:</th>
-          <td colspan="3"><input v-model="quoteStore.quote.den_plan" style="width: 7em;" maxlength="7" required></td>
+          <td colspan="3"><input :readonly="userStore.isUserReadOnly()" v-model="quoteStore.quote.den_plan" style="width: 7em;" maxlength="7" required></td>
         </tr>
         <tr v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.qtype == 'VIS'">
           <th :style="{color:!quoteStore.quote.vis_plan ? 'red' : ''}">Vision Plan:</th>
-          <td colspan="3"><input v-model="quoteStore.quote.vis_plan" style="width: 7em;" maxlength="7" required></td>
+          <td colspan="3"><input :readonly="userStore.isUserReadOnly()" v-model="quoteStore.quote.vis_plan" style="width: 7em;" maxlength="7" required></td>
         </tr>
       </tbody>
     </table>
@@ -105,9 +105,10 @@ const props = defineProps({
   <div class="buttonbar">
     <BConfirm v-if="userStore.getUserRightValue('QUOTE_DELETE') == 'Y' && quoteStore.quote.status == 'INPROG'" style="float: left;" class="anchor" gapright @confirm="emit('delete')"
       pos="T2R"
+      :disabled="userStore.isUserReadOnly()"
       tabindex="-1"
       heading="Permanently Delete Quote"
-      icon="trash-can_">Delete?
+      icon="trash-can_">
       <template #message>
         Since this quote has a status of 'In Progress',
         you are allowed to permanently delete it. However:
@@ -125,12 +126,12 @@ const props = defineProps({
     </BConfirm>
 
     <BButton class="anchor" icon="#red solid x_" @click="emit('abort')">Cancel</BButton>&nbsp;
-    <BButton
+    <BButton v-if="!userStore.isUserReadOnly()"
       :class="quoteStore.quote.status == 'INPROG' ? 'anchor' : 'modern'"
       icon="floppy-disk_"
       @click="emit('save')"
       :disabled="quoteStore.working != null || quoteStore.quote.descr == ''">Save Changes</BButton>&nbsp;
-    <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd == 'N'"
+    <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd == 'N' && !userStore.isUserReadOnly()"
       class="modern"
       icon="solid share_"
       heading="Submit Standard Quote"
@@ -141,7 +142,7 @@ const props = defineProps({
         After submitting this quote, you will no longer be able to edit anything other than the name.
       </template>
     </BConfirm>
-    <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd == 'Y'"
+    <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd == 'Y' && !userStore.isUserReadOnly()"
       class="modern"
       icon="solid coins_"
       heading="Non-Standard Quote Submission"
@@ -153,7 +154,7 @@ const props = defineProps({
         <p>Once rates are available, the quote will move to Ready status.</p>
       </template>
     </BConfirm>
-    <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd == 'C'"
+    <BConfirm v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.nonstd == 'C' && !userStore.isUserReadOnly()"
       class="modern"
       icon="solid user-check_"
       heading="Custom Quote Submission"

@@ -3,6 +3,8 @@
 import { ref, watch, useId } from 'vue';
 import { appProspectStore } from '@/stores/ProspectStore.ts';
 const prospStore = appProspectStore()
+import { appUserStore } from '@/stores/AppUserStore.ts';
+const userStore = appUserStore()
 import { QuoteStore } from '@/stores/QuoteStore.ts';
 const quoteStore = QuoteStore()
 import BTable from './B/BTable.vue';
@@ -121,7 +123,7 @@ const cfgQuotesList = ref({
     { id: "effdat", heading: "Effective", width: "5em", flags: "C" },
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
-    { id: "product", heading: "Product", width: "6em", cellclass: "mono" },
+    { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
     // { id: "nonstd", heading: "NS", width: "3em", flags: "C" },
     { id: "status", heading: "Status", width: "11em" },
     { id: "descr", heading: "Description" },
@@ -157,18 +159,18 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
       >{{ B.codeToText.nonstd(row.nonstd) }}</span>
     </template>
     <template #buttons>
-      <BPopup class="action" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
+      <BPopup v-if="!userStore.isUserReadOnly()" class="action" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
         <template #body>
-          <p><BButton @click="quoteHandler.start('MED')" class="anchor" icon="solid stethoscope_">Medical &amp; Drug</BButton></p>
-          <p><BButton @click="quoteHandler.start('DEN')" class="anchor" icon="solid tooth_">Dental</BButton></p>
-          <p><BButton @click="quoteHandler.start('VIS')" class="anchor" icon="solid glasses_">Vision</BButton></p>
-          <p><BButton disabled @click="quoteHandler.start('WEL')" class="anchor" icon="solid spa_">Wellness</BButton></p>
+          <p><BButton @click="quoteHandler.start('MED')" class="anchor" :icon="B.codeToText.qtypeIcon('MED')">Medical &amp; Drug</BButton></p>
+          <p><BButton @click="quoteHandler.start('DEN')" class="anchor" :icon="B.codeToText.qtypeIcon('DEN')">Dental</BButton></p>
+          <p><BButton @click="quoteHandler.start('VIS')" class="anchor" :icon="B.codeToText.qtypeIcon('VIS')">Vision</BButton></p>
+          <p><BButton disabled @click="quoteHandler.start('WEL')" class="anchor" :icon="B.codeToText.qtypeIcon('WEL')">Wellness</BButton></p>
           <hr style="margin-top: .2em; margin-bottom: .2em;"/>
           <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="quoteHandler.startFromQuote()" class="anchor" icon="clone_">Copy Selected</BButton></p>
         </template>
       </BPopup>
       <!-- <BConfirm class="anchor gapright" @confirm="quoteStore.deleteQuote(cfgQuotesList.pickedRow.id)" :disabled="!cfgQuotesList.pickedRow || cfgQuotesList.pickedRow.status != 'INPROG'" pos="T2R" icon="trash-can_">Delete...</BConfirm> -->
-      <BButton class="anchor anchor-in-table-footer" gapleft gapright style="color: white" :disabled="!cfgQuotesList.pickedRow" icon="edit" @click="quoteHandler.edit()">Edit...</BButton>
+      <BButton class="anchor anchor-in-table-footer" gapleft gapright style="color: white" :disabled="!cfgQuotesList.pickedRow" :icon="userStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'" @click="quoteHandler.edit()">{{ userStore.isUserReadOnly() ? 'View...' : 'Edit...' }}</BButton>
       <BButton class="anchor anchor-in-table-footer" style="color: white" disabled icon="file-pdf">Generate</BButton>
     </template>
   </BTable>

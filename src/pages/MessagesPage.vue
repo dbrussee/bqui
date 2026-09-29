@@ -7,7 +7,6 @@ const messageStore = appMessageStore();
 import BIcon from "@/components/B/BIcon.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
 import BButton from "@/components/B/BButton.vue";
-import { useMarkdown } from "@/composables/UseMarkdown";
 
 const currentMessage = ref<any>(null)
 const showMessage = (index:number) => {
@@ -31,7 +30,7 @@ const msgHandler = {
   send() {
     if (this.msg.sendto.value == '') return false
     if (this.msg.body.value == '') return false
-    messageStore.sendNewMessage(this.msg.sendto.value, this.msg.subject.value, htmlContent.value)
+    messageStore.sendNewMessage(this.msg.sendto.value, this.msg.subject.value, this.msg.body.value)
     this.msg.sendto.value = ''
     this.msg.subject.value = ''
     this.msg.body.value = ''
@@ -44,7 +43,6 @@ const msgHandler = {
     currentMessage.value = null
   }
 }
-const { htmlContent } = useMarkdown(msgHandler.msg.body)
 
 </script>
 <template>
@@ -109,10 +107,6 @@ const { htmlContent } = useMarkdown(msgHandler.msg.body)
       <tbody>
         <tr><th>Send To:</th><td><input v-model="msgHandler.msg.sendto.value"></td></tr>
         <tr><th>Subject:</th><td><input style="width: 30em;" v-model="msgHandler.msg.subject.value"></td></tr>
-        <tr><th>Format:</th><td>
-          <label><input type='radio' name='msg_format' value='text' v-model="msgHandler.msg.format">Text / Markdown</label>&nbsp;&nbsp;
-          <label><input type='radio' name='msg_format' value='html' v-model="msgHandler.msg.format">HTML</label>
-        </td></tr>
         <tr><th>Message:</th><td>
           <textarea style="width: 100%; height: 10em; font-size: 1em;" v-model="msgHandler.msg.body.value"></textarea>
            <!-- <div contenteditable style="width: 100%; height: 10em;"/> -->
@@ -128,7 +122,7 @@ const { htmlContent } = useMarkdown(msgHandler.msg.body)
   </dialog>
   <dialog :id="msgHandler.previewId">
     <div style="width: 5in; height: 30em; overflow-y: scroll;">
-      <span :innerHTML = "htmlContent"></span>
+      <span :innerHTML = "msgHandler.msg.body.value"></span>
     </div>
     <div class="buttonbar">
       <BButton class="anchor" @click="msgHandler.closePreview()" icon="#red solid x">Cancel</BButton>&nbsp;

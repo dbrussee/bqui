@@ -1,0 +1,212 @@
+ul {
+  padding-left: 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: .1em; /* Adjust this value for more or less space */
+}
+
+ul li {
+  display: list-item; /* Required for bullets to render */
+}
+p {
+  margin-top: .2rem;
+}
+select {
+  /* Step 1: Clear Safari enhancements */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /* Step 2: Harmonize the layout structure */
+  box-sizing: border-box;
+
+  /* Step 3: Handle long text safely */
+
+  /* Step 4: Re-add a reliable cross-browser arrow graphic */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://w3.org" width="292.4" height="292.4" viewBox="0 0 292.4 292.4"><path fill="%23333" d="M287 69.4a17.6 17.6 0 0 0-13-5.4H18.4c-5 0-9.3 1.8-12.9 5.4A17.6 17.6 0 0 0 0 82.2c0 5 1.8 9.3 5.4 12.9l128 127.9c3.6 3.6 7.8 5.4 12.8 5.4s9.2-1.8 12.8-5.4L287 95c3.5-3.5 5.4-7.8 5.4-12.8 0-5-1.9-9.2-5.5-12.8z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px top 50%;
+  background-size: 10px auto;
+
+  border-radius: .2em;
+  /* border: 1px solid black; */
+  /* background-color: #ffffff; */
+
+  font-size: 1em;
+  cursor: pointer;
+
+  option {
+    background-color: transparent;
+  }
+
+  /* position: relative; */
+  /* top: -.15em; */
+}
+.pill-red {
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  font-size: .8em;
+  padding: .1em;
+}
+
+button {
+  font-size: 1rem;
+  padding: 0.15rem .3rem;
+  cursor: pointer;
+  border: 1px solid gray;
+  border-radius: .2rem;
+  /* box-shadow: none; */
+  &:disabled {
+    /* background-color: silver !important; */
+    color: var(--ui-disabled-text) !important;
+    background-color: var(--ui-disabled-bg) !important;
+    cursor: default;
+    &:hover {
+      color: var(--ui-disabled-text) !important;
+      background-color: var(--ui-disabled-bg) !important;
+      cursor: default;
+      & * {
+        color: var(--ui-disabled-text) !important;
+        background-color: var(--ui-disabled-bg) !important;
+        cursor: default;
+      }
+    }
+    & * {
+      /* color: white; */
+      cursor: default;
+    }
+  }
+}
+.gapright {
+  padding-right: .4em;
+}
+.gapleft {
+  padding-left: .4em;
+}
+button.modern {
+  /* font-size: 1em  !important; */
+  /* padding: 0.05em .3em !important; */
+  color: var(--btn-secondary-text);
+  border: 1px solid var(--btn-secondary-bg);
+  background-color: var(--btn-secondary-bg);
+  &:hover {
+    background-color: var(--btn-secondary-hover-bg);
+  }
+}
+button.clear {
+  padding: 0 !important;
+  background-color: transparent;
+  border-color: transparent;
+  /* border-radius: .2em; */
+  /* font-size: 1em; */
+  &:focus {
+    outline: 2px solid blue;
+  }
+}
+button.action {
+  /* font-size: 1em !important; */
+  /* padding: 0.05em .3em !important; */
+  color: var(--btn-primary-text);
+  background-color: var(--btn-primary-bg);
+  border: 1px solid var(--btn-primary-bg);
+  /* border-color: salmon; */
+  /* border: none; */
+  &:hover {
+    color: var(--);
+    background-color: var(--btn-primary-hover-bg);
+  }
+}
+pre {
+  white-space: pre-wrap;       /* Triggers natural word wrapping */
+  overflow-wrap: break-word;   /* Safely breaks un-spaced URLs or massive words */
+}
+
+sup {
+    font-size: 80%;
+    line-height: 0;
+    position: relative;
+    /* vertical-align: baseline; */
+    top: 0.1em;
+    left: .2em;
+}
+
+
+div.drop_menu {
+  padding-bottom: .2em;
+  border-bottom: 1px solid black;
+  margin-bottom: .3em;
+}
+
+.info {
+  color: var(--info-text);
+  font-style: italic;
+  padding-right: .5em;
+  text-align: left;
+}
+
+input {
+  background-color: transparent;
+  font-size: 1em;
+
+  &::placeholder {
+    color: var(--form-input-placeholder);
+  }
+  &:read-only {
+    border-bottom: none !important;
+  }
+}
+
+table.form-table {
+  border-collapse: collapse;
+  tr th {
+    text-align: right;
+    padding-right: 0.2rem;
+    color: var(--form-prompt-color);
+    font-weight: normal;
+    vertical-align: baseline;
+  }
+  tr td {
+    vertical-align: first baseline;
+    hr {
+      color: sienna;
+    }
+    textarea {
+      height: 5em;
+      width: 25em;
+    }
+    button {
+      position: relative;
+      top: -.2em !important;
+    }
+    input[type='checkbox'],
+    input[type='radio'] {
+      display: inline-block;
+      margin-bottom: .4em;
+      cursor: pointer;
+    }
+    input, textarea, select {
+      outline: none;
+      border: none;
+      border-radius: 0;
+      border-bottom: 1.5px solid var(--separator-color);
+      margin-bottom: .2em;
+      padding: .2em;
+      &:active, &:focus {
+        inset: unset;
+        background-color: light-dark(snow, black);
+        /* border-style: solid; */
+        border-bottom: 1.5px solid light-dark(blue, teal);
+      }
+      &:invalid {
+        /* background-color: #FFE9F0; */
+        border-bottom-color: red;
+      }
+    }
+    select[size] {
+      padding: .2em;
+      padding-top: none;
+      border: none;
+    }
+  }
+}

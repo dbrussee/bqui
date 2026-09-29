@@ -15,6 +15,7 @@ import BIcon from "@/components/B/BIcon.vue";
 import { useDark } from '@vueuse/core';
 import ClipboardIcon from "@/components/ClipboardIcon.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
+import BInfo from "@/components/B/BInfo.vue";
 
 const isDark = useDark({
   storageKey: null // 🚫 Disables reading and writing to localStorage
@@ -89,7 +90,7 @@ const rightsConfig = ref({
   columns: [
     { id: "descr", heading: "Activity Description" },
     { id: "value", heading: "Value", flags: "C", width: "5em", cellclass: 'mono' },
-    { id: "source", heading: "Source", cellclass: 'mono' },
+    { id: "source", heading: "Source" },
   ]
 })
 
@@ -100,10 +101,12 @@ const decodeSource = (configRight:any, td:any):void => {
   if (!rightCode) cell.innerHTML = "What?"
   const userRight = userStore.user.rights[rightCode]
   if (userRight.source == "@USER") {
-    cell.innerHTML = "User";
+    cell.style.color = "goldenrod"
+    cell.innerHTML = "*User*";
   } else if (userRight.source == "@DFLT") {
     cell.innerHTML = "";
   } else {
+    cell.classList.add("mono")
     cell.innerHTML = '<i>' + userRight.source + "</i>";
   }
 }
@@ -202,7 +205,10 @@ const getUserTheme = computed(():string => {
               <BButton class="anchor"
               @click="roleHandler.open()"
               icon="solid pen_" />
-              <span class="mono">{{ userStore.user.config.roles.join(", ") }}</span>
+              <span v-for="(r,i) in userStore.user.config.roles" :key="r">
+                {{ (i as number) > 0 ? ', ' : '' }}<span class="mono">{{ r }}</span>
+              </span>
+              <!-- <span class="mono">{{ userStore.user.config.roles.join(", ") }}</span> -->
             </td></tr>
           </tbody>
         </table>
@@ -223,7 +229,15 @@ const getUserTheme = computed(():string => {
   </tbody>
   </table>
   <dialog :id="roleHandler.popupId">
-    <div class="titlebar">Assigned Roles</div>
+    <div class="titlebar">Assigned Roles
+      <BInfo pos="R" width="30em" heading="Role Descriptions">
+        <ul>
+          <li v-for="r of app.config.roles" :key="r.code">
+            <b>{{ r.descr }}</b> ({{ r.code }})<br>{{ r.longdescr }}
+          </li>
+        </ul>
+      </BInfo>
+    </div>
     <ul style="list-style:none; padding-left: .5em; margin-top: .4em;">
       <template v-for="r of app.config.roles" :key="r.code">
         <li @click="roleHandler.toggle(r.code)">

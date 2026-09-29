@@ -256,8 +256,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
   async function updateCensus(data:any) {
     B.working.set(censusWorking, "Saving...")
-    console.log("Saving...")
-    console.log(data)
+    cleanCensus()
     const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'PUT', data)
     B.working.clear(censusWorking)
     if (fetcher.resp != null) {
@@ -272,6 +271,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     meta.value = fetcher.meta
     issue.value = fetcher.issue
   }
+
   const exportCensus = async () => {
     const census = flattenCensus()
     const worksheet = XLSX.utils.json_to_sheet(census)
@@ -325,8 +325,27 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       }
     }
   }
+  const cleanCensus = ():void => {
+    prospect.value.census.forEach((sub: any) => {
+      sub.dob = cleanDOB(sub.dob)
+      if (sub.deps && Array.isArray(sub.deps)) {
+        sub.deps.forEach((dep: any) => {
+          dep.dob = cleanDOB(dep.dob)
+        })
+      }
+    });
 
+  }
+  const cleanDOB = (dob:string):string => {
+    if (dob == '') return dob
+    const dob_asDate = new Date(dob)
+    if (!dob_asDate) return ""
+    if (!(dob_asDate instanceof Date)) return ""
+    if (isNaN(dob_asDate.getTime())) return ""
+    return B.format.dateMDYYYY(dob_asDate) as string
+  }
   const flattenCensus = ():any => {
+    cleanCensus()
     const flat = [] as any[]
     prospect.value.census.forEach((sub: any, rn:number) => {
       flat.push({
@@ -383,6 +402,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
         // Display the formatted JSON on the page
         mapImportJSONToCensus(jsonData)
+        cleanCensus()
         setCensusDirty()
         target.value = ''
         target.blur()

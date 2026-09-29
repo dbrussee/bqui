@@ -1,0 +1,28 @@
+.current_style {
+  background-color: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  cursor: pointer;
+}
+.non_current_style {
+  color: var(--noncurrent-color);
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.spinner {
+  /* position:xx absolute; */
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 3px solid #ccc;
+  border-top-color: #42b883;
+  border-radius: 50%;
+  margin-right: .4em;
+  animation: spinner_spin_keyframes 0.8s linear infinite;
+}
+@keyframes spinner_spin_keyframes {
+  to { transform: rotate(360deg); }
+}
+a {
+  color: var(--anchor-color);
+}

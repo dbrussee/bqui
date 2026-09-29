@@ -144,6 +144,10 @@ export const appUserStore = defineStore("appUserStore", () => {
 
   }
 
+  const isUserReadOnly = ():boolean => {
+    if (user.value.config.roles.indexOf('READONLY') >= 0) return true
+    return false
+  }
   const getUserRightValue = (code:string):string => {
     if (!user.value) return "ERROR"
     if (!user.value.rights) return "ERROR"
@@ -191,10 +195,10 @@ export const appUserStore = defineStore("appUserStore", () => {
 
 
   return { isLoading: working,
-    relogin, login, logout,
+    relogin, login, logout, working,
     saveSetting: saveUserSetting, applyTheme, getUserSetting,
     addRole, deleteRole,
-    user, getUserRightValue, setUserRightValue, deleteUserRight, working,
+    user, getUserRightValue, setUserRightValue, deleteUserRight, isUserReadOnly,
     clearRecents,
     getAPIHistory, apiHistory,
     meta, issue

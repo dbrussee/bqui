@@ -141,6 +141,15 @@ export const B = {
         case "WEL": return "Wellness";
         default: return code;
       }
+    },
+    qtypeIcon: (code: string) => {
+      switch (code) {
+        case "MED": return "solid stethoscope_";
+        case "DEN": return "solid tooth_";
+        case "VIS": return "solid glasses_";
+        case "WEL": return "solid spa_";
+        default: return "";
+      }
     }
   },
   ifNull: (value: any, ifNull:any) => {
@@ -343,7 +352,7 @@ export const B = {
       return finalString;
       // Output: "Jul 30, 2026 08:12:10a"
     },
-    date: (d: string | Date = new Date()) => {
+    dateMDYYYY: (d: string | Date = new Date()) => {
       if (!d) return "";
       const date = new Date(d);
       const formatter = new Intl.DateTimeFormat("en-US", {
