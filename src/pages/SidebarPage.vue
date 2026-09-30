@@ -113,4 +113,5 @@ function getCensusCount():string {
 </template>
 
 <style lang="css" scoped>
+
 </style>

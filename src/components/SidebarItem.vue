@@ -55,17 +55,32 @@ const props = defineProps({
     padding-left: .3em;
     border-left: 3px solid transparent;
 
-    &:hover {
-      color: oklch(100% 0 0);
-      background-color: var(--table-row-picked-bg);
-
-      /* p { color: var(--form-prompt-color); } */
+    color: white;
+    i.fa {
+      color: bisque;
     }
-    p { color: var(--form-prompt-color); }
+
+    &:hover {
+      background-color: var(--table-row-picked-bg);
+      /* color: oklch(100% 0 0); */
+      color: sienna;
+      /* color: white; */
+      i.fa {
+        color: sienna;
+      }
+
+      p { color: sienna; }
+    }
+    /* p { color: var(--form-prompt-color); } */
 
   }
   .picked {
-    color: var(--table-row-picked-text) !important;
+    /* color: var(--table-row-picked-text) !important; */
+    color: black !important;
+    i.fa {
+      color: black;
+    }
+    p { color: black; }
     background-color: var(--table-row-picked-bg);
 
     /* p { color: var(--form-prompt-color); } */
