@@ -133,16 +133,13 @@ const inspectRight = ():string => {
   if (!rightsConfig.value.pickedRow) return ""
   const rightCode = rightsConfig.value.pickedRow.code
   // const userRight = userStore.user.rights[rightCode]
-  let html = `Default: ${rightsConfig.value.pickedRow.default_value}`;
+  let html = `Default: ${app.config.rights[rightCode].default_value}`;
   html += "<ul>"
   userStore.user.config.roles.forEach((myrole:string) => {
-    app.config.roles.forEach((appRole:any) => {
-      if (appRole.code == myrole) {
-        appRole.rights.forEach((rr:any) => {
-          if (rr.right == rightCode) {
-            html += `<li>Role ${appRole.code}: ${rr.value}</li>`
-          }
-        })
+    const appRole = app.config.roles[myrole]
+    appRole.rights.forEach((rr:any) => {
+      if (rr.right == rightCode) {
+        html += `<li>Role ${myrole}: ${rr.value}</li>`
       }
     })
   })
@@ -160,6 +157,20 @@ const inspectRight = ():string => {
 
 const getUserTheme = computed(():string => {
   return userStore.getUserSetting('theme','auto')
+})
+
+const computedRightsList = computed(() => {
+  const list = Object.entries(app.config.rights).map(([key, innerObj]) => {
+    const obj = innerObj as any
+    return {
+      code: key,
+      listpos: obj.listpos,
+      descr: app.config.rights[key].descr,
+      value: obj.value,
+      source: obj.source,
+    };
+  })
+  return list.sort((a, b) => a.listpos > b.listpos ? 1 : -1)
 })
 </script>
 
@@ -214,10 +225,11 @@ const getUserTheme = computed(():string => {
         </table>
       </td>
       <td style="vertical-align: top;">
-        <BTable :config="rightsConfig" :rows="app.config.rights"
+        <BTable :config="rightsConfig" :rows="computedRightsList"
             @pick="(row:any) => handlePickRight(row)"
             @dblpick="() => rightHandler.open()"
             heading="Activity Rights">
+          <template #column_descr="{row}">{{ row.descr }}</template>
           <template #column_source="{row,td}">{{ decodeSource(row,td) }}</template>
           <template #column_value="{row}">{{ decodeValue(row) }}</template>
           <template #buttons>
@@ -232,19 +244,19 @@ const getUserTheme = computed(():string => {
     <div class="titlebar">Assigned Roles
       <BInfo pos="R" width="30em" heading="Role Descriptions">
         <ul>
-          <li v-for="r of app.config.roles" :key="r.code">
-            <b>{{ r.descr }}</b> ({{ r.code }})<br>{{ r.longdescr }}
+          <li v-for="(value, key) in app.config.roles" :key="key">
+            <b>{{ value.descr }}</b> ({{ key }})<br>{{ value.longdescr }}
           </li>
         </ul>
       </BInfo>
     </div>
     <ul style="list-style:none; padding-left: .5em; margin-top: .4em;">
-      <template v-for="r of app.config.roles" :key="r.code">
-        <li @click="roleHandler.toggle(r.code)">
+      <template v-for="(value, key) in app.config.roles" :key="key">
+        <li @click="roleHandler.toggle(key as string)" class="anchor" :value="key">
           <span class="anchor">
-            <BIcon :icon="userStore.user.config.roles.indexOf(r.code) < 0 ? 'square' : 'square-check'">{{ r.descr }}</BIcon>
+            <BIcon :icon="userStore.user.config.roles.indexOf(key) < 0 ? 'square' : 'square-check'">{{ value.descr }}</BIcon>
           </span>
-          <span class="info"> ({{ r.code }})</span>
+          <span class="info"> ({{ key }})</span>
         </li>
       <!-- <li v-if="userStore.user.config.roles.indexOf(r.code) < 0" class="anchor" @click="roleHandler.add(r.code)" :value="r.code">{{ r.descr }}</li> -->
       </template>
@@ -264,7 +276,7 @@ const getUserTheme = computed(():string => {
         <ul style="list-style:none; padding-left: .5em; margin-top: .5em;">
           <li class="anchor"
             @click="rightHandler.saveOverride(rightsConfig.pickedRow.code, '')"><BIcon :icon="pickedRightValue == '' ? 'circle-dot_' : 'circle_'"/>No Override</li>
-          <li class="anchor" v-for="opt of app.config.rights.filter((r:any) => r.code === rightsConfig.pickedRow.code)[0].values" :key="opt"
+          <li class="anchor" v-for="opt of app.config.rights[rightsConfig.pickedRow.code].values" :key="opt"
             @click="rightHandler.saveOverride(rightsConfig.pickedRow.code, opt)"
             ><BIcon :icon="pickedRightValue == opt ? 'circle-dot_' : 'circle_'"/>{{ opt }}</li>
         </ul>
