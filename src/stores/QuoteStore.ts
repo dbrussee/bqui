@@ -51,21 +51,20 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     }
   }
   const blankQuote = (qtype:string):void => {
-    quote.value.descr = ''
-    quote.value.prospect_id = -1
-    quote.value.status = 'INPROG'
-    quote.value.size_cd = ''
-    quote.value.qtype = qtype
-    quote.value.effdat = B.firstOfMonth(1)
-    quote.value.grandfathered = false
-    quote.value.mass_compliant = false
-    quote.value.nonstd = 'N'
-    quote.value.rlob = ''
-    quote.value.funding = 'FI'
-    quote.value.med_plan = 'M_NOPLN'
-    quote.value.dru_plan = 'R_NOPLN'
-    quote.value.vis_plan = 'V_NOPLN'
-    quote.value.den_plan = 'D_NOPLN'
+    quote.value = {
+      descr: '',
+      prospect_id: -1,
+      status: 'INPROG',
+      size_cd: '',
+      qtype: qtype,
+      effdat: B.firstOfMonth(1),
+      grandfathered: false,
+      mass_compliant: false,
+      nonstd: 'N',
+      rlob: '',
+      funding: 'FI',
+      med_plan: 'M_NOPLN', dru_plan: 'R_NOPLN', vis_plan: 'V_NOPLN', den_plan: 'D_NOPLN'
+    }
   }
   const deleteQuote = async (qid:number) => {
     B.working.set(working, "Deleting Quote...")
@@ -126,14 +125,8 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     q.size_cd = prospStore.prospect.size_cd
     if (pickedQuote != null) q.effdat = B.dateFromYYYYMMDD(pickedQuote.effdat)
     // opts.grandfathered = false
-    if (rlobList[qtype] && rlobList[qtype].length == 1) {
-      q.rlob = rlobList[qtype][0]
-    } else {
-      q.rlob = ''
-    }
-    if (!verifyEffdatInRange(q.effdat)) {
-      q.effdat = ''
-    }
+
+    getRLOBList(prospStore.prospect.id)
   }
   const initializeFromQuote = (q:any) => {
     const prospStore = appProspectStore()
@@ -145,6 +138,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     opts.qtype = q.qtype
     opts.effdat = B.dateFromYYYYMMDD(q.effdat)
     // opts.grandfathered = false
+    getRLOBList(prospStore.prospect.id)
     opts.rlob = q.rlob
     opts.funding = q.funding
     // opts.mass_compliant = false
@@ -176,16 +170,103 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     return false
   }
 
-  const rlobList: Record<string, string[]> = {
-    'MED': [ 'PPO1', 'PPO3', 'HPN1' ],
-    'DEN': [ 'DTL1', 'DTL2' ],
-    'VIS': [ 'VIS1' ]
+  const rlobList:any = {
+    'MED': ref<[]>([]),
+    'DRU': ref<[]>([]),
+    'DEN': ref<[]>([]),
+    'VIS': ref<[]>([])
   }
+
+  const getRLOBList = async (pid:string) => {
+    B.working.set(working, "Getting avaiable product lines...")
+    const preRLOB = quote.value?.rlob || 'BEEF'
+    rlobList.MED.value.length = 0
+    rlobList.DRU.value.length = 0
+    rlobList.VIS.value.length = 0
+    rlobList.DEN.value.length = 0
+    const eff = B.format.dateMDYYYY(quote.value.effdat)
+    const fetcher = new BQAPIFetcher()
+    await fetcher.callAPI(`/plancodecounts/${pid}?eff=${eff}`, 'GET')
+    B.working.clear(working)
+    // console.dir(fetcher.resp)
+    if (fetcher.issue) {
+      useToast().addToast(`Error getting RLOBs: ${fetcher.issue.error}`, "error")
+    } else {
+      if (fetcher.resp != null) { // No RLOBs with plans
+        const avail = fetcher.resp.avail
+        rlobList.MED.value = avail?.MED || []
+        rlobList.DRU.value = avail?.DRU || []
+        rlobList.VIS.value = avail?.VIS || []
+        rlobList.DEN.value = avail?.DEN || []
+
+        const list = rlobList[quote.value.qtype].value
+        if (list) {
+          if (list.length == 1) {
+            quote.value.rlob = list[0]
+          } else if (list.includes(preRLOB)) {
+            quote.value.rlob = preRLOB
+          } else {
+            quote.value.rlob = ''
+          }
+        } else {
+          quote.value.rlob = ''
+        }
+        if (!verifyEffdatInRange(quote.value.effdat)) {
+          quote.value.effdat = ''
+        }
+      }
+    }
+  }
+
+  const planList = ref<any[]>([])
+  const drugPlanList = ref<any[]>([])
+  const getPlanList = async (pid:string) => {
+    B.working.set(working, "Getting avaiable plan codes...")
+    planList.value.length = 0
+    drugPlanList.value.length = 0
+    const family = quote.value.qtype // Quote qtype is a plancode family (MED, VIS, DEN)
+    const rlob = quote.value.rlob
+    const eff = B.format.dateMDYYYY(quote.value.effdat)
+    const fetcher = new BQAPIFetcher()
+    await fetcher.callAPI(`/plancodes/${pid}/${family}/${rlob}?eff=${eff}&macomp=N&gfther=N`, 'GET')
+    // console.dir(fetcher.resp)
+    if (fetcher.issue) {
+      useToast().addToast(`Error getting plan codes: ${fetcher.issue.error}`, "error")
+    } else {
+      if (fetcher.resp != null) { // No RLOBs with plans
+        planList.value = fetcher.resp || []
+        // console.dir(planList.value)
+        if (planList.value.length == 1) {
+          if (quote.value.qtype == 'MED') quote.value.med_plan = planList.value[0].plncod
+          if (quote.value.qtype == 'DEN') quote.value.den_plan = planList.value[0].plncod
+          if (quote.value.qtype == 'VIS') quote.value.vis_plan = planList.value[0].plncod
+        }
+      }
+    }
+    if (family == 'MED') {
+      // When getting plans for Medical;, get Drug plans too
+      await fetcher.callAPI(`/plancodes/${pid}/DRU/DRU?eff=${eff}&macomp=N&gfther=N`, 'GET')
+      // console.dir(fetcher.resp)
+      if (fetcher.issue) {
+        useToast().addToast(`Error getting plan codes: ${fetcher.issue.error}`, "error")
+      } else {
+        if (fetcher.resp != null) { // No RLOBs with plans
+          drugPlanList.value = fetcher.resp || []
+          // console.dir(planList.value)
+          if (drugPlanList.value.length == 1) {
+            quote.value.dru_plan = drugPlanList.value[0].plncod
+          }
+        }
+      }
+    }
+    B.working.clear(working)
+  }
+
 
   return {
     quote, working,
-    rlobList,
-    // newQuoteOptions,
+    rlobList, getRLOBList,
+    planList, drugPlanList, getPlanList,
     initializeNewQuoteOptions, initializeFromQuote,
     initial_effdate_offset: INITIAL_EFFDATE_OFFSET, number_of_effdates: NUMBER_OF_EFFDATES,
     createQuote, deleteQuote, updateQuote

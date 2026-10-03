@@ -11,6 +11,14 @@ export const B = {
     newd.setHours(0, 0, 0, 0)
     return newd
   },
+  dateFromPostgreDate: (pgdate:string):Date => {
+    if (typeof pgdate != 'string') return pgdate
+    const parts:string[] = pgdate.split("-")
+    if (parts.length < 3) return new Date(pgdate)
+    const newd = new Date(parseInt(parts[0]!), parseInt(parts[1]!)-1, parseInt(parts[2]!))
+    newd.setHours(0, 0, 0, 0)
+    return newd
+  },
   firstOfMonth: (month_offset:number = 0):Date => {
     const d = new Date()
     d.setDate(1)
@@ -34,6 +42,7 @@ export const B = {
       switch (rlob) {
         case 'PPO1': return 'Blue Options'
         case 'PPO3': return 'Blue Options 1-2-3'
+        case 'PPOT': return 'Blue Options Tiered'
         case 'HPN1': return 'Blue High Performance Network'
         case 'DTL1': return 'Dental Blue'
         case 'DTL2': return 'Dental Blue Select'
@@ -354,6 +363,13 @@ export const B = {
     },
     dateMDYYYY: (d: string | Date = new Date()) => {
       if (!d) return "";
+      if (typeof d == "string" && d.indexOf("-") >= 0) {
+        const parts:string[] = d.split("-") // 2027-01-01
+        if (parts.length == 3) {
+          d = `${parts[1]}/${parts[2]}/${parts[0]}`
+        }
+      }
+
       const date = new Date(d);
       const formatter = new Intl.DateTimeFormat("en-US", {
         month: "numeric",

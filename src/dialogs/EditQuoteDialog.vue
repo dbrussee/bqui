@@ -87,9 +87,19 @@ const props = defineProps({
         </tr>
         <tr v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.qtype == 'MED'">
           <th :style="{color:!quoteStore.quote.med_plan ? 'red' : ''}">Medical Plan:</th>
-          <td><input :readonly="userStore.isUserReadOnly()" v-model="quoteStore.quote.med_plan" style="width: 7em;" maxlength="7" required></td>
+          <td>
+            <select :readonly="userStore.isUserReadOnly()" v-model="quoteStore.quote.med_plan" style="width: 7em;" maxlength="7" required>
+              <option disabled value="M_NOPLN" style="color:red;">Select...</option>
+              <option v-for="plan in quoteStore.planList" :key="plan" :value="plan.plncod">{{ plan.plncod }}</option>
+            </select>
+          </td>
           <th :style="{color:!quoteStore.quote.dru_plan ? 'red' : ''}">Drug Plan:</th>
-          <td><input :readonly="userStore.isUserReadOnly()" v-model="quoteStore.quote.dru_plan" style="width: 7em;" maxlength="7" required></td>
+          <td>
+            <select :readonly="userStore.isUserReadOnly()" v-model="quoteStore.quote.dru_plan" style="width: 7em;" maxlength="7" required>
+              <option disabled value="R_NOPLN" style="color:red;">Select...</option>
+              <option v-for="plan in quoteStore.drugPlanList" :key="plan" :value="plan.plncod">{{ plan.plncod }}</option>
+            </select>
+          </td>
         </tr>
         <tr v-if="quoteStore.quote.status == 'INPROG' && quoteStore.quote.qtype == 'DEN'">
           <th :style="{color:!quoteStore.quote.den_plan ? 'red' : ''}">Dental Plan:</th>

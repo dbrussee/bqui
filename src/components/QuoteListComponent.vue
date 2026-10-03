@@ -25,13 +25,14 @@ watch(() => prospStore.prospect, () => {
 )
 
 const quoteHandler = {
+  action: "",
   startPopid: useId(),
   editPopid: useId(),
   lastQtype: '',
-  openStart() { (document.getElementById(this.startPopid) as HTMLDialogElement).showModal() },
-  closeStart() { (document.getElementById(this.startPopid) as HTMLDialogElement).close() },
-  openEdit() { (document.getElementById(this.editPopid) as HTMLDialogElement).showModal() },
-  closeEdit() { (document.getElementById(this.editPopid) as HTMLDialogElement).close() },
+  openStart() { (document.getElementById(this.startPopid) as HTMLDialogElement).showModal(); this.action = "creating"; },
+  closeStart() { (document.getElementById(this.startPopid) as HTMLDialogElement).close(); this.action = ""; },
+  openEdit() { (document.getElementById(this.editPopid) as HTMLDialogElement).showModal(); this.action = "editing"; },
+  closeEdit() { (document.getElementById(this.editPopid) as HTMLDialogElement).close(); this.action = ""; },
   startFromQuote() {
     const q = cfgQuotesList.value.pickedRow
     cfgQuotesList.value.pickedRow = null
@@ -46,8 +47,7 @@ const quoteHandler = {
     quoteStore.createQuote().then(() => {
       cfgQuotesList.value.pickedRow = quoteStore.quote
       cfgQuotesList.value.pickedRowNumber = prospStore.quotes.length - 1
-      this.closeStart()
-      this.openEdit()
+      this.edit()
     })
   },
   delete() {
@@ -57,6 +57,7 @@ const quoteHandler = {
   },
   edit() {
     quoteStore.quote = {...cfgQuotesList.value.pickedRow} // copy of data
+    quoteStore.getPlanList(prospStore.prospect.id)
     this.closeStart()
     this.openEdit()
   },
@@ -126,7 +127,7 @@ const cfgQuotesList = ref({
     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
     // { id: "nonstd", heading: "NS", width: "3em", flags: "C" },
     { id: "status", heading: "Status", width: "11em" },
-    { id: "descr", heading: "Description" },
+    { id: "descr", heading: "Name" },
   ]
 })
 
