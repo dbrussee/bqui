@@ -139,7 +139,7 @@ const inspectRight = ():string => {
     const appRole = app.config.roles[myrole]
     appRole.rights.forEach((rr:any) => {
       if (rr.right == rightCode) {
-        html += `<li>Role ${myrole}: ${rr.value}</li>`
+        html += `<li>Role ${myrole} &gt; ${rr.value}</li>`
       }
     })
   })
@@ -272,21 +272,32 @@ const getRightLongDescription = ():string => {
     </div>
   </dialog>
 
-  <dialog :id="rightHandler.popupId" style="width: 25em;">
+  <dialog :id="rightHandler.popupId" style="width: 30em;">
     <div class="titlebar">Right Code {{ rightsConfig.pickedRow?.code }}</div>
-    <div class="info">{{ getRightLongDescription() }}</div>
+    <p class="info" :innerHTML="getRightLongDescription()"></p>
     <form @submit.prevent="rightHandler.save()">
       <span :innerHTML="inspectRight()"/>
+      <div style="margin-top: .3em">
+        <span class="anchor" @click="rightHandler.saveOverride(rightsConfig.pickedRow.code, '')"><BIcon :icon="pickedRightValue == '' ? 'circle-dot_' : 'circle_'"/>No Override</span>
+      </div>
       <div v-if="rightsConfig.pickedRow" class="form-table" style="margin-top: .5em;">
         This specific user can be assigned a value other than
         the one defined above...
-        <ul style="list-style:none; padding-left: .5em; margin-top: .5em;">
+        <p>
+          <template v-for="(opt,rn) of app.config.rights[rightsConfig.pickedRow.code].values" :key="opt">
+            <span v-if="(rn as number) > 0"> &nbsp; </span
+            ><BAnchor
+              @click="rightHandler.saveOverride(rightsConfig.pickedRow.code, opt)"
+              :icon="pickedRightValue == opt ? 'circle-dot_' : 'circle_'">{{ opt }}</BAnchor>
+          </template>
+        </p>
+        <!-- <ul style="list-style:none; padding-left: .5em; margin-top: .5em;">
           <li class="anchor"
             @click="rightHandler.saveOverride(rightsConfig.pickedRow.code, '')"><BIcon :icon="pickedRightValue == '' ? 'circle-dot_' : 'circle_'"/>No Override</li>
           <li class="anchor" v-for="opt of app.config.rights[rightsConfig.pickedRow.code].values" :key="opt"
             @click="rightHandler.saveOverride(rightsConfig.pickedRow.code, opt)"
             ><BIcon :icon="pickedRightValue == opt ? 'circle-dot_' : 'circle_'"/>{{ opt }}</li>
-        </ul>
+        </ul> -->
       </div>
       <div class="buttonbar">
         <BAnchor @click="rightHandler.close()" icon="#red solid x_">Cancel</BAnchor>

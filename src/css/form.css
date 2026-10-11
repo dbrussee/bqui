@@ -9,7 +9,7 @@ ul li {
   display: list-item; /* Required for bullets to render */
 }
 p {
-  margin-top: .2rem;
+  margin-bottom: .3rem;
 }
 select {
   /* Step 1: Clear Safari enhancements */

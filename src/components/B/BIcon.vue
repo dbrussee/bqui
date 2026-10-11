@@ -118,7 +118,7 @@ const handleClick = () => {
     :class="[getClasses, attrs.classes]"
     :style="[getStyle, attrs.style]"
     @click="handleClick()"
-  /><slot/>
+  /><span :class="[$attrs.classes]" :style="[$attrs.style]"><slot/></span>
 </template>
 
 <style lang="css" scoped>
