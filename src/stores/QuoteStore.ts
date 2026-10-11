@@ -229,7 +229,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
 
   const planList = ref<any[]>([])
   const drugPlanList = ref<any[]>([])
-  const getPlanList = async (pid:string) => {
+  const getPlanList = async (pid:number) => {
     B.working.set(working, "Getting avaiable plan codes...")
     planList.value.length = 0
     drugPlanList.value.length = 0

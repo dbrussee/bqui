@@ -23,19 +23,20 @@ const props = defineProps({
 
 <template>
   <dialog :id="props.popupid" style="position:relative">
-  <div class="titlebar">Edit {{ B.codeToText.qtype(quoteStore.quote.qtype)}} Quote #{{ quoteStore.quote.id }}</div>
+  <div v-if="quoteStore.quote.id < 0" class="titlebar">Edit New {{ B.codeToText.qtype(quoteStore.quote.qtype)}} Quote</div>
+  <div v-else class="titlebar">Edit {{ B.codeToText.qtype(quoteStore.quote.qtype)}} Quote #{{ quoteStore.quote.id }}</div>
   <div style="position: absolute; top: .5em; right: .5em;" class="info">
     Status: <BIcon :icon="B.statusIcon(quoteStore.quote.status)"/>{{ B.codeToText.quoteStatus(quoteStore.quote.status) }}
   </div>
   <form @submit.stop.prevent="emit('save')">
     <table class="form-table">
       <tbody>
-        <tr><th style="width:6.5em;">Created:</th><td colspan="3" class="info">{{ B.format.ts(quoteStore.quote.crttms) }} by {{ quoteStore.quote.crtusr }}</td></tr>
-        <tr v-if="quoteStore.quote.crttms != quoteStore.quote.updtms || quoteStore.quote.crtusr != quoteStore.quote.updusr">
+        <tr v-if="quoteStore.quote.id >= 0"><th style="width:6.5em;">Created:</th><td colspan="3" class="info">{{ B.format.ts(quoteStore.quote.crttms) }} by {{ quoteStore.quote.crtusr }}</td></tr>
+        <tr v-if="quoteStore.quote.id >= 0 && (quoteStore.quote.crttms != quoteStore.quote.updtms || quoteStore.quote.crtusr != quoteStore.quote.updusr)">
           <th>Updated:</th><td colspan="3" class="info">{{ B.format.ts(quoteStore.quote.updtms) }} by {{ quoteStore.quote.updusr }}</td>
         </tr>
 
-        <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
+        <tr v-if="quoteStore.quote.id >= 0"><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
 
         <tr><th>Product:</th><td colspan="3" class="info">{{ B.codeToText.rlob(quoteStore.quote.rlob) }} ({{ quoteStore.quote.rlob }})</td></tr>
         <tr><th>Effective:</th><td colspan="3" class="info">{{ B.format.effdat(quoteStore.quote.effdat) }}</td></tr>

@@ -34,6 +34,7 @@ const doContinue = () => {
 }
 
 const getRlobList = async () => {
+  if (!prospStore.prospect) return
   const savedRlob = quoteStore.quote.rlob
   await quoteStore.getRLOBList(prospStore.prospect.id)
   if (quoteStore.quote && props.qtype) {
@@ -62,7 +63,7 @@ const getRlobList = async () => {
         <td><input v-model="quoteStore.quote.descr" style="width: 25em;" autofocus required></td>
       </tr>
       <tr>
-        <th :style="{color: quoteStore.quote.effdat == '' ? 'red': ''}">Effective:</th>
+        <th :style="{color: quoteStore.quote.effdat ? '': 'red'}">Effective:</th>
         <td>
           <select :ref="effdatRef" v-model="quoteStore.quote.effdat" @change="getRlobList()">
             <option v-for="n in quoteStore.number_of_effdates" :key="n" :value="B.firstOfMonth(n+quoteStore.initial_effdate_offset)">{{ B.format.effdat(B.firstOfMonth(n+quoteStore.initial_effdate_offset)) }}</option>
@@ -106,7 +107,7 @@ const getRlobList = async () => {
   <div class="buttonbar">
     <BButton class="anchor" icon="#red solid x_" @click="emit('abort')">Cancel</BButton>&nbsp;
     <BButton
-      :disabled="quoteStore.quote.effdat == ''
+      :disabled="quoteStore.quote.effdat == null
         || quoteStore.working != null
         || quoteStore.quote.descr == ''
         || quoteStore.quote.rlob == ''" class="modern" @click="doContinue()">Select Plans...</BButton>

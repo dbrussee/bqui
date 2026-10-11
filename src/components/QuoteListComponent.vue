@@ -44,11 +44,15 @@ const quoteHandler = {
     this.openStart()
   },
   step2() {
-    quoteStore.createQuote().then(() => {
-      cfgQuotesList.value.pickedRow = quoteStore.quote
-      cfgQuotesList.value.pickedRowNumber = prospStore.quotes.length - 1
-      this.edit()
-    })
+    if (!prospStore.prospect) return
+    // quoteStore.createQuote().then(() => {
+    //   cfgQuotesList.value.pickedRow = quoteStore.quote
+    //   cfgQuotesList.value.pickedRowNumber = prospStore.quotes.length - 1
+    //   this.edit()
+    // })
+    quoteStore.getPlanList(prospStore.prospect.id)
+    this.closeStart()
+    this.openEdit()
   },
   delete() {
     quoteStore.deleteQuote(quoteStore.quote.id)
@@ -56,6 +60,7 @@ const quoteHandler = {
     this.closeEdit()
   },
   edit() {
+    if (!prospStore.prospect) return
     quoteStore.quote = {...cfgQuotesList.value.pickedRow} // copy of data
     quoteStore.getPlanList(prospStore.prospect.id)
     this.closeStart()
@@ -73,14 +78,23 @@ const quoteHandler = {
     })
   },
   save() {
-    quoteStore.updateQuote(quoteStore.quote, "updated").then((updatedQuote:any) => {
-      if (updatedQuote) {
-        prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
-        cfgQuotesList.value.pickedRow = null
-      }
-    })
-    this.closeStart()
-    this.closeEdit()
+    if (quoteStore.quote.id < 0) {
+      quoteStore.createQuote().then(() => {
+        cfgQuotesList.value.pickedRow = quoteStore.quote
+        cfgQuotesList.value.pickedRowNumber = prospStore.quotes.length - 1
+        this.closeStart()
+        this.closeEdit()
+      })
+    } else {
+      quoteStore.updateQuote(quoteStore.quote, "updated").then((updatedQuote:any) => {
+        if (updatedQuote) {
+          prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+          cfgQuotesList.value.pickedRow = null
+        }
+        this.closeStart()
+        this.closeEdit()
+      })
+    }
   },
   submit() {
     let toastMessage = 'unchanged'
@@ -97,14 +111,23 @@ const quoteHandler = {
         quoteStore.quote.status = 'PENDING'
         toastMessage = 'pending approval'
     }
-    quoteStore.updateQuote(quoteStore.quote, toastMessage).then((updatedQuote:any) => {
-      if (updatedQuote) {
-        prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
-        cfgQuotesList.value.pickedRow = null
-      }
-    })
-    this.closeStart()
-    this.closeEdit()
+    if (quoteStore.quote.id < 0) {
+      quoteStore.createQuote().then(() => {
+        cfgQuotesList.value.pickedRow = quoteStore.quote
+        cfgQuotesList.value.pickedRowNumber = prospStore.quotes.length - 1
+        this.closeStart()
+        this.closeEdit()
+      })
+    } else {
+      quoteStore.updateQuote(quoteStore.quote, toastMessage).then((updatedQuote:any) => {
+        if (updatedQuote) {
+          prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+          cfgQuotesList.value.pickedRow = null
+        }
+        this.closeStart()
+        this.closeEdit()
+      })
+    }
   },
   abort() {
     this.closeStart()
