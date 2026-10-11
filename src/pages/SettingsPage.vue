@@ -291,13 +291,6 @@ const getRightLongDescription = ():string => {
               :icon="pickedRightValue == opt ? 'circle-dot_' : 'circle_'">{{ opt }}</BAnchor>
           </template>
         </p>
-        <!-- <ul style="list-style:none; padding-left: .5em; margin-top: .5em;">
-          <li class="anchor"
-            @click="rightHandler.saveOverride(rightsConfig.pickedRow.code, '')"><BIcon :icon="pickedRightValue == '' ? 'circle-dot_' : 'circle_'"/>No Override</li>
-          <li class="anchor" v-for="opt of app.config.rights[rightsConfig.pickedRow.code].values" :key="opt"
-            @click="rightHandler.saveOverride(rightsConfig.pickedRow.code, opt)"
-            ><BIcon :icon="pickedRightValue == opt ? 'circle-dot_' : 'circle_'"/>{{ opt }}</li>
-        </ul> -->
       </div>
       <div class="buttonbar">
         <BAnchor @click="rightHandler.close()" icon="#red solid x_">Cancel</BAnchor>
