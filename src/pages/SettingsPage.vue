@@ -27,7 +27,7 @@ const roleHandler = {
   open() { (document.getElementById(roleHandler.popupId) as HTMLDialogElement).showModal() },
   close() { (document.getElementById(roleHandler.popupId) as HTMLDialogElement).close() },
   toggle(code:string) {
-    if (userStore.user.config.roles.indexOf(code) < 0) {
+    if (userStore.user?.config.roles.indexOf(code) < 0) {
       this.add(code)
     } else {
       this.delete(code)
@@ -99,7 +99,7 @@ const decodeSource = (configRight:any, td:any):void => {
   if (!cell) return
   const rightCode = configRight.code
   if (!rightCode) cell.innerHTML = "What?"
-  const userRight = userStore.user.rights[rightCode]
+  const userRight = userStore.user?.rights[rightCode]
   if (userRight.source == "@USER") {
     cell.style.color = "goldenrod"
     cell.innerHTML = "*User*";
@@ -113,15 +113,15 @@ const decodeSource = (configRight:any, td:any):void => {
 const decodeValue = (configRight:any):string => {
   const rightCode = configRight.code
   if (!rightCode) return "What?"
-  const userRight = userStore.user.rights[rightCode]
+  const userRight = userStore.user?.rights[rightCode]
   return userRight.value
 }
 
 
 const agencyDetails = () => {
-  if (!userStore.user.agency_id || userStore.user.agency_id == -1) return "<span style='color: var(--ui-disabled-text)'>None</span>"
-  if (userStore.user.agency_descr == null) return `<span style='color: red'>Unknown agency (${userStore.user.agency_id})</span>`
-  return `${userStore.user.agency_descr}`
+  if (!userStore.user?.agency_id || userStore.user?.agency_id == -1) return "<span style='color: var(--ui-disabled-text)'>None</span>"
+  if (userStore.user?.agency_descr == null) return `<span style='color: red'>Unknown agency (${userStore.user?.agency_id})</span>`
+  return `${userStore.user?.agency_descr}`
 }
 
 const handlePickRight = (row:any):void => {
@@ -135,7 +135,7 @@ const inspectRight = ():string => {
   // const userRight = userStore.user.rights[rightCode]
   let html = `Default: ${app.config.rights[rightCode].default_value}`;
   html += "<ul>"
-  userStore.user.config.roles.forEach((myrole:string) => {
+  userStore.user?.config.roles.forEach((myrole:string) => {
     const appRole = app.config.roles[myrole]
     appRole.rights.forEach((rr:any) => {
       if (rr.right == rightCode) {
@@ -143,7 +143,7 @@ const inspectRight = ():string => {
       }
     })
   })
-  const userRight = userStore.user.rights[rightCode]
+  const userRight = userStore.user?.rights[rightCode]
   if (userRight.source == '@USER') {
     pickedRightValue.value = userRight.value
     // html += `<li>User: ${userRight.value}</li>`
@@ -172,6 +172,12 @@ const computedRightsList = computed(() => {
   })
   return list.sort((a, b) => a.listpos > b.listpos ? 1 : -1)
 })
+
+const getRightLongDescription = ():string => {
+  if (!rightsConfig.value.pickedRow) return ""
+  const rightCode = rightsConfig.value.pickedRow.code
+  return app.config.rights[rightCode].long_descr
+}
 </script>
 
 <template>
@@ -181,16 +187,16 @@ const computedRightsList = computed(() => {
       <td style="vertical-align: top; padding-right: 2em; width: 50%;">
         <table class="form-table" style="margin-bottom: 1em; width: 100%;">
           <tbody>
-            <tr><th>Logged In User:</th><td class="mono">{{ userStore.user.id }}</td></tr>
-            <tr><th>Name:</th><td>{{ userStore.user.lstnam }}, {{ userStore.user.fstnam }}</td></tr>
-            <tr><th>Status:</th><td>{{ B.codeToText.userStatus(userStore.user.status) }}</td></tr>
+            <tr><th>Logged In User:</th><td class="mono">{{ userStore.user?.id }}</td></tr>
+            <tr><th>Name:</th><td>{{ userStore.user?.lstnam }}, {{ userStore.user?.fstnam }}</td></tr>
+            <tr><th>Status:</th><td>{{ B.codeToText.userStatus(userStore.user?.status) }}</td></tr>
             <tr><th>Email:</th><td>
-              <a v-if="userStore.user.email != ''" style="cursor: pointer"
-              :href="'mailto:' + encodeURI(`${userStore.user.fstnam} ${userStore.user.lstnam} <${userStore.user.email}>`)">{{userStore.user.email}}</a>
-              <ClipboardIcon :cliptext="userStore.user.email"/>
+              <a v-if="userStore.user?.email != ''" style="cursor: pointer"
+              :href="'mailto:' + encodeURI(`${userStore.user?.fstnam} ${userStore.user?.lstnam} <${userStore.user?.email}>`)">{{userStore.user?.email}}</a>
+              <ClipboardIcon :cliptext="userStore.user?.email"/>
             </td></tr>
             <tr><th>Agency:</th><td :innerHTML="agencyDetails()"/></tr>
-            <!-- <tr><th>Last Login:</th><td>{{ B.format.ts(userStore.user.lst_login) }}</td></tr> -->
+            <!-- <tr><th>Last Login:</th><td>{{ B.format.ts(userStore.user?.lst_login) }}</td></tr> -->
             <tr><td colspan="2" style="text-align: center; padding-top: .5em;">
               <BConfirm
                 icon="solid arrow-right-from-bracket_"
@@ -198,7 +204,7 @@ const computedRightsList = computed(() => {
                 class="anchor"
                 pos="T" @confirm="userStore.logout()">Logout?
                 <template #message>
-                  Log out user '{{ userStore.user.id }}'
+                  Log out user '{{ userStore.user?.id }}'
                 </template>
               </BConfirm>
             </td></tr>
@@ -216,10 +222,10 @@ const computedRightsList = computed(() => {
               <BButton class="anchor"
               @click="roleHandler.open()"
               icon="solid pen_" />
-              <span v-for="(r,i) in userStore.user.config.roles" :key="r">
+              <span v-for="(r,i) in userStore.user?.config.roles" :key="r">
                 {{ (i as number) > 0 ? ', ' : '' }}<span class="mono">{{ r }}</span>
               </span>
-              <!-- <span class="mono">{{ userStore.user.config.roles.join(", ") }}</span> -->
+              <!-- <span class="mono">{{ userStore.user?.config.roles.join(", ") }}</span> -->
             </td></tr>
           </tbody>
         </table>
@@ -254,7 +260,7 @@ const computedRightsList = computed(() => {
       <template v-for="(value, key) in app.config.roles" :key="key">
         <li @click="roleHandler.toggle(key as string)" class="anchor" :value="key">
           <span class="anchor">
-            <BIcon :icon="userStore.user.config.roles.indexOf(key) < 0 ? 'square' : 'square-check'">{{ value.descr }}</BIcon>
+            <BIcon :icon="userStore.user?.config.roles.indexOf(key) < 0 ? 'square' : 'square-check'">{{ value.descr }}</BIcon>
           </span>
           <span class="info"> ({{ key }})</span>
         </li>
@@ -268,6 +274,7 @@ const computedRightsList = computed(() => {
 
   <dialog :id="rightHandler.popupId" style="width: 25em;">
     <div class="titlebar">Right Code {{ rightsConfig.pickedRow?.code }}</div>
+    <div class="info">{{ getRightLongDescription() }}</div>
     <form @submit.prevent="rightHandler.save()">
       <span :innerHTML="inspectRight()"/>
       <div v-if="rightsConfig.pickedRow" class="form-table" style="margin-top: .5em;">

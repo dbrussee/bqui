@@ -19,6 +19,11 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false
+  },
+  void: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
 const doClick = () => {
@@ -38,7 +43,7 @@ const doClick = () => {
     <div class="icon_container">
       <BIcon :disabled="props.disabled" :icon="props.icon" />
     </div>
-    <span :class="{'my-disabled':props.disabled, 'anchor':!props.disabled}"><slot/></span>
+    <span :class="{'my-disabled':props.disabled, 'anchor':!props.disabled && !props.void}"><slot/></span>
   </div>
 </template>
 

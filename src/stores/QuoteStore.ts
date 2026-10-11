@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
 import { B } from '@/composables/BUtils'
 import { appProspectStore } from './ProspectStore'
 import { useToast } from '@/composables/useToast'
 import BQAPIFetcher from '@/components/BQAPI'
+import type { quote } from '@/types/quote'
+import { ref } from 'vue'
 
 export const QuoteStore = defineStore('QuoteStore', () => {
   const NUMBER_OF_EFFDATES = 10
   const INITIAL_EFFDATE_OFFSET = -2
   const working = ref<any>(null)
-  const quote = ref<any>({
+  const quote = ref<quote>({
     descr: '',
+    id: -1,
     prospect_id: -1,
     status: 'INPROG',
     size_cd: '',
@@ -22,7 +24,8 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     nonstd: 'N',
     rlob: '',
     funding: 'FI',
-    med_plan: '', dru_plan: '', vis_plan: '', den_plan: ''
+    med_plan: '', dru_plan: '', vis_plan: '', den_plan: '',
+    crtusr: '', crttms: new Date(), updusr: '', updtms: new Date()
   })
 
   const createQuote = async ():Promise<any> => {
@@ -35,10 +38,12 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       if (q.dru_plan == null) q.dru_plan = ''
       if (q.vis_plan == null) q.vis_plan = ''
       if (q.den_plan == null) q.deb_plan = ''
-      appProspectStore().quotes.unshift(q)
-      appProspectStore().quotes = sortQuotes(appProspectStore().quotes)
-      appProspectStore().prospect.last_quote = {...q}
-      appProspectStore().prospect.last_quote_id = q.id
+      const prospStore = appProspectStore()
+      prospStore.quotes.unshift(q)
+      prospStore.quotes = sortQuotes(appProspectStore().quotes)
+      if (!prospStore.prospect) return null
+      prospStore.prospect.last_quote = {...q}
+      prospStore.prospect.last_quote_id = q.id
       if (fetcher.issue) {
         useToast().addToast(`Error creating quote: ${fetcher.issue.error}`, "error")
       } else {
@@ -52,6 +57,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   }
   const blankQuote = (qtype:string):void => {
     quote.value = {
+      id: -1,
       descr: '',
       prospect_id: -1,
       status: 'INPROG',
@@ -63,7 +69,8 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       nonstd: 'N',
       rlob: '',
       funding: 'FI',
-      med_plan: 'M_NOPLN', dru_plan: 'R_NOPLN', vis_plan: 'V_NOPLN', den_plan: 'D_NOPLN'
+      med_plan: 'M_NOPLN', dru_plan: 'R_NOPLN', vis_plan: 'V_NOPLN', den_plan: 'D_NOPLN',
+      crtusr: '', crttms: new Date(), updusr: '', updtms: new Date()
     }
   }
   const deleteQuote = async (qid:number) => {
@@ -73,13 +80,15 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     if (fetcher.issue) {
       useToast().addToast(`Error deleting quote: ${fetcher.issue.error}`, "error")
     } else {
+      const prospStore = appProspectStore()
+      if (!prospStore.prospect) return
       if (fetcher.resp == null) { // No more quotes
-        appProspectStore().prospect.last_quote = null
-        appProspectStore().prospect.last_quote_id = null
+        prospStore.prospect.last_quote = null
+        prospStore.prospect.last_quote_id = null
       } else { // Found a new last quote
         const newLastQuote = fetcher.resp
-        appProspectStore().prospect.last_quote = {...newLastQuote}
-        appProspectStore().prospect.last_quote_id = newLastQuote.id
+        prospStore.prospect.last_quote = {...newLastQuote}
+        prospStore.prospect.last_quote_id = newLastQuote.id
       }
       blankQuote(quote.value.qtype)
       appProspectStore().quotes = appProspectStore().quotes.filter((q) => {
@@ -119,6 +128,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
 
   const initializeNewQuoteOptions = (qtype:string = 'MED', pickedQuote:any = null) => {
     const prospStore = appProspectStore()
+    if (!prospStore.prospect) return
     blankQuote(qtype)
     const q = quote.value
     q.prospect_id = prospStore.prospect.id
@@ -128,8 +138,9 @@ export const QuoteStore = defineStore('QuoteStore', () => {
 
     getRLOBList(prospStore.prospect.id)
   }
-  const initializeFromQuote = (q:any) => {
+  const initializeFromQuote = (q:quote) => {
     const prospStore = appProspectStore()
+    if (!prospStore.prospect) return
     const opts = quote.value
     opts.descr = q.descr as string
     if (!opts.descr.endsWith("- Copy")) opts.descr += ' - Copy'
@@ -153,13 +164,11 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       test.setMonth(test.getMonth() + 12)
       if (verifyEffdatInRange(test)) {
         opts.effdat = test
-      } else {
-        opts.effdat = ''
       }
     }
   }
 
-  const verifyEffdatInRange = (effdat:Date):boolean => {
+  const verifyEffdatInRange = (effdat:Date | null):boolean => {
     if (!effdat) return true// Empty is ok... but not valid
     for (let i = 0; i < NUMBER_OF_EFFDATES; i++) {
       const test = B.firstOfMonth(i + INITIAL_EFFDATE_OFFSET)
@@ -177,7 +186,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     'VIS': ref<[]>([])
   }
 
-  const getRLOBList = async (pid:string) => {
+  const getRLOBList = async (pid:number) => {
     B.working.set(working, "Getting avaiable product lines...")
     const preRLOB = quote.value?.rlob || 'BEEF'
     rlobList.MED.value.length = 0
@@ -212,7 +221,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
           quote.value.rlob = ''
         }
         if (!verifyEffdatInRange(quote.value.effdat)) {
-          quote.value.effdat = ''
+          quote.value.effdat = null
         }
       }
     }

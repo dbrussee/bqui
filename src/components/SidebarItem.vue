@@ -40,7 +40,7 @@ const props = defineProps({
 <template>
   <div class="content" :class="{'picked': props.current}">
     <BIcon :working="props.working" :icon='props.icon' /><span v-html="props.shortname"/>
-      <p style="font-size: .8em;" v-html="props.longname"></p>
+      <p class="truncate-text" style="font-size: .8em;" v-html="props.longname"></p>
   </div>
 </template>
 
@@ -84,5 +84,11 @@ const props = defineProps({
     background-color: var(--table-row-picked-bg);
 
     /* p { color: var(--form-prompt-color); } */
+  }
+  .truncate-text {
+    white-space: nowrap;      /* 1. Prevents the text from wrapping to a new line */
+    overflow: hidden;         /* 2. Hides the text that overflows the element's box */
+    text-overflow: ellipsis;  /* 3. Adds the actual '...' to the end of the truncated text */
+    width: 100%;              /* 4. Gives the element a boundary (can also be a max-width or fixed px/rem width) */
   }
 </style>

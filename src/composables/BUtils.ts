@@ -2,7 +2,8 @@ import type { Ref } from "vue";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const B = {
-  dateFromYYYYMMDD: (yyyymmdd:string):Date => {
+  dateFromYYYYMMDD: (yyyymmdd:string | Date | null):Date => {
+    if (yyyymmdd == null) yyyymmdd = new Date()
     if (typeof yyyymmdd != 'string') return yyyymmdd
     const splitter = yyyymmdd.charAt(4)
     const parts:string[] = yyyymmdd.split(splitter)
@@ -85,7 +86,7 @@ export const B = {
      * const desc = B.codeToText.quoteStatus('ACTIVE') // returns "Active"
      * ```
      */
-    userStatus: (code: string) => {
+    userStatus: (code: string | undefined) => {
       switch (code) {
         case "ACTIVE": return "Active";
         case "TERM": return "Terminated";
@@ -293,7 +294,7 @@ export const B = {
      * console.log(B.format.effdat('3/1/2027') // Mar 2027
      * ```
      */
-    effdat: (d: string | Date) => {
+    effdat: (d: string | Date | null | undefined) => {
       if (!d) return "";
       let date:Date
       if (typeof d == "string") {
@@ -329,7 +330,7 @@ export const B = {
      * console.log(B.format.ts(new Date()) // Sep 07, 2026 07:47:25a
      * ```
      */
-    ts: (d: string | Date) => {
+    ts: (d: string | Date | null | undefined) => {
       if (!d) return "";
       const date = new Date(d);
       const formatter = new Intl.DateTimeFormat("en-US", {
@@ -361,7 +362,7 @@ export const B = {
       return finalString;
       // Output: "Jul 30, 2026 08:12:10a"
     },
-    dateMDYYYY: (d: string | Date = new Date()) => {
+    dateMDYYYY: (d: string | null | Date = new Date()) => {
       if (!d) return "";
       if (typeof d == "string" && d.indexOf("-") >= 0) {
         const parts:string[] = d.split("-") // 2027-01-01

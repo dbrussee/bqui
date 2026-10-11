@@ -56,7 +56,7 @@ const prospectCSZ = (prosp:any) => {
   <div v-if="!prospStore.prospect?.id && prospStore.prospWorking" class="prospect_info" style="text-align: center; padding-top: 3em;">
     <div class="spinner" />Loading...
   </div>
-  <div v-if="!prospStore.issue?.severity && prospStore.prospect.id" class="prospect_info AAA">
+  <div v-if="!prospStore.issue?.severity && prospStore.prospect?.id" class="prospect_info AAA">
     <div style="display: flex; align-items: flex-start;">
       <table class="form-table">
         <tbody>
@@ -89,7 +89,7 @@ const prospectCSZ = (prosp:any) => {
                   {{ B.codeToText.qtype(prospStore.prospect.last_quote.qtype) }} Quote ID: {{ prospStore.prospect.last_quote.id }}
                   ({{ prospStore.prospect.last_quote.funding }} {{ prospStore.prospect.last_quote.rlob }})
                 </li>
-                <li>Effective: {{ B.format.effdat(prospStore.prospect.last_quote.effdat) }}</li>
+                <li>Effective: {{ B.format.effdat(prospStore.prospect.last_quote?.effdat) }}</li>
                 <li>Status: <BIcon :icon="B.statusIcon(prospStore.prospect.last_quote.status)"/>{{ B.codeToText.quoteStatus(prospStore.prospect.last_quote.status) }}</li>
                 <li v-if="prospStore.prospect.last_quote.qtype == 'MED'">MED Plan: {{ prospStore.prospect.last_quote.med_plan }}</li>
                 <li v-if="prospStore.prospect.last_quote.qtype == 'MED'">DRU Plan: {{ prospStore.prospect.last_quote.dru_plan }}</li>

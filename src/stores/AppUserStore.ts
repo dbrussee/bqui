@@ -6,9 +6,10 @@ import { appProspectStore } from "./ProspectStore";
 import { ref } from "vue";
 import { useToast } from "@/composables/useToast";
 import { B } from "@/composables/BUtils";
+import type { user } from "@/types/user";
 
 export const appUserStore = defineStore("appUserStore", () => {
-  const user = ref<any>(null);
+  const user = ref<user | null>(null);
   // const otherUser = ref<any>(null);
   const meta = ref<any>(null);
   const issue = ref<any>(null)
@@ -45,6 +46,7 @@ export const appUserStore = defineStore("appUserStore", () => {
       issue.value = fetcher.issue;
       const msgStore = appMessageStore()
       msgStore.getMessages()
+      getMostRecentProspect()
     })
   }
   async function relogin() {
@@ -59,6 +61,7 @@ export const appUserStore = defineStore("appUserStore", () => {
 
     const msgStore = appMessageStore()
     msgStore.getMessages()
+    getMostRecentProspect()
     return user.value;
   }
 
@@ -75,6 +78,14 @@ export const appUserStore = defineStore("appUserStore", () => {
       rootElement.setAttribute('data-theme', code)
       localStorage.setItem('bq-ui-theme', code)
     }
+  }
+
+  function getMostRecentProspect ():void {
+    if (!user.value) return
+    if (!user.value.recents) return
+    if (user.value.recents.length == 0) return
+    const prospStore = appProspectStore()
+    prospStore.getProspect(user.value.recents[0].pid)
   }
 
 
@@ -133,6 +144,7 @@ export const appUserStore = defineStore("appUserStore", () => {
 
   const getUserSetting = (thing:string, ifNotFound:string):string => {
     let rslt = ifNotFound
+    if (!user.value) return rslt
     const config = user.value.config
     if ("settings" in config) {
       if (thing in config.settings) {
@@ -145,6 +157,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   }
 
   const isUserReadOnly = ():boolean => {
+    if (!user.value) return true
     if (user.value.config.roles.indexOf('READONLY') >= 0) return true
     return false
   }
@@ -187,9 +200,10 @@ export const appUserStore = defineStore("appUserStore", () => {
     fetcher.callAPI(`/recents`, "DELETE").then(() => {
       B.working.clear(working)
       const userStore = appUserStore()
-      userStore.user.recents = [...fetcher.resp]
-      useToast().addToast("Cleared Recents List", "info")
-
+      if (userStore.user) {
+        userStore.user.recents = [...fetcher.resp]
+        useToast().addToast("Cleared Recents List", "info")
+      }
     })
   }
 

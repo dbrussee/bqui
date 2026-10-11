@@ -6,9 +6,10 @@ import { B } from "@/composables/BUtils";
 import { appUserStore } from "./AppUserStore";
 import { useToast } from '../composables/useToast'
 import * as XLSX from "xlsx";
+import type { prospect } from "@/types/prospect";
 
 export const appProspectStore = defineStore("appProspectStore", () => {
-  const prospect = ref<any>(null);
+  const prospect = ref<prospect | null>(null);
   const searchResults = ref<any[]>([])
   const quotes = ref<any[]>([])
   const meta = ref<any>({
@@ -29,14 +30,16 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
   async function removeMeFromRecents() {
     const fetcher = new BQAPIFetcher()
-    const userStore = appUserStore()
+    if (!prospect.value) return
     const pid = prospect.value.id
     fetcher.callAPI(`/recents/${pid}`, "DELETE").then(() => {
       if (fetcher.issue) {
         useToast().addToast(`Error removing prospect ${pid} from Recents`, "error")
       } else {
-        if (fetcher.resp == null) {
-          userStore.user.recents = null
+        const userStore = appUserStore()
+        if (!userStore.user) return
+        if (fetcher.resp == null) { // This was the last item in recents
+          userStore.user.recents.length = 0
           prospect.value = null
           censusHash.value = ''
           censusDirty.value = false
@@ -54,7 +57,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
   async function deleteProspect() {
     const fetcher = new BQAPIFetcher()
-    const userStore = appUserStore()
+    if (!prospect.value) return
     const pid = prospect.value.id
     B.working.set(prospWorking, "Deleting...");
     fetcher.callAPI(`/prospect/${pid}`, "DELETE").then(() => {
@@ -63,8 +66,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         useToast().addToast(`Error deleting prospect ${pid}:<p>${fetcher.issue.message}</p?`, "error", 0)
         fetcher.issue = null
       } else {
-        useToast().addToast(`Deleted prospect ${pid}`, "success")
+        const userStore = appUserStore()
         userStore.user = fetcher.resp;
+        if (!userStore.user) return
+        useToast().addToast(`Deleted prospect ${pid}`, "success")
         if (userStore.user.recents && userStore.user.recents.length > 0) {
           getProspect(userStore.user.recents[0]?.pid, true)
         } else {
@@ -80,6 +85,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   const censusHash = ref("Unused")
   const censusDirty = ref(false)
   async function setCensusDirty() {
+    if (!prospect.value) return
     const hash = await B.getHash(JSON.stringify(prospect.value.census))
     censusDirty.value = censusHash.value != hash
   }
@@ -99,7 +105,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
   function getProspect(pid: string, registerRecent: boolean = false) {
     if (pid == "") return;
-    prospect.value = {};
+    prospect.value = null;
     quotes.value.length = 0;
     issue.value = {}
     const fetcher = new BQAPIFetcher()
@@ -117,6 +123,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         return
       }
       prospect.value = fetcher.resp.prosp
+      if (prospect.value == null) return
       // console.log(JSON.stringify(prospect.value, null, 2))
       prospect.value.census = sortCensus(fetcher.resp.prosp.census)
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
@@ -129,6 +136,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
         fetcher.callAPI('/recents', "GET").then(() => {
           if (fetcher.resp) {
             const userStore = appUserStore()
+            if (!userStore.user) return
             userStore.user.recents = fetcher.resp
           }
         })
@@ -178,12 +186,14 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     B.working.clear(prospWorking)
     if (fetcher.resp != null) {
       const updatedUser = fetcher.resp as any;
-      const userStore = appUserStore();
+      const userStore = appUserStore()
+      if (!userStore.user) return
       userStore.user.faves = updatedUser.faves as any[];
       useToast().addToast(isFavorite ? "Added to Bookmarks" : "Removed from Bookmarks", isFavorite ? "success" : "info")
     }
   }
   const isCurrentlyFavorite = () => {
+    if (!prospect.value) return false;
     const userStore = appUserStore()
     if (!userStore.user || !userStore.user.faves || !prospect.value.id) return false;
     let rslt = false;
@@ -202,6 +212,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     B.working.clear(prospWorking)
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp.prosp
+      if (!prospect.value) return
       quotes.value.length = 0
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
         censusHash.value = hash
@@ -209,6 +220,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       })
 
       const userStore = appUserStore()
+      if (!userStore.user) return
       if (!userStore.user.recents) userStore.user.recents = []
       userStore.user.recents.unshift({pid: prospect.value.id, name: prospect.value.name})
       useToast().addToast(`Prospect ID ${prospect.value.id} created`, "success")
@@ -217,6 +229,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     issue.value = fetcher.issue
   }
   async function updateProspect(data:any) {
+    if (!prospect.value) return
     B.working.set(prospWorking, "Saving...")
     const curCensus = JSON.parse(JSON.stringify(B.ifNull(prospect.value.census, []))) // Clone the current census
     delete data.census
@@ -224,13 +237,16 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     B.working.clear(prospWorking)
     if (fetcher.resp != null) {
       prospect.value = fetcher.resp.prosp
+      if (!prospect.value) return
+      if (!prospect.value.id) return
       prospect.value.census = [...curCensus]
       const userStore = appUserStore()
+      if (!userStore.user) return
       userStore.user.recents[0].name = prospect.value.name
       // console.dir(userStore.user.faves)
       userStore.user.faves.forEach((fave:any) => {
-        if (fave.pid == prospect.value.id) {
-          fave.name = prospect.value.name
+        if (fave.pid == prospect.value?.id) {
+          fave.name = prospect.value?.name
         }
       })
       useToast().addToast("Prospect Changes Saved", "success")
@@ -240,6 +256,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
 
   async function getCensus() {
+    if (!prospect.value) return
     B.working.set(censusWorking, "Loading...")
     const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'GET')
     B.working.clear(censusWorking)
@@ -255,6 +272,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     issue.value = fetcher.issue
   }
   async function updateCensus(data:any) {
+    if (!prospect.value) return
     B.working.set(censusWorking, "Saving...")
     cleanCensus()
     const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'PUT', data)
@@ -273,6 +291,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
 
   const exportCensus = async () => {
+    if (!prospect.value) return
     const census = flattenCensus()
     const worksheet = XLSX.utils.json_to_sheet(census)
     worksheet['!cols'] = [
@@ -326,6 +345,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     }
   }
   const cleanCensus = ():void => {
+    if (!prospect.value) return
     prospect.value.census.forEach((sub: any) => {
       sub.dob = cleanDOB(sub.dob)
       if (sub.deps && Array.isArray(sub.deps)) {
@@ -345,6 +365,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     return B.format.dateMDYYYY(dob_asDate) as string
   }
   const flattenCensus = ():any => {
+    if (!prospect.value) return []
     cleanCensus()
     const flat = [] as any[]
     prospect.value.census.forEach((sub: any, rn:number) => {
@@ -417,6 +438,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     if (value) parent[nodeName] = value
   }
   const mapImportJSONToCensus = (json:any) => {
+    if (!prospect.value) return
     prospect.value.census.length = 0
     let sub:any = null
     for(let rn = 0; rn < json.length; rn++) {

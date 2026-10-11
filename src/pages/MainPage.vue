@@ -23,13 +23,13 @@ import BInfo from "@/components/B/BInfo.vue";
         <tbody>
           <tr>
             <td style="text-align: left;">
-              v{{app.version()}}
+              <!-- v{{app.version()}}
               <BInfo pos="T2R" :heading="'Application Ver ' + app.version()">
                 <ul>
                   <li>Ver: {{ app.versionDescription() }}</li>
                   <li>{{app.vers.release.getTime() < new Date().getTime() ? 'Released: ' : 'Scheduled Release: '}}{{app.vers.release.toLocaleDateString('en-US')}}</li>
                 </ul>
-              </BInfo>
+              </BInfo> -->
               <!-- &nbsp;&nbsp;
               <BConfirm v-if="userStore.user"
                   icon="solid arrow-right-from-bracket_"
@@ -43,7 +43,7 @@ import BInfo from "@/components/B/BInfo.vue";
               </BConfirm> -->
             </td>
             <td style="text-align: center">
-              &nbsp;
+              Registered Trademark, blah, blah, blah
             </td>
             <td style="text-align: right; width: 15em;">
               <span v-if="counters.apiCalls.active > 0" class="working-message" role="status" aria-live="polite">

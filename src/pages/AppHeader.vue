@@ -17,6 +17,9 @@ const apiHistoryRef = ref<InstanceType<typeof APIHistory> | null>(null)
 const sysmenuRef = ref<InstanceType<typeof BPopupImage> | null>(null)
 import { useNewProspectPopup } from "@/popups/NewProspect/useNewProspectPopup";
 import { useSearchProspectPopup } from '@/popups/SearchProspect/useSearchProspectPopup';
+import BInfo from '@/components/B/BInfo.vue';
+import { appStore } from "@/stores/AppStore.ts";
+const app = appStore()
 
 const fave = (pid: number, isFavorite: boolean) => {
   if (pid) {
@@ -147,6 +150,15 @@ const openHistory = () => {
   <div class="container">
     <div style="padding-left: 2.5em; color: white;">
       <BPopupImage ref="sysmenuRef" :disabled="!userStore.user" pos="B2R" heading="System Menu" src="/src/bcbc_logo.png"  style="position: absolute; height: 2.7em; top: .5em; left: .8em;">
+        <BPopupMenuItem void icon="solid timeline_">Version {{app.version()}}
+          <BInfo pos="R2B" :heading="'Application Ver ' + app.version()">
+            <ul>
+              <li>Version: {{ app.versionDescription() }}</li>
+              <li>{{app.vers.release.getTime() < new Date().getTime() ? 'Released: ' : 'Scheduled Release: '}}{{app.vers.release.toLocaleDateString('en-US')}}</li>
+            </ul>
+          </BInfo>
+
+        </BPopupMenuItem>
         <BPopupMenuItem icon="solid list" @click="openHistory()">API History</BPopupMenuItem>
         <BPopupMenuItem separator="top" icon="solid arrow-right-from-bracket_">
           <BConfirm

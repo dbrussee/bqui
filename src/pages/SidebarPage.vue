@@ -9,19 +9,6 @@ import { appPageStore } from "@/stores/PageStore";
 const pageStore = appPageStore();
 import { appProspectStore } from "@/stores/ProspectStore";
 const prospStore = appProspectStore();
-// import { QuoteStore } from "@/stores/QuoteStore";
-// const quoteStore = QuoteStore()
-import { onRenderTriggered } from "vue";
-
-onRenderTriggered(() => {
-  if (userStore.user && userStore.user.recents) {
-    if (userStore.user.recents.length > 0) {
-      if (!prospStore.prospect) {
-        prospStore.getProspect(userStore.user.recents[0].pid);
-      }
-    }
-  }
-})
 
 function getProspectID():string {
   if (!prospStore.prospect?.id) return ""
