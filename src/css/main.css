@@ -40,6 +40,8 @@
   --table-footer-text: light-dark(var(--bcbs-dark-blue), oklch(90% 0.02 240));
   --table-row-hover-bg: light-dark(oklch(96.5% 0.008 240), var(--sidebar-bg));
   --table-row-hover-text: light-dark(transparent, black);
+  --table-row-bg: light-dark(transparent, transparent);
+  --table-row-text: light-dark(black, white);
   --table-row-picked-bg: light-dark(oklch(88% 0.04 228), var(--bcbs-primary-blue));
   --table-row-picked-text: light-dark(black, white);
   --table-row-border-color: light-dark(gainsboro, darkslategray);

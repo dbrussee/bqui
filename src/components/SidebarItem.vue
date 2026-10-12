@@ -39,13 +39,49 @@ const props = defineProps({
 
 <template>
   <div class="content" :class="{'picked': props.current}">
-    <BIcon :working="props.working" :icon='props.icon' /><span v-html="props.shortname"/>
+    <BIcon :working="props.working" :icon='props.icon' style="font-size: 1.3em; margin-right: .05em; margin-bottom: .2em;" /><span v-html="props.shortname"/>
       <p class="truncate-text" style="font-size: .8em;" v-html="props.longname"></p>
   </div>
 </template>
 
 <style lang="css">
-  .content {
+.content {
+  display: block;
+  padding-top: .3em;
+  cursor: pointer;
+
+  padding-bottom: .3em;
+  border-bottom: 1px solid var(--table-row-border-color);
+  padding-left: .3em;
+  border-left: 3px solid transparent;
+
+  background-color: var(--table-row-bg);
+  color: white;
+
+  i.fa {
+    color: var(--bcbs-light-blue);
+  }
+
+  &:hover {
+    background-color: var(--table-row-picked-bg);
+    color: var(--table-row-picked-text) !important;
+    i.fa {
+      color: goldenrod;
+    }
+  }
+  &.picked {
+    background-color: var(--table-row-picked-bg);
+    color: var(--table-row-picked-text) !important;
+    i.fa {
+      color: var(--bcbs-dark-blue);
+    }
+  }
+
+
+}
+
+
+  .xcontent {
     display: block;
     padding-top: .3em;
     cursor: pointer;
@@ -74,7 +110,7 @@ const props = defineProps({
     /* p { color: var(--form-prompt-color); } */
 
   }
-  .picked {
+  .xpicked {
     /* color: var(--table-row-picked-text) !important; */
     color: black !important;
     i.fa {

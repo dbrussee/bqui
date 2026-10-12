@@ -90,7 +90,7 @@ const rightsConfig = ref({
   columns: [
     { id: "descr", heading: "Activity Description" },
     { id: "value", heading: "Value", flags: "C", width: "5em", cellclass: 'mono' },
-    { id: "source", heading: "Source" },
+    { id: "source", heading: "Source" }
   ]
 })
 

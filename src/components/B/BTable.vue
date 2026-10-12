@@ -262,13 +262,27 @@ tr td {
   vertical-align: top;
   cursor: pointer;
 }
-tbody tr:hover {
+
+tbody tr {
+  background-color: var(--table-row-bg);
+  color: var(--table-row-text);
+  &:hover {
+    background-color: var(--table-row-picked-bg);
+    color: var(--table-row-picked-text) !important;
+  }
+  &.picked {
+    background-color: var(--table-row-picked-bg);
+    color: var(--table-row-picked-text) !important;
+  }
+}
+
+xtbody tr:hover {
   background-color: var(--table-row-picked-bg);
   /* background-color: var(--table-row-hover-bg); */
 }
-tbody tr.picked {
+xtbody tr.picked {
   background-color: var(--table-row-picked-bg);
   /* background-color: var(--table-row-picked-bg); */
-  /* color: var(--table-row-picked-text); */
+  color: var(--table-row-picked-text);
 }
 </style>
