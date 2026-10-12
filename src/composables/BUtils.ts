@@ -255,7 +255,7 @@ export const B = {
   },
   statusIcon: (statusCode:string) => {
     if ('INPROG'.indexOf(statusCode) >= 0) return "##FFBF00 solid wrench_"
-    if ('RATEREQ,PENDING'.indexOf(statusCode) >= 0) return "#sienna solid pause_"
+    if ('RATEREQ,PENDING'.indexOf(statusCode) >= 0) return "#sienna clock_"
     if ('READY'.indexOf(statusCode) >= 0) return "solid check_"
     if ('ENROLLED'.indexOf(statusCode) >= 0) return "#lime solid thumbs-up_"
     if ('EXPIRED'.indexOf(statusCode) >= 0) return "#red rectangle-xmark_"
