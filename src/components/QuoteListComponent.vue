@@ -2,11 +2,11 @@
 <script setup lang="ts">
 import { ref, watch, useId } from 'vue';
 import { appProspectStore } from '@/stores/ProspectStore.ts';
-const prospStore = appProspectStore()
+const pStore = appProspectStore()
 import { appUserStore } from '@/stores/AppUserStore.ts';
-const userStore = appUserStore()
+const uStore = appUserStore()
 import { QuoteStore } from '@/stores/QuoteStore.ts';
-const quoteStore = QuoteStore()
+const qStore = QuoteStore()
 import BTable from './B/BTable.vue';
 import { B } from '@/composables/BUtils.ts';
 import BPopup from './B/BPopup.vue';
@@ -18,7 +18,7 @@ import BIcon from './B/BIcon.vue';
 // Watch for changes to the prospect.
 // Because the value is in a store, we need to use
 // a 'getter' function rather than just the value itself
-watch(() => prospStore.prospect, () => {
+watch(() => pStore.prospect, () => {
     // console.log('Prospect quotes changed (Quotes List)')
     cfgQuotesList.value.pickedRow = null
   }
@@ -36,59 +36,59 @@ const quoteHandler = {
   startFromQuote() {
     const q = cfgQuotesList.value.pickedRow
     cfgQuotesList.value.pickedRow = null
-    quoteStore.initializeFromQuote(q)
+    qStore.initializeFromQuote(q)
     this.openStart()
   },
   start(qtype:string) {
-    quoteStore.initializeNewQuoteOptions(qtype, cfgQuotesList.value.pickedRow)
+    qStore.initializeNewQuoteOptions(qtype, cfgQuotesList.value.pickedRow)
     this.openStart()
   },
   step2() {
-    if (!prospStore.prospect) return
+    if (!pStore.prospect) return
     // quoteStore.createQuote().then(() => {
     //   cfgQuotesList.value.pickedRow = quoteStore.quote
     //   cfgQuotesList.value.pickedRowNumber = prospStore.quotes.length - 1
     //   this.edit()
     // })
-    quoteStore.getPlanList(prospStore.prospect.id)
+    qStore.getPlanList(pStore.prospect.id)
     this.closeStart()
     this.openEdit()
   },
   delete() {
-    quoteStore.deleteQuote(quoteStore.quote.id)
+    qStore.deleteQuote(qStore.quote.id)
     cfgQuotesList.value.pickedRow = null
     this.closeEdit()
   },
   edit() {
-    if (!prospStore.prospect) return
-    quoteStore.quote = {...cfgQuotesList.value.pickedRow} // copy of data
-    quoteStore.getPlanList(prospStore.prospect.id)
+    if (!pStore.prospect) return
+    qStore.quote = {...cfgQuotesList.value.pickedRow} // copy of data
+    qStore.getPlanList(pStore.prospect.id)
     this.closeStart()
     this.openEdit()
   },
   revertToINPROG() {
-    const tempDescr = quoteStore.quote.descr
-    quoteStore.quote = {...cfgQuotesList.value.pickedRow} // copy of data
-    quoteStore.quote.status = 'INPROG'
-    quoteStore.updateQuote(quoteStore.quote, "set back to In Progress").then((updatedQuote:any) => {
+    const tempDescr = qStore.quote.descr
+    qStore.quote = {...cfgQuotesList.value.pickedRow} // copy of data
+    qStore.quote.status = 'INPROG'
+    qStore.updateQuote(qStore.quote, "set back to In Progress").then((updatedQuote:any) => {
       if (updatedQuote) {
-        quoteStore.quote.descr = tempDescr
+        qStore.quote.descr = tempDescr
         cfgQuotesList.value.pickedRow.status = 'INPROG'
       }
     })
   },
   save() {
-    if (quoteStore.quote.id < 0) {
-      quoteStore.createQuote().then(() => {
-        cfgQuotesList.value.pickedRow = quoteStore.quote
-        cfgQuotesList.value.pickedRowNumber = prospStore.quotes.length - 1
+    if (qStore.quote.id < 0) {
+      qStore.createQuote().then(() => {
+        cfgQuotesList.value.pickedRow = qStore.quote
+        cfgQuotesList.value.pickedRowNumber = pStore.quotes.length - 1
         this.closeStart()
         this.closeEdit()
       })
     } else {
-      quoteStore.updateQuote(quoteStore.quote, "updated").then((updatedQuote:any) => {
+      qStore.updateQuote(qStore.quote, "updated").then((updatedQuote:any) => {
         if (updatedQuote) {
-          prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+          pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
           cfgQuotesList.value.pickedRow = null
         }
         this.closeStart()
@@ -98,30 +98,30 @@ const quoteHandler = {
   },
   submit() {
     let toastMessage = 'unchanged'
-    switch(quoteStore.quote.nonstd) {
+    switch(qStore.quote.nonstd) {
       case 'N':
-        quoteStore.quote.status = 'READY'
+        qStore.quote.status = 'READY'
         toastMessage = 'submitted'
         break
       case 'Y':
-        quoteStore.quote.status = 'RATEREQ'
+        qStore.quote.status = 'RATEREQ'
         toastMessage = 'rates requested'
         break
       case 'C':
-        quoteStore.quote.status = 'PENDING'
+        qStore.quote.status = 'PENDING'
         toastMessage = 'pending approval'
     }
-    if (quoteStore.quote.id < 0) {
-      quoteStore.createQuote().then(() => {
-        cfgQuotesList.value.pickedRow = quoteStore.quote
-        cfgQuotesList.value.pickedRowNumber = prospStore.quotes.length - 1
+    if (qStore.quote.id < 0) {
+      qStore.createQuote().then(() => {
+        cfgQuotesList.value.pickedRow = qStore.quote
+        cfgQuotesList.value.pickedRowNumber = pStore.quotes.length - 1
         this.closeStart()
         this.closeEdit()
       })
     } else {
-      quoteStore.updateQuote(quoteStore.quote, toastMessage).then((updatedQuote:any) => {
+      qStore.updateQuote(qStore.quote, toastMessage).then((updatedQuote:any) => {
         if (updatedQuote) {
-          prospStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+          pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
           cfgQuotesList.value.pickedRow = null
         }
         this.closeStart()
@@ -171,7 +171,7 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
   <BTable
       @pick="(row:any, rn:number, col:any) => { handleQuoteRowClicked(row, rn) }"
       @dblpick="(row:any, rn:number, col:any) => { quoteHandler.edit() }"
-      :config="cfgQuotesList" :rows="prospStore.quotes">
+      :config="cfgQuotesList" :rows="pStore.quotes">
     <!-- <template #column_id="{row, rn, td}">{{ formatIDCell(row, rn, td) }}</template> -->
     <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
     <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
@@ -183,7 +183,7 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
       >{{ B.codeToText.nonstd(row.nonstd) }}</span>
     </template>
     <template #buttons>
-      <BPopup v-if="!userStore.isUserReadOnly()" class="action" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
+      <BPopup v-if="!uStore.isUserReadOnly()" class="action" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
         <template #body>
           <p><BButton @click="quoteHandler.start('MED')" class="anchor" :icon="B.codeToText.qtypeIcon('MED')">Medical &amp; Drug</BButton></p>
           <p><BButton @click="quoteHandler.start('DEN')" class="anchor" :icon="B.codeToText.qtypeIcon('DEN')">Dental</BButton></p>
@@ -194,14 +194,14 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
         </template>
       </BPopup>
       <!-- <BConfirm class="anchor gapright" @confirm="quoteStore.deleteQuote(cfgQuotesList.pickedRow.id)" :disabled="!cfgQuotesList.pickedRow || cfgQuotesList.pickedRow.status != 'INPROG'" pos="T2R" icon="trash-can_">Delete...</BConfirm> -->
-      <BButton class="anchor anchor-in-table-footer" gapleft gapright style="color: white" :disabled="!cfgQuotesList.pickedRow" :icon="userStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'" @click="quoteHandler.edit()">{{ userStore.isUserReadOnly() ? 'View...' : 'Edit...' }}</BButton>
+      <BButton class="anchor anchor-in-table-footer" gapleft gapright style="color: white" :disabled="!cfgQuotesList.pickedRow" :icon="uStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'" @click="quoteHandler.edit()">{{ uStore.isUserReadOnly() ? 'View...' : 'Edit...' }}</BButton>
       <BButton class="anchor anchor-in-table-footer" style="color: white" disabled icon="file-pdf">Generate</BButton>
     </template>
   </BTable>
   <NewQuoteDialog :popupid="quoteHandler.startPopid"
     @abort="quoteHandler.abort()"
     @continue="(opts) => quoteHandler.step2()"
-    :qtype="quoteStore.quote.qtype"></NewQuoteDialog>
+    :qtype="qStore.quote.qtype"></NewQuoteDialog>
   <EditQuoteDialog :popupid="quoteHandler.editPopid"
     @abort="quoteHandler.abort()"
     @delete="quoteHandler.delete()"

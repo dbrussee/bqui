@@ -1,9 +1,9 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { appProspectStore } from '@/stores/ProspectStore';
-const prospStore = appProspectStore()
+const pStore = appProspectStore()
 import { QuoteStore } from '@/stores/QuoteStore';
-const quoteStore = QuoteStore()
+const qStore = QuoteStore()
 import { B } from '@/composables/BUtils';
 import BButton from '@/components/B/BButton.vue';
 import BIcon from '@/components/B/BIcon.vue';
@@ -34,18 +34,18 @@ const doContinue = () => {
 }
 
 const getRlobList = async () => {
-  if (!prospStore.prospect) return
-  const savedRlob = quoteStore.quote.rlob
-  await quoteStore.getRLOBList(prospStore.prospect.id)
-  if (quoteStore.quote && props.qtype) {
+  if (!pStore.prospect) return
+  const savedRlob = qStore.quote.rlob
+  await qStore.getRLOBList(pStore.prospect.id)
+  if (qStore.quote && props.qtype) {
     // console.dir(quoteStore.rlobList)
-    const list = quoteStore.rlobList[props.qtype]
+    const list = qStore.rlobList[props.qtype]
     if (list.includes(savedRlob)) {
-      quoteStore.quote.rlob = savedRlob
+      qStore.quote.rlob = savedRlob
     } else if (list.length == 1) {
-      quoteStore.quote.rlob = list[0]
+      qStore.quote.rlob = list[0]
     } else {
-      quoteStore.quote.rlob = ''
+      qStore.quote.rlob = ''
     }
   }
 }
@@ -59,44 +59,44 @@ const getRlobList = async () => {
   <table class="form-table">
     <tbody>
       <tr>
-        <th :style="{color: quoteStore.quote.descr == '' ? 'red': ''}">Name:</th>
-        <td><input v-model="quoteStore.quote.descr" style="width: 25em;" autofocus required></td>
+        <th :style="{color: qStore.quote.descr == '' ? 'red': ''}">Name:</th>
+        <td><input v-model="qStore.quote.descr" style="width: 25em;" autofocus required></td>
       </tr>
       <tr>
-        <th :style="{color: quoteStore.quote.effdat ? '': 'red'}">Effective:</th>
+        <th :style="{color: qStore.quote.effdat ? '': 'red'}">Effective:</th>
         <td>
-          <select :ref="effdatRef" v-model="quoteStore.quote.effdat" @change="getRlobList()">
-            <option v-for="n in quoteStore.number_of_effdates" :key="n" :value="B.firstOfMonth(n+quoteStore.initial_effdate_offset)">{{ B.format.effdat(B.firstOfMonth(n+quoteStore.initial_effdate_offset)) }}</option>
+          <select :ref="effdatRef" v-model="qStore.quote.effdat" @change="getRlobList()">
+            <option v-for="n in qStore.number_of_effdates" :key="n" :value="B.firstOfMonth(n+qStore.initial_effdate_offset)">{{ B.format.effdat(B.firstOfMonth(n+qStore.initial_effdate_offset)) }}</option>
           </select>
         </td>
       </tr>
       <tr>
         <th>Funding:</th>
         <td>
-          <label><input @click="getRlobList()" type="radio" name="funding_option" value="FI" v-model="quoteStore.quote.funding"> Fully Insured</label>&nbsp;&nbsp;
-          <label><input @click="getRlobList()" type="radio" name="funding_option" value="ASO" v-model="quoteStore.quote.funding"> ASO</label>&nbsp;&nbsp;
-          <label><input @click="getRlobList()" type="radio" name="funding_option" value="BF" v-model="quoteStore.quote.funding"> Balanced</label>
+          <label><input @click="getRlobList()" type="radio" name="funding_option" value="FI" v-model="qStore.quote.funding"> Fully Insured</label>&nbsp;&nbsp;
+          <label><input @click="getRlobList()" type="radio" name="funding_option" value="ASO" v-model="qStore.quote.funding"> ASO</label>&nbsp;&nbsp;
+          <label><input @click="getRlobList()" type="radio" name="funding_option" value="BF" v-model="qStore.quote.funding"> Balanced</label>
         </td>
       </tr>
       <tr>
         <th>Grandfathered:</th>
-        <td><label><input @click="getRlobList()" type="checkbox" v-model="quoteStore.quote.grandfathered"> <span class='mini info'
-          >({{quoteStore.quote.grandfathered ? 'ONLY' : 'NO'}} Grandfathered plans)</span></label></td>
+        <td><label><input @click="getRlobList()" type="checkbox" v-model="qStore.quote.grandfathered"> <span class='mini info'
+          >({{qStore.quote.grandfathered ? 'ONLY' : 'NO'}} Grandfathered plans)</span></label></td>
       </tr>
       <tr>
         <th>Massachusetts:</th>
-        <td><label><input @click="getRlobList()" type="checkbox" v-model="quoteStore.quote.mass_compliant"> <span class='mini info'
-          >({{quoteStore.quote.mass_compliant ? 'ONLY' : 'NO' }} Massachusetts Compliant plans)</span></label></td>
+        <td><label><input @click="getRlobList()" type="checkbox" v-model="qStore.quote.mass_compliant"> <span class='mini info'
+          >({{qStore.quote.mass_compliant ? 'ONLY' : 'NO' }} Massachusetts Compliant plans)</span></label></td>
       </tr>
       <tr class="line-top" v-if="props.qtype">
-        <th :style="{color: quoteStore.quote.rlob == '' ? 'red': ''}">Product:</th>
+        <th :style="{color: qStore.quote.rlob == '' ? 'red': ''}">Product:</th>
         <td>
           <div style="display: flex; flex-direction: column; gap: 0; height: 7.5em;">
-            <span v-if="quoteStore.working"><div class="spinner"></div>{{ quoteStore.working }}</span>
-            <span v-if="!quoteStore.working && quoteStore.rlobList[props.qtype].length == 0" class="warning">
+            <span v-if="qStore.working"><div class="spinner"></div>{{ qStore.working }}</span>
+            <span v-if="!qStore.working && qStore.rlobList[props.qtype].length == 0" class="warning">
               <BIcon icon="#goldenrod face-frown"/>No available product lines</span>
-            <label v-for="(rlob) in quoteStore.rlobList[props.qtype]" :key="rlob">
-              <input type="radio" name="rlob_option" v-model="quoteStore.quote.rlob" :value="rlob"> {{ B.codeToText.rlob(rlob) }}
+            <label v-for="(rlob) in qStore.rlobList[props.qtype]" :key="rlob">
+              <input type="radio" name="rlob_option" v-model="qStore.quote.rlob" :value="rlob"> {{ B.codeToText.rlob(rlob) }}
             </label>
           </div>
         </td>
@@ -107,10 +107,10 @@ const getRlobList = async () => {
   <div class="buttonbar">
     <BButton class="anchor" icon="#red solid x_" @click="emit('abort')">Cancel</BButton>&nbsp;
     <BButton
-      :disabled="quoteStore.quote.effdat == null
-        || quoteStore.working != null
-        || quoteStore.quote.descr == ''
-        || quoteStore.quote.rlob == ''" class="modern" @click="doContinue()">Select Plans...</BButton>
+      :disabled="qStore.quote.effdat == null
+        || qStore.working != null
+        || qStore.quote.descr == ''
+        || qStore.quote.rlob == ''" class="modern" @click="doContinue()">Select Plans...</BButton>
   </div>
   </dialog>
 </template>

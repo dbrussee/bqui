@@ -3,20 +3,20 @@
 import { B } from "@/composables/BUtils";
 import { ref, useId } from "vue";
 import { appMessageStore } from "../stores/MessagesStore";
-const messageStore = appMessageStore();
+const msgStore = appMessageStore();
 import BIcon from "@/components/B/BIcon.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
 import BButton from "@/components/B/BButton.vue";
 
 const currentMessage = ref<any>(null)
 const showMessage = (index:number) => {
-  currentMessage.value = messageStore.messages[index]
-  messageStore.acknowledge(index)
+  currentMessage.value = msgStore.messages[index]
+  msgStore.acknowledge(index)
 }
 
 const reloadMessageList = () => {
   currentMessage.value = null
-  messageStore.getMessages()
+  msgStore.getMessages()
 }
 
 const msgHandler = {
@@ -30,7 +30,7 @@ const msgHandler = {
   send() {
     if (this.msg.sendto.value == '') return false
     if (this.msg.body.value == '') return false
-    messageStore.sendNewMessage(this.msg.sendto.value, this.msg.subject.value, this.msg.body.value)
+    msgStore.sendNewMessage(this.msg.sendto.value, this.msg.subject.value, this.msg.body.value)
     this.msg.sendto.value = ''
     this.msg.subject.value = ''
     this.msg.body.value = ''
@@ -39,7 +39,7 @@ const msgHandler = {
   },
   delete() {
     if (!currentMessage.value) return
-    messageStore.deleteMessage(currentMessage.value.id)
+    msgStore.deleteMessage(currentMessage.value.id)
     currentMessage.value = null
   }
 }
@@ -59,8 +59,8 @@ const msgHandler = {
     </span>
   </div>
   <div class="msgcontainer">
-    <div v-if="messageStore.messages.length == 0" style="width: 100%; text-align: center; color: silver">No Messages</div>
-    <div class="msgitem" v-for="(message, index) in messageStore.messages" :key="index"
+    <div v-if="msgStore.messages.length == 0" style="width: 100%; text-align: center; color: silver">No Messages</div>
+    <div class="msgitem" v-for="(message, index) in msgStore.messages" :key="index"
       :class="{current_style: currentMessage && currentMessage.id == message.id}"
       @click="showMessage(index)">
       <BIcon :icon="message.readat ? '#green envelope-open_' : '#red solid envelope_'">{{ message.subject }}</BIcon>

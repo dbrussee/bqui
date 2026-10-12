@@ -2,61 +2,61 @@
 <script setup lang="ts">
 import SidebarItem from "@/components/SidebarItem.vue";
 import { appMessageStore } from "@/stores/MessagesStore";
-const messageStore = appMessageStore()
+const msgStore = appMessageStore()
 import { appUserStore } from "../stores/AppUserStore";
-const userStore = appUserStore();
+const uStore = appUserStore();
 import { appPageStore } from "@/stores/PageStore";
 const pageStore = appPageStore();
 import { appProspectStore } from "@/stores/ProspectStore";
-const prospStore = appProspectStore();
+const pStore = appProspectStore();
 
 function getProspectID():string {
-  if (!prospStore.prospect?.id) return ""
-  if (prospStore.prospect.id) return " #" + prospStore.prospect.id
+  if (!pStore.prospect?.id) return ""
+  if (pStore.prospect.id) return " #" + pStore.prospect.id
   return ' unknown'
 }
 function getProspectName():string {
-  if (!prospStore.prospect?.id) return "No Prospect"
-  if (prospStore.prospWorking != null) return prospStore.prospWorking as string
-  if (prospStore.prospect.name) return prospStore.prospect.name
+  if (!pStore.prospect?.id) return "No Prospect"
+  if (pStore.prospWorking != null) return pStore.prospWorking as string
+  if (pStore.prospect.name) return pStore.prospect.name
   return 'Unknown '
 }
 function getProposalsCount():string {
-  if (!prospStore.prospect?.id) return "No Prospect"
+  if (!pStore.prospect?.id) return "No Prospect"
   // if (quoteStore.working) return quoteStore.working
-  if (prospStore.prospect.name) return "None"
+  if (pStore.prospect.name) return "None"
   return 'Unknown '
 }
 function getUnreadMessageCounts():string {
-  if (messageStore.working) return messageStore.working
-  if (messageStore.messages.length == 0) return "None"
-  const unread = messageStore.unreadCount()
+  if (msgStore.working) return msgStore.working
+  if (msgStore.messages.length == 0) return "None"
+  const unread = msgStore.unreadCount()
   if (unread > 0) {
     const unread_msg = "<span style='color: white; background-color: red; border-radius: 50%; padding: 0 .4em;'>" + unread + "</span>"
     // if (unread == messageStore.messages.length) return unread_msg
-    return `Count: ${messageStore.messages.length}, Unread: ${unread_msg}`
+    return `Count: ${msgStore.messages.length}, Unread: ${unread_msg}`
   }
-  return `Count: ${messageStore.messages.length.toString()}`
+  return `Count: ${msgStore.messages.length.toString()}`
 }
 function getCensusCount():string {
   let msg = "Unknown"
-  if (!prospStore.prospect?.id) {
+  if (!pStore.prospect?.id) {
     msg = "No Prospect"
-  } else if (prospStore.censusWorking) {
-    msg = prospStore.censusWorking
-  } else if (prospStore.prospect.census) {
-    if (prospStore.prospect.census.length == 0) {
+  } else if (pStore.censusWorking) {
+    msg = pStore.censusWorking
+  } else if (pStore.prospect.census) {
+    if (pStore.prospect.census.length == 0) {
       msg = "None"
     } else {
       let gtotal = 0
-      prospStore.prospect.census.forEach((sub:any) => {
+      pStore.prospect.census.forEach((sub:any) => {
         gtotal++
         gtotal += sub.deps.length
       })
-      if (gtotal == prospStore.prospect.census.length) {
+      if (gtotal == pStore.prospect.census.length) {
         msg = 'Subs: ' + gtotal.toString()
       } else {
-        msg = `Subs: ${prospStore.prospect.census.length} / Total: ${gtotal}`
+        msg = `Subs: ${pStore.prospect.census.length} / Total: ${gtotal}`
       }
     }
   }
@@ -67,10 +67,10 @@ function getCensusCount():string {
 </script>
 
 <template>
-  <div v-if="userStore.user">
+  <div v-if="uStore.user">
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
         icon="solid shop_"
-        :working="prospStore.prospWorking"
+        :working="pStore.prospWorking"
         :shortname="`Prospect<span style='font-size: .8em;'>${ getProspectID() }</span>`"
         :longname="getProspectName()" />
     <SidebarItem @click="pageStore.page = 'PROPOSALS'" :current="pageStore.page == 'PROPOSALS'"
@@ -78,21 +78,21 @@ function getCensusCount():string {
         shortname="Proposals"
         :longname="getProposalsCount()" />
     <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
-        :icon="prospStore.censusDirty ? '#red solid people-group_' : 'solid people-group_'"
-        :working="prospStore.censusWorking"
+        :icon="pStore.censusDirty ? '#red solid people-group_' : 'solid people-group_'"
+        :working="pStore.censusWorking"
         shortname="Census"
         :longname="getCensusCount()" />
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
-        :badge="messageStore.unreadCount()"
+        :badge="msgStore.unreadCount()"
         icon="envelope_"
-        :working="messageStore.working"
+        :working="msgStore.working"
         shortname="Messages"
         :longname="getUnreadMessageCounts()" />
     <SidebarItem @click="pageStore.page = 'SETTINGS'" :current="pageStore.page == 'SETTINGS'"
         icon="circle-user_"
-        :working="userStore.working"
-        :shortname="userStore.user.id"
-        :longname="(userStore.user.fstnam + ' ' + userStore.user.lstnam).trim()" />
+        :working="uStore.working"
+        :shortname="uStore.user.id"
+        :longname="(uStore.user.fstnam + ' ' + uStore.user.lstnam).trim()" />
   </div>
   <data v-else>
     <!-- <SidebarItem>Login</SidebarItem> -->

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { appUserStore } from "../stores/AppUserStore";
+const uStore = appUserStore();
 import BIcon from "@/components/B/BIcon.vue";
-const userStore = appUserStore();
 
 const loginuid = ref("");
 const loginpwd = ref("");
@@ -11,12 +11,12 @@ const loginpwd = ref("");
 </script>
 
 <template>
-  <div class="centerme message warning" v-if="!userStore.isLoading">
+  <div class="centerme message warning" v-if="!uStore.isLoading">
     This system is for authorized users only. Unauthorized access or use is
     prohibited and subject to criminal and civil penalties.
     All activity may be monitored and recorded.
   </div>
-  <form @submit.prevent="userStore.login(loginuid, loginpwd)" v-if="!userStore.isLoading">
+  <form @submit.prevent="uStore.login(loginuid, loginpwd)" v-if="!uStore.isLoading">
     <table class="centerme form-table" style="margin-top: 1em;">
       <tbody>
         <tr>
@@ -29,20 +29,20 @@ const loginpwd = ref("");
         </tr>
         <tr>
           <td colspan="2" style="text-align: right">
-            <button :disabled="userStore.isLoading" type="submit">Login</button>
+            <button :disabled="uStore.isLoading" type="submit">Login</button>
           </td>
         </tr>
       </tbody>
     </table>
   </form>
-  <div class="message loading" v-if="userStore.isLoading">
+  <div class="message loading" v-if="uStore.isLoading">
     <div class="spinner" style="height: 1em; width: 1em;"></div>&nbsp;Checking User Info...
   </div>
-  <div v-if="userStore.issue?.severity == 'FATAL'" style="color: maroon;">
-    <BIcon icon="#red solid bug" /> {{ userStore.issue.message }}
+  <div v-if="uStore.issue?.severity == 'FATAL'" style="color: maroon;">
+    <BIcon icon="#red solid bug" /> {{ uStore.issue.message }}
   </div>
-  <div v-if="userStore.issue?.severity == 'INFO'" style="color: sienna;">
-    <BIcon icon="#sienna solid circle-exclamation" /> {{ userStore.issue.message }}
+  <div v-if="uStore.issue?.severity == 'INFO'" style="color: sienna;">
+    <BIcon icon="#sienna solid circle-exclamation" /> {{ uStore.issue.message }}
   </div>
 </template>
 

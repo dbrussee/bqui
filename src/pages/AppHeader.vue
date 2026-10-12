@@ -6,9 +6,9 @@ import BConfirm from '@/components/B/BConfirm.vue';
 import BButton from '@/components/B/BButton.vue';
 import BPopup from '@/components/B/BPopup.vue';
 import { appProspectStore } from "@/stores/ProspectStore";
-const prospStore = appProspectStore();
+const pStore = appProspectStore();
 import { appUserStore } from "../stores/AppUserStore";
-const userStore = appUserStore();
+const uStore = appUserStore();
 import BIcon from '@/components/B/BIcon.vue';
 import APIHistory from '@/components/APIHistory.vue';
 import BPopupMenuItem from '@/components/B/BPopupMenuItem.vue';
@@ -23,7 +23,7 @@ const app = appStore()
 
 const fave = (pid: number, isFavorite: boolean) => {
   if (pid) {
-    prospStore.setFavorite(pid, isFavorite);
+    pStore.setFavorite(pid, isFavorite);
   }
 };
 
@@ -34,22 +34,22 @@ const recentPopover = ref()
 const pickedFave = ref("");
 const pickedRecent = ref("");
 function pickFave(pid: string) {
-  prospStore.getProspect(pid, true);
+  pStore.getProspect(pid, true);
   pickedFave.value = "";
   favesPopover.value?.close();
 }
 function pickRecent(pid: string) {
-  prospStore.getProspect(pid, true);
+  pStore.getProspect(pid, true);
   pickedRecent.value = "";
   recentPopover.value?.close();
 }
 function clearRecents() {
-  userStore.clearRecents();
+  uStore.clearRecents();
   pickedRecent.value = "";
   recentPopover.value?.close();
 }
 const removeMeFromRecents = () => {
-  prospStore.removeMeFromRecents().then(() => {
+  pStore.removeMeFromRecents().then(() => {
     pickedRecent.value = "";
     recentPopover.value?.close();
   })
@@ -95,7 +95,7 @@ const searchHandler = ref({
     popup?.showModal()
   },
   load: (row:any) => {
-    prospStore.getProspect(row.id, true)
+    pStore.getProspect(row.id, true)
     searchHandler.value.abort()
   },
   pick: (row:any) => {
@@ -103,14 +103,14 @@ const searchHandler = ref({
   },
   search: () => {
     cfgSearchResults.value.pickedRow = null
-    prospStore.searchProspects(searchHandler.value.temp.query).then(() => {
-      if (prospStore.searchResults.length > 0) {
+    pStore.searchProspects(searchHandler.value.temp.query).then(() => {
+      if (pStore.searchResults.length > 0) {
         const dlg = document.getElementById(searchHandler.value.id)
         const tbox = dlg?.querySelector("input") as HTMLInputElement
         tbox.select()
         tbox.focus()
-        if (prospStore.searchResults.length == 1) {
-          cfgSearchResults.value.pickedRow = prospStore.searchResults[0]
+        if (pStore.searchResults.length == 1) {
+          cfgSearchResults.value.pickedRow = pStore.searchResults[0]
           // const btn = document.getElementById(searchHandler.value.submitButtonId) as HTMLButtonElement
           // btn.focus()
         }
@@ -124,22 +124,22 @@ const searchHandler = ref({
 })
 
 function getProspectName():string {
-  if (!prospStore.prospect) return ""
-  if (!prospStore.prospect.id) return "Loading..."
-  if (prospStore.prospect.id) return prospStore.prospect.name
+  if (!pStore.prospect) return ""
+  if (!pStore.prospect.id) return "Loading..."
+  if (pStore.prospect.id) return pStore.prospect.name
   return 'Unknown'
 }
 
 function getBookmarkIcon():string {
-  if (!userStore.user) return "#silver bookmark_"
-  if (!prospStore.prospect) return "#silver bookmark_"
-  if (!prospStore.prospect.id) return "#silver bookmark_"
-  if (prospStore.isCurrentlyFavorite()) return "#gold solid bookmark_"
+  if (!uStore.user) return "#silver bookmark_"
+  if (!pStore.prospect) return "#silver bookmark_"
+  if (!pStore.prospect.id) return "#silver bookmark_"
+  if (pStore.isCurrentlyFavorite()) return "#gold solid bookmark_"
   return "#gold bookmark_"
 }
 
 const openHistory = () => {
-  if (!userStore.user) return
+  if (!uStore.user) return
   apiHistoryRef.value?.open()
 }
 
@@ -149,7 +149,7 @@ const openHistory = () => {
   <APIHistory ref="apiHistoryRef"/>
   <div class="container">
     <div style="padding-left: 2.5em; color: white;">
-      <BPopupImage ref="sysmenuRef" :disabled="!userStore.user" pos="B2R" heading="System Menu" src="/src/bcbc_logo.png"  style="position: absolute; height: 2.7em; top: .5em; left: .8em;">
+      <BPopupImage ref="sysmenuRef" :disabled="!uStore.user" pos="B2R" heading="System Menu" src="/src/bcbc_logo.png"  style="position: absolute; height: 2.7em; top: .5em; left: .8em;">
         <BPopupMenuItem void icon="solid timeline_">Version {{app.version()}}
           <BInfo pos="R2B" :heading="'Application Ver ' + app.version()">
             <ul>
@@ -162,11 +162,11 @@ const openHistory = () => {
         <BPopupMenuItem icon="solid list" @click="openHistory()">API History</BPopupMenuItem>
         <BPopupMenuItem separator="top" icon="solid arrow-right-from-bracket_">
           <BConfirm
-            :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
+            :warning="pStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
             class="anchor"
-            pos="R" @confirm="sysmenuRef?.close(); userStore.logout()">Logout?
+            pos="R" @confirm="sysmenuRef?.close(); uStore.logout()">Logout?
             <template #message>
-              Log out user '{{ userStore.user?.id }}'
+              Log out user '{{ uStore.user?.id }}'
             </template>
           </BConfirm>
         </BPopupMenuItem>
@@ -180,34 +180,34 @@ const openHistory = () => {
         <tbody>
           <tr>
             <td style="text-align: left; color:white;">
-              <BIcon v-if="prospStore.prospect" :icon="getBookmarkIcon()"
-                @click="fave(prospStore.prospect.id, !prospStore.isCurrentlyFavorite())" />
+              <BIcon v-if="pStore.prospect" :icon="getBookmarkIcon()"
+                @click="fave(pStore.prospect.id, !pStore.isCurrentlyFavorite())" />
               {{ getProspectName() }}
             </td>
-            <td v-if="userStore.user" style="text-align: right;">
+            <td v-if="uStore.user" style="text-align: right;">
               <BPopup class="anchor anchor-in-header" pos="B" icon="solid list-ul_" ref="recentPopover">Recent
                 <template #body>
                   <BTable nofooter
                     heading="Recently Viewed Prospects"
-                    :rows="userStore.user.recents"
+                    :rows="uStore.user.recents"
                     :config="cfgRecents"
                     @pick="(row: any) => pickRecent(row.pid)"
                   />
                   <div class="buttonbar">
                     <BConfirm
                         @confirm="removeMeFromRecents()"
-                        :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
+                        :warning="pStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
                         icon="solid eject"
                         width="30em"
                         pos="L2B"
                         class="anchor"
                         heading="Forget This Prospect"
-                        :disabled="!userStore.user.recents || userStore.user.recents.length < 1"
+                        :disabled="!uStore.user.recents || uStore.user.recents.length < 1"
                       >Forget This?
                       <template #message>
                         <ul>
                           <li class="info">Remove the current prospect from your Recents list</li>
-                          <li v-if="userStore.user.recents && userStore.user.recents.length > 1" class="info">Load the next most recent prospect in the list.</li>
+                          <li v-if="uStore.user.recents && uStore.user.recents.length > 1" class="info">Load the next most recent prospect in the list.</li>
                           <li v-else class="info">There are no other prospects in your Recents list, so you will need to
                             create a new prospect, search for existing prospects or use your Bookmarks list.
                           </li>
@@ -224,7 +224,7 @@ const openHistory = () => {
                       @confirm="clearRecents()"
                       icon="solid minimize"
                       class="anchor"
-                      :disabled="!userStore.user.recents || userStore.user.recents.length < 2"
+                      :disabled="!uStore.user.recents || uStore.user.recents.length < 2"
                     >Clear Others?
                       <template #message>
                         All but the currently showing prospect will be forgotten. They can
@@ -241,11 +241,11 @@ const openHistory = () => {
                 class="anchor anchor-in-header" pos="B" icon="bookmark_" ref="favesPopover">Bookmarks<template #body>
                   <BTable nofooter
                     heading="Bookmarked Prospects"
-                    :rows="userStore.user.faves"
+                    :rows="uStore.user.faves"
                     :config="cfgFaves"
                     @pick="(row: any) => pickFave(row.pid)"
                   />
-                  <span v-if="prospStore.censusDirty" style="color:red">You will lose unsaved census changes!</span>
+                  <span v-if="pStore.censusDirty" style="color:red">You will lose unsaved census changes!</span>
                 </template>
               </BPopup>&nbsp;
               <BButton
@@ -253,7 +253,7 @@ const openHistory = () => {
                 class="modern"
                 icon="solid magnifying-glass_">Search&hellip;</BButton>&nbsp;
               <BButton
-                v-if="!userStore.isUserReadOnly()"
+                v-if="!uStore.isUserReadOnly()"
                 @click="useNewProspectPopup().openNewProspect()"
                 class="action"
                 icon="square-plus_">New Prospect&hellip;</BButton>

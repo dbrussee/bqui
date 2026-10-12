@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import BConfirm from "./B/BConfirm.vue";
 import { appUserStore } from "../stores/AppUserStore";
-const userStore = appUserStore();
+const uStore = appUserStore();
 import { appProspectStore } from "@/stores/ProspectStore";
-const prospStore = appProspectStore();
+const pStore = appProspectStore();
 
 
 </script>
@@ -11,13 +11,13 @@ const prospStore = appProspectStore();
 <style scoped></style>
 
 <template>
-  <span v-if="userStore.user">
-    {{ userStore.user.id }} ({{ userStore.user.fstnam }} {{ userStore.user.lstnam }}) &nbsp;
-    <BConfirm pos="T" @confirm="userStore.logout()">
+  <span v-if="uStore.user">
+    {{ uStore.user.id }} ({{ uStore.user.fstnam }} {{ uStore.user.lstnam }}) &nbsp;
+    <BConfirm pos="T" @confirm="uStore.logout()">
       Logout&hellip;
       <template #message>
-        Log out user '{{ userStore.user.id }}'
-        <p v-if="prospStore.censusDirty" style="color:red">You will lose unsaved census changes!</p>
+        Log out user '{{ uStore.user.id }}'
+        <p v-if="pStore.censusDirty" style="color:red">You will lose unsaved census changes!</p>
       </template>
     </BConfirm>
   </span>

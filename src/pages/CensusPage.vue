@@ -3,7 +3,7 @@
 // import BTable from '@/components/BTable.vue';
 import { ref, useId } from 'vue';
 import { appProspectStore } from '@/stores/ProspectStore';
-const prospStore = appProspectStore()
+const pStore = appProspectStore()
 import BButton from '@/components/B/BButton.vue';
 import BConfirm from '@/components/B/BConfirm.vue';
 import BIcon from '@/components/B/BIcon.vue';
@@ -13,11 +13,11 @@ const handler = {
   open() { (document.getElementById(this.popId) as HTMLDialogElement).showModal() },
   close() { (document.getElementById(this.popId) as HTMLDialogElement).close() },
   import(e:Event) {
-    prospStore.importCensus(e)
+    pStore.importCensus(e)
     this.close()
   },
   export() {
-    prospStore.exportCensus()
+    pStore.exportCensus()
   }
 }
 
@@ -94,16 +94,16 @@ const newSub = ():void => {
   const sub = {relation:"SUB", fstnam:'', lstnam:'', midnam:'', sufnam:'',
     sex:'M', dob:'', med:false, den:false, vis:false, cobra: false, deps:[]
   } as any
-  prospStore.prospect.census.unshift(sub)
-  prospStore.setCensusDirty()
+  pStore.prospect?.census.unshift(sub)
+  pStore.setCensusDirty()
   setFocus(0, -1)
 }
 const delSub = (subnum:number):void => {
-  prospStore.prospect.census.splice(subnum, 1)
-  prospStore.setCensusDirty()
+  pStore.prospect?.census.splice(subnum, 1)
+  pStore.setCensusDirty()
 }
 const newDep = (subnum:number):void => {
-  const sub = prospStore.prospect.census[subnum] as any
+  const sub = pStore.prospect?.census[subnum] as any
   let relation = 'SPS'
   let sex = 'M'
   if (sub.deps.length > 0) {
@@ -115,12 +115,12 @@ const newDep = (subnum:number):void => {
     sex:sex, dob:'', med:sub.med, den:sub.den, vis:sub.vis, cobra: false
   } as any
   sub.deps.push(data)
-  prospStore.setCensusDirty()
+  pStore.setCensusDirty()
   setFocus(subnum, sub.deps.length - 1)
 }
 const delDep = (subnum:number, depnum:number):void => {
-  prospStore.prospect.census[subnum]?.deps.splice(depnum, 1)
-  prospStore.setCensusDirty()
+  pStore.prospect?.census[subnum]?.deps.splice(depnum, 1)
+  pStore.setCensusDirty()
 }
 
 // const setButtonFocus = (e:Event):void => {
@@ -129,7 +129,7 @@ const delDep = (subnum:number, depnum:number):void => {
 //   btn?.focus()
 // }
 const setSubBoolean = (subnum:number, opt:string):void => {
-  const sub = prospStore.prospect.census[subnum] as any
+  const sub = pStore.prospect?.census[subnum] as any
   if (sub) {
     sub[opt] = !sub[opt]
     if (opt != 'cobra') {
@@ -138,20 +138,20 @@ const setSubBoolean = (subnum:number, opt:string):void => {
       })
     }
   }
-  prospStore.setCensusDirty()
+  pStore.setCensusDirty()
 }
 const setDepBoolean = (subnum:number, depnum:number, opt:string):void => {
-  const sub = prospStore.prospect.census[subnum] as any
+  const sub = pStore.prospect?.census[subnum] as any
   if (sub) {
     const dep = sub.deps[depnum] as any
     if (dep) dep[opt] = !dep[opt]
   }
-  prospStore.setCensusDirty()
+  pStore.setCensusDirty()
 }
 const setRelation = (subnum:number, depnum:number, e:Event) => {
   const sel = e.target as HTMLSelectElement
   const relation = sel.value
-  const sub = prospStore.prospect.census[subnum] as any
+  const sub = pStore.prospect?.census[subnum] as any
   if (sub) {
     if (depnum < 0) {
       // Trying to set relation on Sub... should never really get here
@@ -175,9 +175,9 @@ const setRelation = (subnum:number, depnum:number, e:Event) => {
         delete newSub.deps[depnum].deps
         newSub.deps[depnum].relation = dep.relation
 
-        prospStore.prospect.census.splice(subnum, 1, newSub)
+        pStore.prospect?.census.splice(subnum, 1, newSub)
         // deps cannot have what some does not take
-        prospStore.prospect.census[subnum].deps.forEach((dep:any) => {
+        pStore.prospect?.census[subnum].deps.forEach((dep:any) => {
           dep.cobra = false // Fixes the one that was SUB before
           if (!sub.med) dep.med = false
           if (!sub.den) dep.den = false
@@ -197,11 +197,11 @@ const setRelation = (subnum:number, depnum:number, e:Event) => {
       }
     }
   }
-  prospStore.setCensusDirty()
+  pStore.setCensusDirty()
 }
 const setSex = (subnum:number, depnum:number):void => {
   // setButtonFocus(e)
-  const sub = prospStore.prospect.census[subnum] as any
+  const sub = pStore.prospect?.census[subnum] as any
   if (sub) {
     if (depnum < 0) {
       sub.sex = sub.sex == 'M' ? 'F' : 'M'
@@ -210,11 +210,11 @@ const setSex = (subnum:number, depnum:number):void => {
       dep.sex = dep.sex == 'M' ? 'F' : 'M'
     }
   }
-  prospStore.setCensusDirty()
+  pStore.setCensusDirty()
 }
 
 const updateCensusDirty = () => {
-  prospStore.setCensusDirty()
+  pStore.setCensusDirty()
 }
 
 
@@ -225,20 +225,20 @@ const hardSpace = (txt:string):string => {
 
 <template>
   <div class="drop_menu">
-    <span v-if="!prospStore.prospect">No Prospect Selected</span>
-    <BConfirm v-if="prospStore.prospect" :bypass="!prospStore.censusDirty" class="anchor" width="20em" @confirm="prospStore.getCensus()" icon="solid rotate-left_">Reload
+    <span v-if="!pStore.prospect">No Prospect Selected</span>
+    <BConfirm v-if="pStore.prospect" :bypass="!pStore.censusDirty" class="anchor" width="20em" @confirm="pStore.getCensus()" icon="solid rotate-left_">Reload
       <template #message>
         <span style="color: red;">You will lose unsaved census changes!</span><p>Are you sure?</p>
       </template>
     </BConfirm>&nbsp;
-    <BButton v-if="prospStore.prospect" class="modern" icon="solid user-plus_" @click="newSub()">Add Subscriber</BButton>&nbsp;
-    <BButton v-if="prospStore.prospect" @click="handler.open()" icon="file-excel">Import...</BButton>&nbsp;
-    <BButton v-if="prospStore.prospect" @click="handler.export()" icon="file-excel">Export...</BButton>&nbsp;
+    <BButton v-if="pStore.prospect" class="modern" icon="solid user-plus_" @click="newSub()">Add Subscriber</BButton>&nbsp;
+    <BButton v-if="pStore.prospect" @click="handler.open()" icon="file-excel">Import...</BButton>&nbsp;
+    <BButton v-if="pStore.prospect" @click="handler.export()" icon="file-excel">Export...</BButton>&nbsp;
     <span style='float: right;'>
       <BButton class="anchor"
-        :disabled="!prospStore.censusDirty"
-        :icon="prospStore.censusDirty ? '#red solid floppy-disk' : 'floppy-disk'"
-        @click="prospStore.updateCensus(prospStore.prospect.census)">Save Changes
+        :disabled="!pStore.censusDirty"
+        :icon="pStore.censusDirty ? '#red solid floppy-disk' : 'floppy-disk'"
+        @click="pStore.updateCensus(pStore.prospect?.census)">Save Changes
       </BButton>&nbsp;
     </span>
   </div>
@@ -259,8 +259,8 @@ const hardSpace = (txt:string):string => {
           <th v-for="col in cfgCensus.columns" :key="col.id" :style="deduceTHStyle(col)" :innerHTML="hardSpace(col.heading)" />
         </tr>
       </thead>
-      <tbody v-if="prospStore.prospect">
-        <template v-for="(sub, rn) in prospStore.prospect.census" :key="sub">
+      <tbody v-if="pStore.prospect">
+        <template v-for="(sub, rn) in pStore.prospect.census" :key="sub">
           <tr :class="{seperator: Number(rn) > 0}">
             <td>&nbsp;</td>
             <td><input v-model="sub.lstnam" class="lstnam" placeholder="Last name"/></td>

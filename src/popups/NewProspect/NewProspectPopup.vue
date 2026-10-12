@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import BButton from '@/components/B/BButton.vue'
 import { appProspectStore } from '@/stores/ProspectStore'
-const prospStore = appProspectStore()
+const pStore = appProspectStore()
 import { useNewProspectPopup } from './useNewProspectPopup'
 const { popRef, closeNewProspect, createProspect } = useNewProspectPopup()
 import { reactive } from 'vue'
@@ -36,9 +36,9 @@ const prosp = reactive({
         </tbody>
       </table>
       <div class="buttonbar">
-        <span v-if="prospStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
-        <BButton :disabled="prospStore.prospWorking != null" type="button" class="anchor" icon="#red solid x" @click="closeNewProspect()">Cancel</BButton>&nbsp;
-        <BButton :disabled="prospStore.prospWorking != null" type="submit" class="action" icon="square-plus_">Create Prospect</BButton>
+        <span v-if="pStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
+        <BButton :disabled="pStore.prospWorking != null" type="button" class="anchor" icon="#red solid x" @click="closeNewProspect()">Cancel</BButton>&nbsp;
+        <BButton :disabled="pStore.prospWorking != null" type="submit" class="action" icon="square-plus_">Create Prospect</BButton>
       </div>
     </form>
   </dialog>

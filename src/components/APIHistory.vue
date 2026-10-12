@@ -3,7 +3,7 @@
 <script setup lang="ts">
 import { ref, useId } from 'vue';
 import { appUserStore } from '@/stores/AppUserStore.ts';
-const userStore = appUserStore()
+const uStore = appUserStore()
 import BTable from './B/BTable.vue';
 import BButton from './B/BButton.vue';
 import { B } from '@/composables/BUtils.ts';
@@ -27,7 +27,7 @@ const bodyPopid = useId()
 const open = () => {
   const popup = document.getElementById(popid) as HTMLDialogElement
   popup?.showModal()
-  userStore.getAPIHistory()
+  uStore.getAPIHistory()
 }
 const abort = () => {
   const popup = document.getElementById(popid) as HTMLDialogElement
@@ -112,7 +112,7 @@ const simplifyEndpoint = (row:any) => {
 
 <template>
   <dialog :id="popid">
-    <BTable heading="Recent Backend Call Activity" :config="cfgHistory" :rows="userStore.apiHistory"
+    <BTable heading="Recent Backend Call Activity" :config="cfgHistory" :rows="uStore.apiHistory"
     @pick="(row:any) => pickHistoryRow(row)"
     @dblpick="() => showBodyPopup()"
     >

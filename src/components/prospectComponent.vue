@@ -1,9 +1,9 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { appProspectStore } from "../stores/ProspectStore.ts";
-const prospStore = appProspectStore();
+const pStore = appProspectStore();
 import { appUserStore } from "@/stores/AppUserStore.ts";
-const userStore = appUserStore()
+const uStore = appUserStore()
 import { B } from "@/composables/BUtils";
 import { useId, ref } from "vue";
 import BIcon from "./B/BIcon.vue";
@@ -18,17 +18,17 @@ const handler = {
   open() { (document.getElementById(this.popId) as HTMLDialogElement).showModal() },
   close() { (document.getElementById(this.popId) as HTMLDialogElement).close() },
   edit() {
-    this.temp.value = {...prospStore.prospect}
+    this.temp.value = {...pStore.prospect}
     this.open()
   },
   save() {
-    prospStore.prospect = {...this.temp.value}
-    prospStore.updateProspect(prospStore.prospect)
+    pStore.prospect = {...this.temp.value}
+    pStore.updateProspect(pStore.prospect)
     this.close()
   },
   deleteProspect() {
     this.close()
-    prospStore.deleteProspect()
+    pStore.deleteProspect()
   }
 }
 const prospectCSZ = (prosp:any) => {
@@ -46,81 +46,81 @@ const prospectCSZ = (prosp:any) => {
 </style>
 
 <template>
-  <div v-if="prospStore.issue?.severity == 'FATAL'">
-    <BIcon icon="#red solid bug_">{{ prospStore.issue.message }}</BIcon>
+  <div v-if="pStore.issue?.severity == 'FATAL'">
+    <BIcon icon="#red solid bug_">{{ pStore.issue.message }}</BIcon>
   </div>
-  <div v-if="prospStore.issue?.severity == 'INFO'">
-    <BIcon icon="#sienna solid circle-exclamation_">{{ prospStore.issue.message }}</BIcon>
+  <div v-if="pStore.issue?.severity == 'INFO'">
+    <BIcon icon="#sienna solid circle-exclamation_">{{ pStore.issue.message }}</BIcon>
   </div>
 
-  <div v-if="!prospStore.prospect?.id && prospStore.prospWorking" class="prospect_info" style="text-align: center; padding-top: 3em;">
+  <div v-if="!pStore.prospect?.id && pStore.prospWorking" class="prospect_info" style="text-align: center; padding-top: 3em;">
     <div class="spinner" />Loading...
   </div>
-  <div v-if="!prospStore.issue?.severity && prospStore.prospect?.id" class="prospect_info AAA">
+  <div v-if="!pStore.issue?.severity && pStore.prospect?.id" class="prospect_info AAA">
     <div style="display: flex; align-items: flex-start;">
       <table class="form-table">
         <tbody>
           <tr><td>
-            <BButton v-if="prospStore.prospect" class="anchor"
+            <BButton v-if="pStore.prospect" class="anchor"
               @click="handler.edit()"
               icon="solid pen_">Edit Prospect Details</BButton>
           </td></tr>
-          <tr><td>{{ prospStore.prospect.addr1 }}{{ prospStore.prospect.addr2 ? ', ' + prospStore.prospect.addr2 : '' }}</td></tr>
-          <tr><td v-html="prospectCSZ(prospStore.prospect)"></td></tr>
+          <tr><td>{{ pStore.prospect.addr1 }}{{ pStore.prospect.addr2 ? ', ' + pStore.prospect.addr2 : '' }}</td></tr>
+          <tr><td v-html="prospectCSZ(pStore.prospect)"></td></tr>
         </tbody>
       </table>
       <table class="form-table" style="margin-left: 2em;">
         <tbody>
-          <tr><td>{{prospStore.prospect.contact}}</td></tr>
-          <tr><td><a v-if="prospStore.prospect.email" style="cursor: pointer"
-            :href="'mailto:' + encodeURI(`${prospStore.prospect.contact} <${prospStore.prospect.email}>`)">{{prospStore.prospect.email}}</a>
-            <ClipboardIcon :cliptext="prospStore.prospect.email"/>
+          <tr><td>{{pStore.prospect.contact}}</td></tr>
+          <tr><td><a v-if="pStore.prospect.email" style="cursor: pointer"
+            :href="'mailto:' + encodeURI(`${pStore.prospect.contact} <${pStore.prospect.email}>`)">{{pStore.prospect.email}}</a>
+            <ClipboardIcon :cliptext="pStore.prospect.email"/>
           </td></tr>
-          <tr><td>{{prospStore.prospect.phone}}</td></tr>
+          <tr><td>{{pStore.prospect.phone}}</td></tr>
         </tbody>
       </table>
       <table class="form-table" style="margin-left: 2em;">
         <tbody>
           <!-- <tr><th>Created:</th><td>{{ B.format.ts(prospStore.prospect.crttms) }}</td></tr> -->
-          <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.format.ts(prospStore.prospect.last_quote?.crttms), 'No quotes') }}
-            <BInfo v-if="prospStore.prospect.last_quote" pos="L" heading="Last Quote Details">
+          <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.format.ts(pStore.prospect.last_quote?.crttms), 'No quotes') }}
+            <BInfo v-if="pStore.prospect.last_quote" pos="L" heading="Last Quote Details">
               <ul>
-                <li>{{ B.codeToText.nonstd(prospStore.prospect.last_quote.nonstd) }}
-                  {{ B.codeToText.qtype(prospStore.prospect.last_quote.qtype) }} Quote ID: {{ prospStore.prospect.last_quote.id }}
-                  ({{ prospStore.prospect.last_quote.funding }} {{ prospStore.prospect.last_quote.rlob }})
+                <li>{{ B.codeToText.nonstd(pStore.prospect.last_quote.nonstd) }}
+                  {{ B.codeToText.qtype(pStore.prospect.last_quote.qtype) }} Quote ID: {{ pStore.prospect.last_quote.id }}
+                  ({{ pStore.prospect.last_quote.funding }} {{ pStore.prospect.last_quote.rlob }})
                 </li>
-                <li>Effective: {{ B.format.effdat(prospStore.prospect.last_quote?.effdat) }}</li>
-                <li>Status: <BIcon :icon="B.statusIcon(prospStore.prospect.last_quote.status)"/>{{ B.codeToText.quoteStatus(prospStore.prospect.last_quote.status) }}</li>
-                <li v-if="prospStore.prospect.last_quote.qtype == 'MED'">MED Plan: {{ prospStore.prospect.last_quote.med_plan }}</li>
-                <li v-if="prospStore.prospect.last_quote.qtype == 'MED'">DRU Plan: {{ prospStore.prospect.last_quote.dru_plan }}</li>
-                <li v-if="prospStore.prospect.last_quote.qtype == 'DEN'">DEN Plan: {{ prospStore.prospect.last_quote.den_plan }}</li>
-                <li v-if="prospStore.prospect.last_quote.qtype == 'VIS'">VIS Plan: {{ prospStore.prospect.last_quote.vis_plan }}</li>
-                <li>Created: {{ B.format.ts(prospStore.prospect.last_quote.crttms) }} ({{ prospStore.prospect.last_quote.crtusr }})</li>
-                <li>Updated: {{ B.format.ts(prospStore.prospect.last_quote.updtms) }} ({{ prospStore.prospect.last_quote.updusr }})</li>
+                <li>Effective: {{ B.format.effdat(pStore.prospect.last_quote?.effdat) }}</li>
+                <li>Status: <BIcon :icon="B.statusIcon(pStore.prospect.last_quote.status)"/>{{ B.codeToText.quoteStatus(pStore.prospect.last_quote.status) }}</li>
+                <li v-if="pStore.prospect.last_quote.qtype == 'MED'">MED Plan: {{ pStore.prospect.last_quote.med_plan }}</li>
+                <li v-if="pStore.prospect.last_quote.qtype == 'MED'">DRU Plan: {{ pStore.prospect.last_quote.dru_plan }}</li>
+                <li v-if="pStore.prospect.last_quote.qtype == 'DEN'">DEN Plan: {{ pStore.prospect.last_quote.den_plan }}</li>
+                <li v-if="pStore.prospect.last_quote.qtype == 'VIS'">VIS Plan: {{ pStore.prospect.last_quote.vis_plan }}</li>
+                <li>Created: {{ B.format.ts(pStore.prospect.last_quote.crttms) }} ({{ pStore.prospect.last_quote.crtusr }})</li>
+                <li>Updated: {{ B.format.ts(pStore.prospect.last_quote.updtms) }} ({{ pStore.prospect.last_quote.updusr }})</li>
               </ul>
             </BInfo>
 
           </td></tr>
-          <tr><th>Enrolled:</th><td>{{ B.ifNull(B.format.ts(prospStore.prospect.enrolled_ts), "Not Enrolled") }}</td></tr>
+          <tr><th>Enrolled:</th><td>{{ B.ifNull(B.format.ts(pStore.prospect.enrolled_ts), "Not Enrolled") }}</td></tr>
         </tbody>
       </table>
     </div>
     <!-- </div> -->
   </div>
   <Teleport to="body">
-  <dialog v-if="prospStore.prospect" :id="handler.popId">
+  <dialog v-if="pStore.prospect" :id="handler.popId">
     <div class="titlebar">
-      Edit Prospect #{{ prospStore.prospect.id }}
+      Edit Prospect #{{ pStore.prospect.id }}
     </div>
-    <div v-if="userStore.getUserRightValue('GROUP_DELETE') == 'Y'" style="position: absolute; top: .5em; right: .5em;" class="info">
+    <div v-if="uStore.getUserRightValue('GROUP_DELETE') == 'Y'" style="position: absolute; top: .5em; right: .5em;" class="info">
       <BConfirm
-      v-if="!userStore.isUserReadOnly()"
-      :disabled="prospStore.quotes.length > 0"
+      v-if="!uStore.isUserReadOnly()"
+      :disabled="pStore.quotes.length > 0"
       icon="trash-can"
       @confirm="handler.deleteProspect()"
       pos="L2B"
       class="anchor"
-      :heading="'Delete Prospect #' + prospStore.prospect.id"
+      :heading="'Delete Prospect #' + pStore.prospect.id"
       ><template #message>
         <ul>
           <li>You are granted the right to delete prospects</li>
@@ -140,25 +140,25 @@ const prospectCSZ = (prosp:any) => {
 
         <tr><td colspan="2"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
 
-        <tr><th>Group Name:</th><td><input :readonly="userStore.isUserReadOnly()" name="grpname" style="width: 30em;" v-model="handler.temp.value.name"></td></tr>
-        <tr><th>Contact:</th><td><input :readonly="userStore.isUserReadOnly()" name="grpcontact" style="width: 30em;" v-model="handler.temp.value.contact"></td></tr>
-        <tr><th>Email:</th><td><input :readonly="userStore.isUserReadOnly()" name="grpemail" style="width: 30em;" v-model="handler.temp.value.email"></td></tr>
-        <tr><th>Phone:</th><td><input :readonly="userStore.isUserReadOnly()" name="grpphone" style="width: 12em;" v-model="handler.temp.value.phone"></td></tr>
-        <tr><th>Eligible:</th><td><input :readonly="userStore.isUserReadOnly()" name="estimate" style="width: 5em;" v-model="handler.temp.value.subs_estimate">
-          <span class="info">(estimate) - Census has {{ B.format.valueWithUnits(prospStore.prospect.census?.length, 'subscriber') }}</span>
+        <tr><th>Group Name:</th><td><input :readonly="uStore.isUserReadOnly()" name="grpname" style="width: 30em;" v-model="handler.temp.value.name"></td></tr>
+        <tr><th>Contact:</th><td><input :readonly="uStore.isUserReadOnly()" name="grpcontact" style="width: 30em;" v-model="handler.temp.value.contact"></td></tr>
+        <tr><th>Email:</th><td><input :readonly="uStore.isUserReadOnly()" name="grpemail" style="width: 30em;" v-model="handler.temp.value.email"></td></tr>
+        <tr><th>Phone:</th><td><input :readonly="uStore.isUserReadOnly()" name="grpphone" style="width: 12em;" v-model="handler.temp.value.phone"></td></tr>
+        <tr><th>Eligible:</th><td><input :readonly="uStore.isUserReadOnly()" name="estimate" style="width: 5em;" v-model="handler.temp.value.subs_estimate">
+          <span class="info">(estimate) - Census has {{ B.format.valueWithUnits(pStore.prospect.census?.length, 'subscriber') }}</span>
         </td></tr>
-        <tr><th>Address:</th><td><input :readonly="userStore.isUserReadOnly()" name="grpaddr1" style="width: 30em;" v-model="handler.temp.value.addr1"></td></tr>
-        <tr><th></th><td><input :readonly="userStore.isUserReadOnly()" name="grpaddr2" style="width: 30em;" v-model="handler.temp.value.addr2"></td></tr>
+        <tr><th>Address:</th><td><input :readonly="uStore.isUserReadOnly()" name="grpaddr1" style="width: 30em;" v-model="handler.temp.value.addr1"></td></tr>
+        <tr><th></th><td><input :readonly="uStore.isUserReadOnly()" name="grpaddr2" style="width: 30em;" v-model="handler.temp.value.addr2"></td></tr>
         <tr><th></th><td>
-          <input :readonly="userStore.isUserReadOnly()" name="grpcity" style="width: 12em; margin-right: .3em;" v-model="handler.temp.value.city">
-          <input :readonly="userStore.isUserReadOnly()" name="grpstate" style="width: 3em; margin-right: .3em;" v-model="handler.temp.value.state_cd">
-          <input :readonly="userStore.isUserReadOnly()" name="grpzip" style="width: 6em;" v-model="handler.temp.value.zip_cd">
+          <input :readonly="uStore.isUserReadOnly()" name="grpcity" style="width: 12em; margin-right: .3em;" v-model="handler.temp.value.city">
+          <input :readonly="uStore.isUserReadOnly()" name="grpstate" style="width: 3em; margin-right: .3em;" v-model="handler.temp.value.state_cd">
+          <input :readonly="uStore.isUserReadOnly()" name="grpzip" style="width: 6em;" v-model="handler.temp.value.zip_cd">
         </td></tr>
-        <tr><th>Enroll Date:</th><td><input :readonly="userStore.isUserReadOnly()" name="enrollDate" style="width: 10em;" v-model="handler.temp.value.enroll_date"></td></tr>
+        <tr><th>Enroll Date:</th><td><input :readonly="uStore.isUserReadOnly()" name="enrollDate" style="width: 10em;" v-model="handler.temp.value.enroll_date"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton type="button" class="anchor" style="margin-right: .6em;" @click="handler.close()" icon="#red solid x">Cancel</BButton>
-            <BButton v-if="!userStore.isUserReadOnly()" type="submit" class="action" icon="floppy-disk_"> Save Changes</BButton>
+            <BButton v-if="!uStore.isUserReadOnly()" type="submit" class="action" icon="floppy-disk_"> Save Changes</BButton>
           </div>
         </td></tr>
       </tbody>

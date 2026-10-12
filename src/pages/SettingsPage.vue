@@ -2,9 +2,9 @@
 <script setup lang="ts">
 import BTable from "@/components/B/BTable.vue";
 import { appUserStore } from "../stores/AppUserStore";
-const userStore = appUserStore();
+const uStore = appUserStore();
 import { appProspectStore } from "@/stores/ProspectStore";
-const prospStore = appProspectStore()
+const pStore = appProspectStore()
 import { appStore } from "@/stores/AppStore";
 const app = appStore()
 import { B } from "@/composables/BUtils.ts";
@@ -27,19 +27,19 @@ const roleHandler = {
   open() { (document.getElementById(roleHandler.popupId) as HTMLDialogElement).showModal() },
   close() { (document.getElementById(roleHandler.popupId) as HTMLDialogElement).close() },
   toggle(code:string) {
-    if (userStore.user?.config.roles.indexOf(code) < 0) {
+    if (uStore.user?.config.roles.indexOf(code) < 0) {
       this.add(code)
     } else {
       this.delete(code)
     }
   },
   add(rolecode:string):void {
-    userStore.addRole(rolecode);
+    uStore.addRole(rolecode);
     // rolesConfig.value.pickedRow = null
     // this.close()
   },
   delete(rolecode:string) {
-    userStore.deleteRole(rolecode) // The row is just the role code
+    uStore.deleteRole(rolecode) // The row is just the role code
     // rolesConfig.value.pickedRow = null
     // this.close()
   }
@@ -50,10 +50,10 @@ const rightHandler = {
   close() { (document.getElementById(this.popupId) as HTMLDialogElement).close() },
   saveOverride(rightCode:string, value:string) {
     if (value == '') {
-      userStore.deleteUserRight(rightCode)
+      uStore.deleteUserRight(rightCode)
       rightsConfig.value.pickedRow = null
     } else {
-      userStore.setUserRightValue(rightCode, value)
+      uStore.setUserRightValue(rightCode, value)
       rightsConfig.value.pickedRow = null
     }
     this.close()
@@ -61,10 +61,10 @@ const rightHandler = {
   save() {
     const sel = document.querySelector(".SETTINGS_PAGE_SAVE_USER_RIGHT") as HTMLSelectElement
     if (sel.value == '') {
-      userStore.deleteUserRight(rightsConfig.value.pickedRow.code)
+      uStore.deleteUserRight(rightsConfig.value.pickedRow.code)
       rightsConfig.value.pickedRow = null
     } else {
-      userStore.setUserRightValue(rightsConfig.value.pickedRow.code, sel.value)
+      uStore.setUserRightValue(rightsConfig.value.pickedRow.code, sel.value)
       rightsConfig.value.pickedRow = null
     }
     this.close()
@@ -99,7 +99,7 @@ const decodeSource = (configRight:any, td:any):void => {
   if (!cell) return
   const rightCode = configRight.code
   if (!rightCode) cell.innerHTML = "What?"
-  const userRight = userStore.user?.rights[rightCode]
+  const userRight = uStore.user?.rights[rightCode]
   if (userRight.source == "@USER") {
     cell.style.color = "goldenrod"
     cell.innerHTML = "*User*";
@@ -113,15 +113,15 @@ const decodeSource = (configRight:any, td:any):void => {
 const decodeValue = (configRight:any):string => {
   const rightCode = configRight.code
   if (!rightCode) return "What?"
-  const userRight = userStore.user?.rights[rightCode]
+  const userRight = uStore.user?.rights[rightCode]
   return userRight.value
 }
 
 
 const agencyDetails = () => {
-  if (!userStore.user?.agency_id || userStore.user?.agency_id == -1) return "<span style='color: var(--ui-disabled-text)'>None</span>"
-  if (userStore.user?.agency_descr == null) return `<span style='color: red'>Unknown agency (${userStore.user?.agency_id})</span>`
-  return `${userStore.user?.agency_descr}`
+  if (!uStore.user?.agency_id || uStore.user?.agency_id == -1) return "<span style='color: var(--ui-disabled-text)'>None</span>"
+  if (uStore.user?.agency_descr == null) return `<span style='color: red'>Unknown agency (${uStore.user?.agency_id})</span>`
+  return `${uStore.user?.agency_descr}`
 }
 
 const handlePickRight = (row:any):void => {
@@ -135,7 +135,7 @@ const inspectRight = ():string => {
   // const userRight = userStore.user.rights[rightCode]
   let html = `Default: ${app.config.rights[rightCode].default_value}`;
   html += "<ul>"
-  userStore.user?.config.roles.forEach((myrole:string) => {
+  uStore.user?.config.roles.forEach((myrole:string) => {
     const appRole = app.config.roles[myrole]
     appRole.rights.forEach((rr:any) => {
       if (rr.right == rightCode) {
@@ -143,7 +143,7 @@ const inspectRight = ():string => {
       }
     })
   })
-  const userRight = userStore.user?.rights[rightCode]
+  const userRight = uStore.user?.rights[rightCode]
   if (userRight.source == '@USER') {
     pickedRightValue.value = userRight.value
     // html += `<li>User: ${userRight.value}</li>`
@@ -156,7 +156,7 @@ const inspectRight = ():string => {
 }
 
 const getUserTheme = computed(():string => {
-  return userStore.getUserSetting('theme','auto')
+  return uStore.getUserSetting('theme','auto')
 })
 
 const computedRightsList = computed(() => {
@@ -187,32 +187,32 @@ const getRightLongDescription = ():string => {
       <td style="vertical-align: top; padding-right: 2em; width: 50%;">
         <table class="form-table" style="margin-bottom: 1em; width: 100%;">
           <tbody>
-            <tr><th>Logged In User:</th><td class="mono">{{ userStore.user?.id }}</td></tr>
-            <tr><th>Name:</th><td>{{ userStore.user?.lstnam }}, {{ userStore.user?.fstnam }}</td></tr>
-            <tr><th>Status:</th><td>{{ B.codeToText.userStatus(userStore.user?.status) }}</td></tr>
+            <tr><th>Logged In User:</th><td class="mono">{{ uStore.user?.id }}</td></tr>
+            <tr><th>Name:</th><td>{{ uStore.user?.lstnam }}, {{ uStore.user?.fstnam }}</td></tr>
+            <tr><th>Status:</th><td>{{ B.codeToText.userStatus(uStore.user?.status) }}</td></tr>
             <tr><th>Email:</th><td>
-              <a v-if="userStore.user?.email != ''" style="cursor: pointer"
-              :href="'mailto:' + encodeURI(`${userStore.user?.fstnam} ${userStore.user?.lstnam} <${userStore.user?.email}>`)">{{userStore.user?.email}}</a>
-              <ClipboardIcon :cliptext="userStore.user?.email"/>
+              <a v-if="uStore.user?.email != ''" style="cursor: pointer"
+              :href="'mailto:' + encodeURI(`${uStore.user?.fstnam} ${uStore.user?.lstnam} <${uStore.user?.email}>`)">{{uStore.user?.email}}</a>
+              <ClipboardIcon :cliptext="uStore.user?.email"/>
             </td></tr>
             <tr><th>Agency:</th><td :innerHTML="agencyDetails()"/></tr>
             <!-- <tr><th>Last Login:</th><td>{{ B.format.ts(userStore.user?.lst_login) }}</td></tr> -->
             <tr><td colspan="2" style="text-align: center; padding-top: .5em;">
               <BConfirm
                 icon="solid arrow-right-from-bracket_"
-                :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
+                :warning="pStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
                 class="anchor"
-                pos="T" @confirm="userStore.logout()">Logout?
+                pos="T" @confirm="uStore.logout()">Logout?
                 <template #message>
-                  Log out user '{{ userStore.user?.id }}'
+                  Log out user '{{ uStore.user?.id }}'
                 </template>
               </BConfirm>
             </td></tr>
             <tr><td colspan="2"><div class="buttonbar"/></td></tr>
             <tr><th>Theme:</th><td>
-              <label><input @click="userStore.saveSetting('theme','auto').then(() => { userStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'auto'" value=''> Auto ({{ isDark ? 'Dark' : 'Light' }})</label>&nbsp;&nbsp;
-              <label><input @click="userStore.saveSetting('theme','light').then(() => { userStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'light'" value='light'> Light</label>&nbsp;&nbsp;
-              <label><input @click="userStore.saveSetting('theme','dark').then(() => { userStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'dark'" value='dark'> Dark</label>
+              <label><input @click="uStore.saveSetting('theme','auto').then(() => { uStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'auto'" value=''> Auto ({{ isDark ? 'Dark' : 'Light' }})</label>&nbsp;&nbsp;
+              <label><input @click="uStore.saveSetting('theme','light').then(() => { uStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'light'" value='light'> Light</label>&nbsp;&nbsp;
+              <label><input @click="uStore.saveSetting('theme','dark').then(() => { uStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'dark'" value='dark'> Dark</label>
             </td></tr>
             <tr><td colspan="2">
               <br/>
@@ -222,7 +222,7 @@ const getRightLongDescription = ():string => {
               <BButton class="anchor"
               @click="roleHandler.open()"
               icon="solid pen_" />
-              <span v-for="(r,i) in userStore.user?.config.roles" :key="r">
+              <span v-for="(r,i) in uStore.user?.config.roles" :key="r">
                 {{ (i as number) > 0 ? ', ' : '' }}<span class="mono">{{ r }}</span>
               </span>
               <!-- <span class="mono">{{ userStore.user?.config.roles.join(", ") }}</span> -->
@@ -260,7 +260,7 @@ const getRightLongDescription = ():string => {
       <template v-for="(value, key) in app.config.roles" :key="key">
         <li @click="roleHandler.toggle(key as string)" class="anchor" :value="key">
           <span class="anchor">
-            <BIcon :icon="userStore.user?.config.roles.indexOf(key) < 0 ? 'square' : 'square-check'">{{ value.descr }}</BIcon>
+            <BIcon :icon="uStore.user?.config.roles.indexOf(key) < 0 ? 'square' : 'square-check'">{{ value.descr }}</BIcon>
           </span>
           <span class="info"> ({{ key }})</span>
         </li>

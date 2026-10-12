@@ -5,7 +5,7 @@ import BTable from '@/components/B/BTable.vue'
 import BIcon from '@/components/B/BIcon.vue'
 
 import { appProspectStore } from '@/stores/ProspectStore'
-const prospStore = appProspectStore()
+const pStore = appProspectStore()
 import { ref } from 'vue'
 import { useSearchProspectPopup } from './useSearchProspectPopup'
 const { popRef, closeSearch, loadProspect } = useSearchProspectPopup()
@@ -30,13 +30,13 @@ const searchHandler = ref({
   },
   search: () => {
     cfgSearchResults.value.pickedRow = null
-    prospStore.searchProspects(query.value).then(() => {
-      if (prospStore.searchResults.length > 0) {
+    pStore.searchProspects(query.value).then(() => {
+      if (pStore.searchResults.length > 0) {
         const tbox = (queryTextRef.value! as HTMLInputElement)
         tbox.select()
         tbox.focus()
-        if (prospStore.searchResults.length == 1) {
-          cfgSearchResults.value.pickedRow = prospStore.searchResults[0]
+        if (pStore.searchResults.length == 1) {
+          cfgSearchResults.value.pickedRow = pStore.searchResults[0]
         }
       }
     })
@@ -53,12 +53,12 @@ const searchHandler = ref({
               <td><input ref="queryTextRef" style="width: 30em;" v-model="query"><BButton>Search</BButton></td></tr>
         </tbody>
       </table>
-      <BTable nofooter :config="cfgSearchResults" :rows="prospStore.searchResults"
+      <BTable nofooter :config="cfgSearchResults" :rows="pStore.searchResults"
         @pick="(row:any) => searchHandler.pick(row)"
         @dblpick="() => loadProspect(cfgSearchResults.pickedRow.id)"
       />
       <div class="buttonbar">
-        <span v-if="prospStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
+        <span v-if="pStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
         <BButton class="anchor gapright" icon="#red solid x" @click="closeSearch()">Cancel</BButton>
         <BButton type="submit" :disabled="!cfgSearchResults.pickedRow" class="modern" icon="solid check">Load</BButton>
       </div>
