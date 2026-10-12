@@ -4,9 +4,6 @@ import HomePage from "./HomePage.vue";
 import SidebarPage from "./SidebarPage.vue";
 import { countersStore } from "../stores/CountersStore";
 const counters = countersStore();
-import { appStore } from "@/stores/AppStore.ts";
-const app = appStore()
-import BInfo from "@/components/B/BInfo.vue";
 
 </script>
 <template>
