@@ -60,7 +60,7 @@ const searchHandler = ref({
       <div class="buttonbar">
         <span v-if="pStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
         <BButton class="anchor gapright" icon="#red solid x" @click="closeSearch()">Cancel</BButton>
-        <BButton type="submit" :disabled="!cfgSearchResults.pickedRow" class="modern" icon="solid check">Load</BButton>
+        <BButton type="button" @click="loadProspect(cfgSearchResults.pickedRow.id)" :disabled="!cfgSearchResults.pickedRow" class="modern" icon="solid check">Load</BButton>
       </div>
     </form>
   </dialog>
