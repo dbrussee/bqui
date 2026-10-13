@@ -136,7 +136,7 @@ const prospectCSZ = (prosp:any) => {
       <tbody>
         <tr><th>Created:</th><td class="info">{{ B.format.ts(handler.temp.value.crttms) }} by {{ handler.temp.value.crtusr }}</td></tr>
         <tr><th>Updated:</th><td class="info">{{ B.format.ts(handler.temp.value.updtms) }} by {{ handler.temp.value.updusr }}</td></tr>
-        <tr><th>Agent of Record:</th><td class="info">{{ handler.temp.value.agent_id }}</td></tr>
+        <tr><th>Agent:</th><td class="info">{{ handler.temp.value.agent_id }}</td></tr>
 
         <tr><td colspan="2"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
 

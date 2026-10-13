@@ -71,27 +71,33 @@ const rightHandler = {
   },
 }
 
-// const rolesConfig = ref({
-//   // height: "calc(100vh - 17em)",
-//   height: "7em",
-//   width: "25em",
-//   pickedRow: null as any,
-//   columns: [
-//     { id: "role", heading: "Role", flags: "C", width: "4em"},
-//     { id: "descr", heading: "Description" }
-//   ]
-// })
-
+const computedRightsList = computed(() => {
+  const list = Object.entries(app.config.rights).map(([key, innerObj]) => {
+    const obj = innerObj as any
+    return {
+      code: key,
+      listpos: obj.listpos,
+      descr: app.config.rights[key].descr,
+      value: obj.value,
+      source: obj.source,
+    };
+  })
+  list.sort((a, b) => a.listpos > b.listpos ? 1 : -1)
+  return list
+})
 const rightsConfig = ref({
-  // height: "calc(100vh - 9em)",
-  height: "calc(100vh - 9.5em)",
-  width: "calc((100vw - 200px) / 2)",
-  pickedRow: null as any,
   columns: [
     { id: "descr", heading: "Activity Description" },
     { id: "value", heading: "Value", flags: "C", width: "5em", cellclass: 'mono' },
     { id: "source", heading: "Source" }
-  ]
+  ],
+  pickedRow: null as any,
+  onPick: (row:any) => rightsConfig.value.pickedRow = row,
+  onDblpick: () => rightHandler.open(),
+  heading: "Activity Rights",
+  // height: "calc(100vh - 9em)",
+  height: "calc(100vh - 9.5em)",
+  width: "calc((100vw - 200px) / 2)"
 })
 
 const decodeSource = (configRight:any, td:any):void => {
@@ -124,10 +130,6 @@ const agencyDetails = () => {
   return `${uStore.user?.agency_descr}`
 }
 
-const handlePickRight = (row:any):void => {
-  rightsConfig.value.pickedRow = row
-}
-
 const pickedRightValue = ref<string>('')
 const inspectRight = ():string => {
   if (!rightsConfig.value.pickedRow) return ""
@@ -157,20 +159,6 @@ const inspectRight = ():string => {
 
 const getUserTheme = computed(():string => {
   return uStore.getUserSetting('theme','auto')
-})
-
-const computedRightsList = computed(() => {
-  const list = Object.entries(app.config.rights).map(([key, innerObj]) => {
-    const obj = innerObj as any
-    return {
-      code: key,
-      listpos: obj.listpos,
-      descr: app.config.rights[key].descr,
-      value: obj.value,
-      source: obj.source,
-    };
-  })
-  return list.sort((a, b) => a.listpos > b.listpos ? 1 : -1)
 })
 
 const getRightLongDescription = ():string => {
@@ -231,14 +219,11 @@ const getRightLongDescription = ():string => {
         </table>
       </td>
       <td style="vertical-align: top;">
-        <BTable :config="rightsConfig" :rows="computedRightsList"
-            @pick="(row:any) => handlePickRight(row)"
-            @dblpick="() => rightHandler.open()"
-            heading="Activity Rights">
+        <BTable :config="rightsConfig" :rows="computedRightsList">
           <template #column_descr="{row}">{{ row.descr }}</template>
           <template #column_source="{row,td}">{{ decodeSource(row,td) }}</template>
           <template #column_value="{row}">{{ decodeValue(row) }}</template>
-          <template #buttons>
+          <template #footer>
             <BAnchor :disabled="!rightsConfig.pickedRow" icon="solid edit_" @click="rightHandler.open()">Set User Override...</BAnchor>
           </template>
         </BTable>

@@ -137,6 +137,11 @@ const quoteHandler = {
 
 
 const cfgQuotesList = ref({
+  onPick: (row:any, rn:number) => {
+    cfgQuotesList.value.pickedRow = row
+    cfgQuotesList.value.pickedRowNumber = rn
+  },
+  onDblpick: () => { quoteHandler.edit() },
   height: "calc(100vh - 11.7em)",
   width: "calc(100vw - 200px - .9em)",
   pickedRow: null as any,
@@ -154,11 +159,6 @@ const cfgQuotesList = ref({
   ]
 })
 
-const handleQuoteRowClicked = (row:any, rn:number) => {
-  cfgQuotesList.value.pickedRow = row
-  cfgQuotesList.value.pickedRowNumber = rn
-}
-
 const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
   if (td == null) return
   const classname = "status" + row.status
@@ -168,10 +168,7 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
 </script>
 
 <template>
-  <BTable
-      @pick="(row:any, rn:number, col:any) => { handleQuoteRowClicked(row, rn) }"
-      @dblpick="(row:any, rn:number, col:any) => { quoteHandler.edit() }"
-      :config="cfgQuotesList" :rows="pStore.quotes">
+  <BTable :config="cfgQuotesList" :rows="pStore.quotes">
     <!-- <template #column_id="{row, rn, td}">{{ formatIDCell(row, rn, td) }}</template> -->
     <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
     <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
@@ -182,7 +179,7 @@ const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
         'nonstdC': row.nonstd == 'C'}"
       >{{ B.codeToText.nonstd(row.nonstd) }}</span>
     </template>
-    <template #buttons>
+    <template #footer>
       <BPopup v-if="!uStore.isUserReadOnly()" class="action" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
         <template #body>
           <p><BButton @click="quoteHandler.start('MED')" class="anchor" :icon="B.codeToText.qtypeIcon('MED')">Medical &amp; Drug</BButton></p>

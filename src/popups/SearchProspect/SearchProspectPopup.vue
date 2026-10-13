@@ -8,12 +8,14 @@ import { appProspectStore } from '@/stores/ProspectStore'
 const pStore = appProspectStore()
 import { ref } from 'vue'
 import { useSearchProspectPopup } from './useSearchProspectPopup'
-const { popRef, closeSearch, loadProspect } = useSearchProspectPopup()
+const { closeSearch, loadProspect } = useSearchProspectPopup()
 
 const query = ref("")
 const queryTextRef = ref(null)
 
 const cfgSearchResults = ref({
+  onPick: (row:any) => cfgSearchResults.value.pickedRow = row,
+  onDblpick: () => loadProspect(cfgSearchResults.value.pickedRow.id),
   width: "45em",
   height: "15em",
   pickedRow: null as any,
@@ -25,9 +27,6 @@ const cfgSearchResults = ref({
 })
 
 const searchHandler = ref({
-  pick: (row:any) => {
-    cfgSearchResults.value.pickedRow = row
-  },
   search: () => {
     cfgSearchResults.value.pickedRow = null
     pStore.searchProspects(query.value).then(() => {
@@ -53,10 +52,7 @@ const searchHandler = ref({
               <td><input ref="queryTextRef" style="width: 30em;" v-model="query"><BButton>Search</BButton></td></tr>
         </tbody>
       </table>
-      <BTable nofooter :config="cfgSearchResults" :rows="pStore.searchResults"
-        @pick="(row:any) => searchHandler.pick(row)"
-        @dblpick="() => loadProspect(cfgSearchResults.pickedRow.id)"
-      />
+      <BTable :config="cfgSearchResults" :rows="pStore.searchResults" />
       <div class="buttonbar">
         <span v-if="pStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
         <BButton class="anchor gapright" icon="#red solid x" @click="closeSearch()">Cancel</BButton>

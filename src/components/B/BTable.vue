@@ -1,6 +1,7 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, toRaw } from 'vue'
+
 interface IColumn {
   id: string
   flags?: string
@@ -8,26 +9,11 @@ interface IColumn {
   width?: string
   cellclass?: string
 }
-const emit = defineEmits(["pick", "dblpick", "hdrclick"])
+const emit = defineEmits(["pick", "unpick", "dblpick", "hdrclick"])
 const props = defineProps({
   config: {
     type: Object as () => any,
     required: true,
-  },
-  heading: {
-    type: String,
-    required: false,
-    default: ""
-  },
-  nofooter: {
-    type: Boolean,
-    required: false,
-    defaul: false
-  },
-  togglePick: {
-    type: Boolean,
-    required: false,
-    defaul: false
   },
   rows: {
     type: Array as () => any[],
@@ -51,7 +37,6 @@ const deduceTHStyle = (col: IColumn) => {
   }
   return style;
 };
-
 const deduceJustification = (style: Record<string, string>, col: IColumn) => {
   if (col.flags) {
     if (col.flags.includes("R")) {
@@ -64,7 +49,7 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
   }
 };
 
-const getCellValueInSlot = computed(() => {
+const getCellValue = computed(() => {
   return (row:any, col:any):string => {
     if (typeof row == 'string') return row
     const dotList:string[] = col.id.split(".")
@@ -84,7 +69,22 @@ const handleTableHeadClick = (event:MouseEvent) => {
   const col = props.config.columns[cell.cellIndex]
   emit("hdrclick", col)
 }
-const handleTableBodyClick = (event:MouseEvent) => {
+
+const doPick = (isDouble:boolean, row:any, ri?:number, col?:IColumn, ci?:number) => {
+  if (!isDouble) {
+    if (row == props.config.pickedRow) {
+      emit('unpick', row, ri, col, ci)
+      if (props.config['onUnpick']) props.config.onUnpick(row, ri, col, ci)
+    } else {
+      emit('pick')
+      if (props.config['onPick']) props.config.onPick(row, ri, col, ci)
+    }
+  } else if (isDouble) {
+      emit('dblpick', row, ri, col, ci)
+      if (props.config['onDblpick']) props.config.onDblpick(row, ri, col, ci)
+  }
+}
+const handleTableBodyClick = (event:MouseEvent, isDouble:boolean) => {
   event.stopImmediatePropagation()
   const el = event.target as HTMLElement // could be anything
   const cell = el.closest('td') as HTMLTableCellElement | null
@@ -92,25 +92,7 @@ const handleTableBodyClick = (event:MouseEvent) => {
   const col = props.config.columns[cell.cellIndex]
   const tr = cell.closest('tr') as HTMLTableRowElement
   const row = props.rows[tr.rowIndex - 1] // Skip thead row
-  if (props.togglePick) {
-    if (row == props.config.pickedRow) {
-      emit('pick', null)
-    } else {
-      emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
-    }
-  } else {
-      emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
-  }
-}
-const handleTableDblClick = (event:MouseEvent) => {
-  const el = event.target as HTMLElement // could be anything
-  const cell = el.closest('td') as HTMLTableCellElement | null
-  if (!cell) return
-  const col = props.config.columns[cell.cellIndex]
-  const tr = cell.closest('tr') as HTMLTableRowElement
-  const row = props.rows[tr.rowIndex - 1] // Skip thead row
-  // emit('pick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
-  emit('dblpick', row, tr.rowIndex - 1, col, cell.cellIndex as number)
+  doPick(isDouble, row, tr.rowIndex - 1, col, cell.cellIndex as number)
 }
 
 const getCellRef = (rn:any, cn:any) => {
@@ -119,16 +101,18 @@ const getCellRef = (rn:any, cn:any) => {
   const offset:number = (rownum * props.config.columns.length) + colnum
   return tdRef.value?.[offset] || null
 }
+
 </script>
+
 
 <template>
   <div style="width: fit-content">
-  <div v-if="props.heading != ''" class="b-table-heading">
-    {{ props.heading }}
+  <div v-if="props.config.heading && props.config.heading != ''" class="b-table-heading">
+    {{ props.config.heading }}
   </div>
   <div class="b-table-container"
     :style="{
-      height: 'calc(' + props.config.height + (props.nofooter ? ')' : ' - 1.3em)'),
+      height: 'calc(' + props.config.height + (props.config.nofooter ? ')' : ' - 1.3em)'),
       'overflow-y': props.config.height == '' ? 'hidden' : 'auto',
     }"
   >
@@ -140,16 +124,16 @@ const getCellRef = (rn:any, cn:any) => {
         </th>
       </tr>
     </thead>
-    <tbody v-if="Array.isArray(props.rows)"
-        @click="handleTableBodyClick($event)"
-        @dblclick="handleTableDblClick($event)"
+    <tbody
+        @click="handleTableBodyClick($event, false)"
+        @dblclick="handleTableBodyClick($event, true)"
         >
-        <tr v-for="(row,rn) in props.rows" :key="row" :class="{picked : props.config.pickedRow == row}">
+        <tr v-for="(row,rn) in props.rows" :key="row" :class="{picked : toRaw(props.config.pickedRow) == toRaw(row)}">
           <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
             ref="tdRef"
             >
             <slot v-if="row" :name="'column_' + col.id" :row="row" :rn="rn" :td="getCellRef(rn, cn)" :col="col" :cn="cn">
-              {{ getCellValueInSlot(row, col) }}
+              {{ getCellValue(row, col) }}
             </slot>
           </td>
         </tr>
@@ -157,25 +141,12 @@ const getCellRef = (rn:any, cn:any) => {
           <td :colspan="props.config.columns.length" :innweHTML="props.config.no_rows_text" />
         </tr>
       </tbody>
-      <tbody v-if="!Array.isArray(props.rows)"
-        @click="handleTableBodyClick($event)"
-        @dblclick="handleTableDblClick($event)"
-        >
-        <tr v-for="(value,objProp,rn) in props.rows" :key="objProp" :class="{picked : props.config.pickedRow == props.rows[objProp]}">
-          <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
-            ref="tdRef"
-            >
-            <slot v-if="objProp" :name="'column_' + col.id" :row="objProp" :rn="rn" :td="getCellRef(rn, cn)" :key="objProp" :col="col" :cn="cn">
-              {{ value }}
-            </slot>
-          </td>
-        </tr>
-      </tbody>
     </table>
   </div>
-  <div v-if="!props.nofooter" class="b-table-footer" @click.self="emit('pick',null)"><slot name="buttons"/>&nbsp;</div>
+  <div v-if="$slots.footer" class="b-table-footer" @click.self="doPick(false,null,-1)"><slot name="footer"/>&nbsp;</div>
   </div>
 </template>
+
 
 <style scoped lang="css">
 tr.no_rows_text {

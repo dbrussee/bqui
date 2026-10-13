@@ -1,6 +1,5 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-// import BTable from '@/components/BTable.vue';
 import { ref, useId } from 'vue';
 import { appProspectStore } from '@/stores/ProspectStore';
 const pStore = appProspectStore()
@@ -79,7 +78,7 @@ const cfgCensus = ref({
 // }
 
 const setFocus = (subnum:number, depnum:number):void => {
-  console.log("Sub:", subnum, "Dep:", depnum)
+  // console.log("Sub:", subnum, "Dep:", depnum)
   window.setTimeout(() => {
     const tbl = document.querySelector("table.CENSUS_TABLE") as HTMLTableElement
     const row = tbl.rows[subnum + 1 + depnum + 1] as HTMLTableRowElement

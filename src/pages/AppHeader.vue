@@ -55,21 +55,24 @@ const removeMeFromRecents = () => {
   })
 }
 const cfgFaves = ref({
+  heading: "Bookmarked Prospects",
+  onPick: (row: any) => pickFave(row.pid),
   width: "25em",
   no_rows_text: 'No bookmarked prospects',
   columns: [
     { id: "pid", heading: "Prosp", width: "4em", flags: "R" },
-
     { id: "name", heading: "Name", width: "20em" },
   ],
 })
 const cfgRecents = ref({
-  width: "25em",
-  no_rows_text: 'No recent prospects',
+  heading: "Recently Viewed Prospects",
   columns: [
     { id: "pid", heading: "Prosp", width: "4em", flags: "R" },
     { id: "name", heading: "Name", width: "20em" },
   ],
+  onPick: (row: any) => pickRecent(row.pid),
+  width: "25em",
+  no_rows_text: 'No recent prospects'
 })
 const cfgSearchResults = ref({
   width: "45em",
@@ -187,12 +190,7 @@ const openHistory = () => {
             <td v-if="uStore.user" style="text-align: right;">
               <BPopup class="anchor anchor-in-header" pos="B" icon="solid list-ul_" ref="recentPopover">Recent
                 <template #body>
-                  <BTable nofooter
-                    heading="Recently Viewed Prospects"
-                    :rows="uStore.user.recents"
-                    :config="cfgRecents"
-                    @pick="(row: any) => pickRecent(row.pid)"
-                  />
+                  <BTable :config="cfgRecents" :rows="uStore.user.recents"/>
                   <div class="buttonbar">
                     <BConfirm
                         @confirm="removeMeFromRecents()"
@@ -239,12 +237,7 @@ const openHistory = () => {
               </BPopup>&nbsp;
               <BPopup
                 class="anchor anchor-in-header" pos="B" icon="bookmark_" ref="favesPopover">Bookmarks<template #body>
-                  <BTable nofooter
-                    heading="Bookmarked Prospects"
-                    :rows="uStore.user.faves"
-                    :config="cfgFaves"
-                    @pick="(row: any) => pickFave(row.pid)"
-                  />
+                  <BTable :config="cfgFaves" :rows="uStore.user.faves" />
                   <span v-if="pStore.censusDirty" style="color:red">You will lose unsaved census changes!</span>
                 </template>
               </BPopup>&nbsp;

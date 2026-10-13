@@ -10,6 +10,9 @@ import { B } from '@/composables/BUtils.ts';
 import BIcon from './B/BIcon.vue';
 
 const cfgHistory = ref({
+  heading: "Recent Backend Call Activity",
+  onPick: (row:any) => cfgHistory.value.pickedRow = row,
+  onDblpick: () => showBodyPopup(),
   pickedRow: null as any,
   height: "50vh",
   columns: [
@@ -45,9 +48,6 @@ const showBodyPopup = () => {
   // if (row.body.length == 0) return
   const popup = document.getElementById(bodyPopid) as HTMLDialogElement
   popup?.showModal()
-}
-const pickHistoryRow = (row:any):void => {
-  cfgHistory.value.pickedRow = row
 }
 const getPickedRowBody = ():string => {
   const row = cfgHistory.value.pickedRow
@@ -112,10 +112,7 @@ const simplifyEndpoint = (row:any) => {
 
 <template>
   <dialog :id="popid">
-    <BTable heading="Recent Backend Call Activity" :config="cfgHistory" :rows="uStore.apiHistory"
-    @pick="(row:any) => pickHistoryRow(row)"
-    @dblpick="() => showBodyPopup()"
-    >
+    <BTable :config="cfgHistory" :rows="uStore.apiHistory">
       <template #column_endpoint="{row}">{{ simplifyEndpoint(row) }}</template>
       <template #column_ts="{row,td}">{{ setTimestamp(row, td) }}</template>
       <template #column_body="{row}"><BIcon v-if="row.body && row.body.length > 0" icon="solid code"/></template>
