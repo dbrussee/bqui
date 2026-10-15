@@ -31,12 +31,18 @@ const props = defineProps({
   <form @submit.stop.prevent="emit('save')">
     <table class="form-table">
       <tbody>
-        <tr v-if="qStore.quote.id >= 0"><th style="width:6.5em;">Created:</th><td colspan="3" class="info">{{ B.format.ts(qStore.quote.crttms) }} by {{ qStore.quote.crtusr }}</td></tr>
-        <tr v-if="qStore.quote.id >= 0 && (qStore.quote.crttms != qStore.quote.updtms || qStore.quote.crtusr != qStore.quote.updusr)">
-          <th>Updated:</th><td colspan="3" class="info">{{ B.format.ts(qStore.quote.updtms) }} by {{ qStore.quote.updusr }}</td>
+        <template v-if="qStore.quote.id >= 0">
+        <tr>
+          <th style="width:6.5em;">Created:</th>
+          <td colspan="3" class="info">{{ B.format.ts(qStore.quote.crttms) }} by {{ qStore.quote.crtusr }}</td>
+        </tr>
+        <tr v-if="qStore.quote.crttms != qStore.quote.updtms">
+          <th>Updated:</th>
+          <td colspan="3" class="info">{{ B.format.ts(qStore.quote.updtms) }} by {{ qStore.quote.updusr }}</td>
         </tr>
 
-        <tr v-if="qStore.quote.id >= 0"><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
+        <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
+        </template>
 
         <tr><th>Product:</th><td colspan="3" class="info">{{ B.codeToText.rlob(qStore.quote.rlob) }} ({{ qStore.quote.rlob }})</td></tr>
         <tr><th>Effective:</th><td colspan="3" class="info">{{ B.format.effdat(qStore.quote.effdat) }}</td></tr>

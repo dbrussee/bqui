@@ -8,7 +8,7 @@ import { appProspectStore } from '@/stores/ProspectStore'
 const pStore = appProspectStore()
 import { ref } from 'vue'
 import { useSearchProspectPopup } from './useSearchProspectPopup'
-const { closeSearch, loadProspect } = useSearchProspectPopup()
+const { popRef, closeSearch, loadProspect } = useSearchProspectPopup()
 
 const query = ref("")
 const queryTextRef = ref(null)
