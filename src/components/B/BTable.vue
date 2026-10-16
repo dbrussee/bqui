@@ -112,11 +112,11 @@ const getCellRef = (rn:any, cn:any) => {
   </div>
   <div class="b-table-container"
     :style="{
-      height: 'calc(' + props.config.height + (props.config.nofooter ? ')' : ' - 1.3em)'),
+      height: 'calc(' + props.config.height + ($slots.footer ? ' - 1.3em)' : ')'),
       'overflow-y': props.config.height == '' ? 'hidden' : 'auto',
     }"
   >
-    <table :style="{ width: props.config.width }">
+    <table :style="{ width: props.config.width }" :class="{'nohover': (props.config.hover != undefined && props.config.hover == false)}">
     <thead @click="handleTableHeadClick($event)">
       <tr>
         <th v-for="col in props.config.columns" :key="col.id" :style="deduceTHStyle(col)">
@@ -237,14 +237,14 @@ tr td {
 tbody tr {
   background-color: var(--table-row-bg);
   color: var(--table-row-text);
-  &:hover {
-    background-color: var(--table-row-picked-bg);
-    color: var(--table-row-picked-text) !important;
-  }
   &.picked {
     background-color: var(--table-row-picked-bg);
     color: var(--table-row-picked-text) !important;
   }
+}
+table:not(.nohover) tr:hover {
+    background-color: var(--table-row-picked-bg);
+    color: var(--table-row-picked-text) !important;
 }
 
 xtbody tr:hover {

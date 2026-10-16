@@ -9,7 +9,7 @@ import { appProspectStore } from '@/stores/ProspectStore'
 const pStore = appProspectStore()
 import { useSearchProspectPopup } from '@/popups/SearchProspect/useSearchProspectPopup';
 import BTable from '@/components/B/BTable.vue'
-import BButton from '@/components/B/BButton.vue'
+// import BButton from '@/components/B/BButton.vue'
 
 const salutation = ():string => {
   const msg = timeOfDay()
@@ -25,11 +25,17 @@ const timeOfDay = ():string => {
   return "Good Evening"
 }
 
-const doSearch = ():void => {
-  if (!uStore.dashdata[dashConfig.value.pickedRow]) return
-  const parts = dashConfig.value.pickedRow.split("/")
+const doSearch = (row:any, col:any):void => {
+  if (!row) return
+  if (!uStore.dashdata[row]) return
+  // console.dir(col)
+  const parts = row.split("/")
   const eff = parts[0] + "/" + parts[2]
-  pStore.searchQuery = "@" + eff
+  pStore.searchQuery = "@" + eff // Add status
+  if (col.id != 'eff' && col.id != 'total') {
+    if (!uStore.dashdata[row].breakout[col.id]) return
+    pStore.searchQuery += " ~" + col.id
+  }
   pStore.searchProspects(pStore.searchQuery)
   useSearchProspectPopup().openSearch()
 }
@@ -56,15 +62,17 @@ const monthsRange = computed(() => {
 })
 
 const dashConfig = ref({
-  onPick: (row:any) => {
-    dashConfig.value.pickedRow = row
+  hover: false,
+  onPick: (row:any, ri:number, col:any) => {
+    // dashConfig.value.pickedRow = row
+    doSearch(row, col)
   },
-  onDblpick: () => { doSearch() },
-  pickedRow: null as any,
+  // onDblpick: () => { doSearch() },
+  // pickedRow: null as any,
   columns: [
     { id: "eff", heading: "Effective", width: "6em", flags: "R" },
     { id: "total", heading: "Total", flags: "R" },
-    { id: "INPROG", heading: B.codeToText.quoteStatus('INPROG'), width: "2em", flags: "R" },
+    { id: "INPROG", heading: B.codeToText.quoteStatus('INPROG'), width: "6em", flags: "R" },
     { id: "PENDING", heading: B.codeToText.quoteStatus('PENDING'), width: "2em", flags: "R" },
     { id: "RATEREQ", heading: B.codeToText.quoteStatus('RATEREQ'), width: "2em", flags: "R" },
     { id: "READY", heading: B.codeToText.quoteStatus('READY'), width: "2em", flags: "R" },
@@ -87,57 +95,11 @@ const dashConfig = ref({
   <template #column_READY="{row}">{{ uStore.dashdata[row]?.breakout.READY }}</template>
   <template #column_ENROLLED="{row}">{{ uStore.dashdata[row]?.breakout.ENROLLED }}</template>
   <template #column_EXPIRED="{row}">{{ uStore.dashdata[row]?.breakout.EXPIRED }}</template>
-  <template #footer>
+  <!-- <template #footer>
       <BButton class="anchor" :disabled="!dashConfig.pickedRow" icon="solid magnifying-glass" @click="doSearch()">Search...</BButton>
-  </template>
+  </template> -->
 </BTable>
 </template>
 <style lang="css" scoped>
-
-table {
-  border-collapse: collapse;
-  position: relative;
-}
-thead tr {
-  top: 0;
-  position: sticky;
-  z-index: 1;
-}
-thead tr th {
-  /* border-top: 1px solid var(--table-header-bg); */
-  /* border-bottom: 1px solid var(--table-header-bg); */
-  width: 2em;
-  text-align: left;
-  font-weight: normal;
-  text-align: right;
-  background-color: var(--body-bg);
-  color: var(--form-prompt-color) !important;
-  padding: 0.1rem 0.2rem;
-  padding-bottom: .6rem;
-  /* text-decoration: double underline; */
-  text-underline-offset: 4px;
-  vertical-align: bottom;
-}
-tr td {
-  line-height: 1.1em;
-  /* border-left: 1px solid black; */
-  border-bottom: 1px solid var(--table-row-border-color);
-  padding: 0.1rem 0.2rem;
-  vertical-align: top;
-  cursor: pointer;
-}
-
-tbody tr {
-  background-color: var(--table-row-bg);
-  color: var(--table-row-text);
-  &:hover {
-    background-color: var(--table-row-picked-bg);
-    color: var(--table-row-picked-text) !important;
-  }
-  &.picked {
-    background-color: var(--table-row-picked-bg);
-    color: var(--table-row-picked-text) !important;
-  }
-}
 
 </style>
