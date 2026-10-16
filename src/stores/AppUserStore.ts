@@ -10,6 +10,7 @@ import type { user } from "@/types/user";
 
 export const appUserStore = defineStore("appUserStore", () => {
   const user = ref<user | null>(null);
+  const dashdata = ref<any>({})
   // const otherUser = ref<any>(null);
   const meta = ref<any>(null);
   const issue = ref<any>(null)
@@ -23,14 +24,6 @@ export const appUserStore = defineStore("appUserStore", () => {
     relogin();
   }
 
-  // async function getOtherUser(uid: string) {
-  //   otherUser.value = null;
-  //   const fetcher = await new BQAPIFetcher().callAPI(`/user/${uid}`, "GET");
-  //   otherUser.value = fetcher.resp;
-  //   meta.value = fetcher.meta;
-  //   issue.value = fetcher.issue;
-  //   return otherUser.value;
-  // }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function login(uid: string, pwd: string = "") {
     if (uid == "") return
@@ -47,6 +40,7 @@ export const appUserStore = defineStore("appUserStore", () => {
       const msgStore = appMessageStore()
       msgStore.getMessages()
       getMostRecentProspect()
+      getDashboard()
     })
   }
   async function relogin() {
@@ -62,8 +56,20 @@ export const appUserStore = defineStore("appUserStore", () => {
     const msgStore = appMessageStore()
     msgStore.getMessages()
     getMostRecentProspect()
+    getDashboard()
     return user.value;
   }
+
+  function getDashboard():void {
+    dashdata.value = {}
+    if (!user.value) return
+    const fetcher = new BQAPIFetcher()
+    fetcher.callAPI(`/dashboard`, "GET").then(() => {
+      dashdata.value = fetcher.resp.result
+      console.dir(dashdata.value)
+    })
+  }
+
 
   function applyTheme(value:string | null = null) {
     const rootElement = document.documentElement
@@ -209,7 +215,7 @@ export const appUserStore = defineStore("appUserStore", () => {
 
 
   return { isLoading: working,
-    relogin, login, logout, working,
+    relogin, login, logout, working, getDashboard, dashdata,
     saveSetting: saveUserSetting, applyTheme, getUserSetting,
     addRole, deleteRole,
     user, getUserRightValue, setUserRightValue, deleteUserRight, isUserReadOnly,

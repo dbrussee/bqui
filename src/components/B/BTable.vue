@@ -223,7 +223,7 @@ thead tr th {
   padding-bottom: .6rem;
   text-decoration: double underline;
   text-underline-offset: 4px;
-  vertical-align: top;
+  vertical-align: bottom;
 }
 tr td {
   line-height: 1.1em;

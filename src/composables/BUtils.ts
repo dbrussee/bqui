@@ -72,6 +72,7 @@ export const B = {
         case "INPROG": return "In Progress";
         case "ENROLLED": return "Enrolled";
         case "EXPIRED": return "Expired";
+        case "ABANDONED": return "Abandoned";
         default: return code;
       }
     },
@@ -261,6 +262,12 @@ export const B = {
     if ('EXPIRED'.indexOf(statusCode) >= 0) return "#red rectangle-xmark_"
     return "circle_"
   },
+  isYYYYMMDD: (test:string, splitter:string):boolean => {
+    const parts:string[] = test.split(splitter)
+    if (parts.length != 3) return false
+    if (parts[0]?.length != 4) return false
+    return true
+  },
 
   working: {
     set: (whichRef:Ref, val:string):void => {
@@ -298,7 +305,13 @@ export const B = {
       if (!d) return "";
       let date:Date
       if (typeof d == "string") {
-        date = B.dateFromYYYYMMDD(d)
+        if (B.isYYYYMMDD(d, '-')) {
+          date = B.dateFromYYYYMMDD(d)
+        } else if (B.isYYYYMMDD(d, '/')) {
+          date = B.dateFromYYYYMMDD(d)
+        } else {
+          date = new Date(d)
+        }
       } else {
         date = d
       }
@@ -361,6 +374,27 @@ export const B = {
 
       return finalString;
       // Output: "Jul 30, 2026 08:12:10a"
+    },
+    dateMMDDYYYY: (d: string | null | Date = new Date()):string => {
+      if (!d) return ""
+      let date:Date
+      if (typeof d == "string") {
+        if (B.isYYYYMMDD(d, '-')) {
+          date = B.dateFromYYYYMMDD(d)
+        } else if (B.isYYYYMMDD(d, '/')) {
+          date = B.dateFromYYYYMMDD(d)
+        } else {
+          date = new Date(d)
+        }
+      } else {
+        date = d
+      }
+      let mm = (date.getMonth() + 1).toString()
+      if (mm.length == 1) mm = "0" + mm
+      let dd = (date.getDate()).toString()
+      if (dd.length == 1) dd = "0" + dd
+      const yyyy = (date.getFullYear()).toString()
+      return `${mm}/${dd}/${yyyy}`
     },
     dateMDYYYY: (d: string | null | Date = new Date()) => {
       if (!d) return "";

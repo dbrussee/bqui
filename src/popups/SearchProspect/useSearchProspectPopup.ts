@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { appProspectStore } from '@/stores/ProspectStore';
+import { appPageStore } from '@/stores/PageStore';
 
 // Reference to the actual native HTML element
 const popRef = ref<HTMLDialogElement | null>(null);
@@ -13,6 +14,7 @@ export function useSearchProspectPopup() {
   }
   async function loadProspect(pid:string):Promise<void> {
     appProspectStore().getProspect(pid, true)
+    appPageStore().page = "PROSPECTS"
     closeSearch()
   }
 

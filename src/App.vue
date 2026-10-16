@@ -4,8 +4,13 @@ import MainPage from './pages/MainPage.vue'
 import NewProspectPopup from './popups/NewProspect/NewProspectPopup.vue';
 import SearchProspectPopup from './popups/SearchProspect/SearchProspectPopup.vue';
 import { appStore } from './stores/AppStore.ts';
-appStore().initialize()
+import { appUserStore } from './stores/AppUserStore.ts';
 
+const theme = localStorage.getItem("bq-ui-theme")
+if (theme) {
+  appUserStore().applyTheme(theme)
+}
+appStore().initialize()
 </script>
 
 <style scoped></style>

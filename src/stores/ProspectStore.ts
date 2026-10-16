@@ -10,6 +10,7 @@ import type { prospect } from "@/types/prospect";
 
 export const appProspectStore = defineStore("appProspectStore", () => {
   const prospect = ref<prospect | null>(null);
+  const searchQuery = ref<string>("")
   const searchResults = ref<any[]>([])
   const quotes = ref<any[]>([])
   const meta = ref<any>({
@@ -124,6 +125,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       }
       prospect.value = fetcher.resp.prosp
       if (prospect.value == null) return
+
       // console.log(JSON.stringify(prospect.value, null, 2))
       prospect.value.census = sortCensus(fetcher.resp.prosp.census)
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
@@ -141,6 +143,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
           }
         })
       }
+      // appPageStore().page = "PROSPECTS"
     })
   }
   const sortCensus = (original:any[]):any[] => {
@@ -476,7 +479,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     prospWorking, censusWorking, meta, issue,
     censusDirty, getCensus, updateCensus, importCensus, exportCensus,
     quotes,
-    prospect, createProspect, updateProspect, getProspect, searchProspects, searchResults, deleteProspect,
+    prospect, createProspect, updateProspect, getProspect, searchQuery, searchProspects, searchResults, deleteProspect,
     removeMeFromRecents, setFavorite, isCurrentlyFavorite, setCensusDirty };
   }
 );

@@ -6,7 +6,7 @@ import { appProspectStore } from "@/stores/ProspectStore";
 const pStore = appProspectStore();
 import { appUserStore } from "@/stores/AppUserStore.ts";
 const uStore = appUserStore()
-import ProspectComponent from "@/components/ProspectComponent.vue";
+import ProspectComponent from "@/components/prospectComponent.vue";
 import QuoteListComponent from "@/components/QuoteListComponent.vue";
 import { useNewProspectPopup } from "@/popups/NewProspect/useNewProspectPopup.ts";
 import { useSearchProspectPopup } from "@/popups/SearchProspect/useSearchProspectPopup.ts";

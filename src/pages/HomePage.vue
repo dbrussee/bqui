@@ -10,12 +10,14 @@ import ProspectsPage from './ProspectsPage.vue'
 import ProposalsPage from './ProposalsPage.vue';
 import MessagesPage from './MessagesPage.vue'
 import CensusPage from './CensusPage.vue';
+import DashboardPage from './DashboardPage.vue';
 
 
 </script>
 
 <template>
   <div v-if="userStore.user">
+    <DashboardPage v-if="pageStore.page == 'DASHBOARD'" />
     <ProspectsPage v-if="pageStore.page == 'PROSPECTS'" />
     <CensusPage v-if="pageStore.page == 'CENSUS'" />
     <MessagesPage v-if="pageStore.page == 'MSGS'" />

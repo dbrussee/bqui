@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { B } from '@/composables/BUtils'
 import { appProspectStore } from './ProspectStore'
 import { useToast } from '@/composables/useToast'
+import { appUserStore } from './AppUserStore'
 import BQAPIFetcher from '@/components/BQAPI'
 import type { quote } from '@/types/quote'
 import { ref } from 'vue'
@@ -48,6 +49,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         useToast().addToast(`Error creating quote: ${fetcher.issue.error}`, "error")
       } else {
         useToast().addToast(`Quote ${q.id} created`, "success")
+        appUserStore().getDashboard()
       }
       quote.value = {...q}
       return q
@@ -95,6 +97,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         return q.id != qid
       })
       useToast().addToast(`Quote ${qid} deleted`, "success")
+      appUserStore().getDashboard()
     }
   }
   const updateQuote = async (q:any, action:string):Promise<unknown> => {
@@ -107,6 +110,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         return null
       } else {
         useToast().addToast(`Quote ${fetcher.resp.id} ${action}`, "success")
+        appUserStore().getDashboard()
         return fetcher.resp
       }
     }
@@ -237,7 +241,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     const rlob = quote.value.rlob
     const eff = B.format.dateMDYYYY(quote.value.effdat)
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/plancodes/${pid}/${family}/${rlob}?eff=${eff}&macomp=N&gfther=N`, 'GET')
+    await fetcher.callAPI(`/plancodes/${pid}/${family}?eff=${eff}&rlob=${rlob}&macomp=N&gfther=N`, 'GET')
     // console.dir(fetcher.resp)
     if (fetcher.issue) {
       useToast().addToast(`Error getting plan codes: ${fetcher.issue.error}`, "error")
@@ -254,7 +258,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     }
     if (family == 'MED') {
       // When getting plans for Medical;, get Drug plans too
-      await fetcher.callAPI(`/plancodes/${pid}/DRU/DRU?eff=${eff}&macomp=N&gfther=N`, 'GET')
+      await fetcher.callAPI(`/plancodes/${pid}/DRU?eff=${eff}&macomp=N&gfther=N`, 'GET')
       // console.dir(fetcher.resp)
       if (fetcher.issue) {
         useToast().addToast(`Error getting plan codes: ${fetcher.issue.error}`, "error")
