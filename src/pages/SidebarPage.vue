@@ -70,6 +70,7 @@ function getCensusCount():string {
   <div v-if="uStore.user">
     <SidebarItem @click="pageStore.page = 'DASHBOARD'" :current="pageStore.page == 'DASHBOARD'"
         icon="solid chart-simple_"
+        :working="uStore.dashworking"
         :shortname="'Dashboard'" />
     <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
         icon="solid shop_"

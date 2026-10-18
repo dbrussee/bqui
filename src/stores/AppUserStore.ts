@@ -15,6 +15,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   const meta = ref<any>(null);
   const issue = ref<any>(null)
   const working = ref<any>(null)
+  const dashworking = ref<any>(null)
 
   const apiHistory = ref<any[]>([])
 
@@ -63,10 +64,12 @@ export const appUserStore = defineStore("appUserStore", () => {
   function getDashboard():void {
     dashdata.value = {}
     if (!user.value) return
+    B.working.set(dashworking, "Loading...")
     const fetcher = new BQAPIFetcher()
     fetcher.callAPI(`/dashboard`, "GET").then(() => {
+      B.working.clear(dashworking)
       dashdata.value = fetcher.resp.result
-      console.dir(dashdata.value)
+      // console.dir(dashdata.value)
     })
   }
 
@@ -77,7 +80,7 @@ export const appUserStore = defineStore("appUserStore", () => {
       rootElement.setAttribute('data-theme', value.toLowerCase())
       return
     }
-    if (user.value == null) {
+    if (user.value == null || user.value.config == null) {
       // rootElement.removeAttribute('data-theme')
     } else if (user.value.config.settings?.theme) {
       const code = user.value.config.settings.theme.toLowerCase()
@@ -122,6 +125,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
       useToast().addToast(`Added role ${code}`, "info")
+      getDashboard()
     } else {
       useToast().addToast(fetcher.issue, "error")
     }
@@ -133,6 +137,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
       useToast().addToast(`Removed role ${code}`, "info")
+      getDashboard()
     } else {
       useToast().addToast(fetcher.issue, "error")
     }
@@ -144,6 +149,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     B.working.clear(working)
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
+      getDashboard()
       localStorage.setItem('bq-ui-theme', code)
     }
   }
@@ -182,6 +188,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     B.working.clear(working)
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
+      getDashboard()
       useToast().addToast(`Set right override for ${code} to ${value}`, "info")
     } else {
       useToast().addToast(fetcher.issue, "error")
@@ -194,6 +201,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     B.working.clear(working)
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
+      getDashboard()
       useToast().addToast(`Removed override for ${code}`, "info")
     } else {
       useToast().addToast(fetcher.issue, "error")
@@ -215,7 +223,8 @@ export const appUserStore = defineStore("appUserStore", () => {
 
 
   return { isLoading: working,
-    relogin, login, logout, working, getDashboard, dashdata,
+    relogin, login, logout, working,
+    dashworking, getDashboard, dashdata,
     saveSetting: saveUserSetting, applyTheme, getUserSetting,
     addRole, deleteRole,
     user, getUserRightValue, setUserRightValue, deleteUserRight, isUserReadOnly,

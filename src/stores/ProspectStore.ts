@@ -10,7 +10,22 @@ import type { prospect } from "@/types/prospect";
 
 export const appProspectStore = defineStore("appProspectStore", () => {
   const prospect = ref<prospect | null>(null);
-  const searchQuery = ref<string>("")
+  const clearSearchParameters = () => {
+    const sp = searchParameters.value
+    sp.query = ""
+    sp.min = ""
+    sp.max = ""
+    sp.eff = ''
+    sp.status = 'ANY'
+  }
+  const searchParameters = ref({
+    query: '',
+    min: '',
+    max: '',
+    eff: '',
+    status: 'ANY'
+  })
+  // const searchQuery = ref<string>("")
   const searchResults = ref<any[]>([])
   const quotes = ref<any[]>([])
   const meta = ref<any>({
@@ -91,11 +106,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     censusDirty.value = censusHash.value != hash
   }
 
-  async function searchProspects(query:string) {
-    if (query == "") return
+  async function searchProspects() {
     B.working.set(prospWorking, "Searching...")
     searchResults.value.length = 0
-    const fetcher = await new BQAPIFetcher().callAPI(`/search/prospects`, 'POST', query)
+    const fetcher = await new BQAPIFetcher().callAPI(`/search/prospects`, 'POST', searchParameters.value)
     B.working.clear(prospWorking)
     if (fetcher.resp != null) {
       searchResults.value = [...fetcher.resp]
@@ -479,7 +493,9 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     prospWorking, censusWorking, meta, issue,
     censusDirty, getCensus, updateCensus, importCensus, exportCensus,
     quotes,
-    prospect, createProspect, updateProspect, getProspect, searchQuery, searchProspects, searchResults, deleteProspect,
+    prospect, createProspect, updateProspect, getProspect,
+    searchProspects, searchResults, searchParameters, clearSearchParameters,
+    deleteProspect,
     removeMeFromRecents, setFavorite, isCurrentlyFavorite, setCensusDirty };
   }
 );

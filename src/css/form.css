@@ -167,6 +167,7 @@ table.form-table {
     vertical-align: baseline;
   }
   tr td {
+    position: relative;
     vertical-align: first baseline;
     hr {
       color: sienna;
@@ -186,8 +187,10 @@ table.form-table {
       cursor: pointer;
     }
     input, textarea, select {
+      position: relative;
       outline: none;
       border: none;
+      top: -.15em !important;
       border-radius: 0;
       border-bottom: 1.5px solid var(--separator-color);
       margin-bottom: .2em;
@@ -195,11 +198,9 @@ table.form-table {
       &:active, &:focus {
         inset: unset;
         background-color: light-dark(snow, black);
-        /* border-style: solid; */
-        border-bottom: 1.5px solid light-dark(blue, teal);
+        border-bottom-color: light-dark(blue, teal);
       }
       &:invalid {
-        /* background-color: #FFE9F0; */
         border-bottom-color: red;
       }
     }

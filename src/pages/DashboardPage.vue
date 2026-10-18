@@ -31,13 +31,21 @@ const doSearch = (row:any, col:any):void => {
   // console.dir(col)
   const parts = row.split("/")
   const eff = parts[0] + "/" + parts[2]
-  pStore.searchQuery = "@" + eff // Add status
-  if (col.id != 'eff' && col.id != 'total') {
+  pStore.clearSearchParameters()
+  pStore.searchParameters.eff = eff
+    if (col.id != 'eff' && col.id != 'total') {
     if (!uStore.dashdata[row].breakout[col.id]) return
-    pStore.searchQuery += " ~" + col.id
+    pStore.searchParameters.status = col.id
   }
-  pStore.searchProspects(pStore.searchQuery)
+  pStore.searchProspects()
   useSearchProspectPopup().openSearch()
+}
+
+const setCount = (td:HTMLTableCellElement | null, count:number) => {
+  if (!td) return
+  if (!count) return
+  td.classList.add("anchor")
+  return count.toString()
 }
 
 const monthsRange = computed(() => {
@@ -88,13 +96,13 @@ const dashConfig = ref({
 </p>
 <BTable :config="dashConfig" :rows="monthsRange">
   <template #column_eff="{row}">{{ B.format.effdat(row) }}</template>
-  <template #column_total="{row}">{{ uStore.dashdata[row]?.total }}</template>
-  <template #column_INPROG="{row}">{{ uStore.dashdata[row]?.breakout.INPROG }}</template>
-  <template #column_PENDING="{row}">{{ uStore.dashdata[row]?.breakout.PENDING }}</template>
-  <template #column_RATEREQ="{row}">{{ uStore.dashdata[row]?.breakout.RATEREQ }}</template>
-  <template #column_READY="{row}">{{ uStore.dashdata[row]?.breakout.READY }}</template>
-  <template #column_ENROLLED="{row}">{{ uStore.dashdata[row]?.breakout.ENROLLED }}</template>
-  <template #column_EXPIRED="{row}">{{ uStore.dashdata[row]?.breakout.EXPIRED }}</template>
+  <template #column_total="{row, td}">{{ setCount(td, uStore.dashdata[row]?.total) }}</template>
+  <template #column_INPROG="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.INPROG) }}</template>
+  <template #column_PENDING="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.PENDING) }}</template>
+  <template #column_RATEREQ="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.RATEREQ) }}</template>
+  <template #column_READY="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.READY) }}</template>
+  <template #column_ENROLLED="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.ENROLLED) }}</template>
+  <template #column_EXPIRED="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.EXPIRED) }}</template>
   <!-- <template #footer>
       <BButton class="anchor" :disabled="!dashConfig.pickedRow" icon="solid magnifying-glass" @click="doSearch()">Search...</BButton>
   </template> -->

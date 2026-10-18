@@ -180,7 +180,7 @@ i.fa {
 a, .anchor {
   text-decoration: none;
   background: none !important;
-  border: none !important;
+  /* border: none !important; */
   color: var(--anchor-color) !important;
   /* background-color: var(--body-bg); */
   cursor: pointer !important;
@@ -199,4 +199,7 @@ a, .anchor {
   &:hover:not(:disabled) {
     text-decoration: underline !important;
   }
+}
+button.anchor {
+  border: none !important;
 }
