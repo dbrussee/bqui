@@ -108,6 +108,12 @@ const simplifyEndpoint = (row:any) => {
   return endpoint
 }
 
+const reQueryAPI = () => {
+  let filter:'ALL' | 'ERROR' = uStore.lastAPIFilter
+  filter = (filter as string == 'ALL' ? 'ERROR' : 'ALL')
+  uStore.getAPIHistory(filter)
+}
+
 </script>
 
 <template>
@@ -127,6 +133,7 @@ const simplifyEndpoint = (row:any) => {
       </template>
     </BTable>
     <div class="buttonbar">
+      <label class="gapright"><input type="checkbox" :checked="uStore.lastAPIFilter == 'ERROR'" @click="reQueryAPI()"> Only Errors</label>
       <BButton icon="#red solid x_" @click="abort()">Close</BButton>
     </div>
     <dialog :id="bodyPopid" closedBy="any">

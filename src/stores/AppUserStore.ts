@@ -109,10 +109,16 @@ export const appUserStore = defineStore("appUserStore", () => {
       new BQAPIFetcher().callAPI(`/logout`, "POST");
     },100)
   }
-  async function getAPIHistory() {
+
+  // Remember last filter option. If no filter is passed to the
+  // method, this is the next filter.
+  const lastAPIFilter = ref<'ALL'|'ERROR'>('ERROR')
+  async function getAPIHistory(filter?:'ALL' | 'ERROR') {
+    if (filter == undefined) filter = lastAPIFilter.value
     apiHistory.value.length = 0
-    const fetcher = await new BQAPIFetcher().callAPI(`/apihistory`, 'GET')
+    const fetcher = await new BQAPIFetcher().callAPI(`/apihistory/${filter}`, 'GET')
     if (fetcher.resp != null) {
+      lastAPIFilter.value = filter
       apiHistory.value.push(...(fetcher.resp as any[]))
     }
   }
@@ -229,7 +235,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     addRole, deleteRole,
     user, getUserRightValue, setUserRightValue, deleteUserRight, isUserReadOnly,
     clearRecents,
-    getAPIHistory, apiHistory,
+    getAPIHistory, apiHistory, lastAPIFilter,
     meta, issue
   };
 });

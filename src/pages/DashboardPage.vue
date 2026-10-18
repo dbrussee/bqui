@@ -47,6 +47,20 @@ const setCount = (td:HTMLTableCellElement | null, count:number) => {
   td.classList.add("anchor")
   return count.toString()
 }
+const setEff = (row:any, rn:number, td:HTMLTableCellElement | null) => {
+  if (!td) return
+  const txt = B.format.effdat(row).toString()
+  // if (rn > 0 && !txt.startsWith("Jan")) {
+  //   txt = txt.split(" ")[0] as string
+  // }
+  const tr = td.closest("tr") as HTMLTableRowElement
+  if (!uStore.dashdata[row]) {
+    tr.style.display = "none"
+  } else {
+    tr.style.display = ""
+  }
+  td.innerHTML = txt
+}
 
 const monthsRange = computed(() => {
   const dates = [];
@@ -78,7 +92,7 @@ const dashConfig = ref({
   // onDblpick: () => { doSearch() },
   // pickedRow: null as any,
   columns: [
-    { id: "eff", heading: "Effective", width: "6em", flags: "R" },
+    { id: "eff", heading: "Effective", width: "5em", flags: "R" },
     { id: "total", heading: "Total", flags: "R" },
     { id: "INPROG", heading: B.codeToText.quoteStatus('INPROG'), width: "6em", flags: "R" },
     { id: "PENDING", heading: B.codeToText.quoteStatus('PENDING'), width: "2em", flags: "R" },
@@ -94,8 +108,8 @@ const dashConfig = ref({
 <p>
   {{ salutation() }}
 </p>
-<BTable :config="dashConfig" :rows="monthsRange">
-  <template #column_eff="{row}">{{ B.format.effdat(row) }}</template>
+<BTable class="centerme" :config="dashConfig" :rows="monthsRange">
+  <template #column_eff="{row, td, rn}">{{ setEff(row, rn, td) }}</template>
   <template #column_total="{row, td}">{{ setCount(td, uStore.dashdata[row]?.total) }}</template>
   <template #column_INPROG="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.INPROG) }}</template>
   <template #column_PENDING="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.PENDING) }}</template>
