@@ -88,8 +88,8 @@ const computedRightsList = computed(() => {
 const rightsConfig = ref({
   columns: [
     { id: "descr", heading: "Activity Description" },
+    { id: "source", heading: "Source", flags: "R" },
     { id: "value", heading: "Value", flags: "C", width: "5em", cellclass: 'mono' },
-    { id: "source", heading: "Source" }
   ],
   pickedRow: null as any,
   onPick: (row:any) => rightsConfig.value.pickedRow = row,
@@ -108,10 +108,12 @@ const decodeSource = (configRight:any, td:any):void => {
   const userRight = uStore.user?.rights[rightCode]
   if (userRight.source == "@USER") {
     cell.style.color = "goldenrod"
-    cell.innerHTML = "*User*";
+    cell.innerHTML = "User";
   } else if (userRight.source == "@DFLT") {
+    cell.style.color = ""
     cell.innerHTML = "";
   } else {
+    cell.style.color = ""
     cell.classList.add("mono")
     cell.innerHTML = '<i>' + userRight.source + "</i>";
   }
