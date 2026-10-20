@@ -72,6 +72,15 @@ export const appUserStore = defineStore("appUserStore", () => {
       // console.dir(dashdata.value)
     })
   }
+  async function getDashboardQuotes(eff:string, status:string) {
+    if (!user.value) return []
+    B.working.set(dashworking, "Loading Quotes...")
+    const fetcher = new BQAPIFetcher()
+    await fetcher.callAPI(`/dashboard/quotes?eff=${eff}&status=${status}`, "GET")
+    B.working.clear(dashworking)
+    // dashdata.value = fetcher.resp.result
+    return fetcher.resp as any[]
+  }
 
 
   function applyTheme(value:string | null = null) {
@@ -230,7 +239,7 @@ export const appUserStore = defineStore("appUserStore", () => {
 
   return { isLoading: working,
     relogin, login, logout, working,
-    dashworking, getDashboard, dashdata,
+    dashworking, getDashboard, getDashboardQuotes, dashdata,
     saveSetting: saveUserSetting, applyTheme, getUserSetting,
     addRole, deleteRole,
     user, getUserRightValue, setUserRightValue, deleteUserRight, isUserReadOnly,

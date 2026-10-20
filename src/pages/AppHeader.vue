@@ -106,7 +106,9 @@ const searchHandler = ref({
   },
   search: () => {
     cfgSearchResults.value.pickedRow = null
-    pStore.searchProspects(searchHandler.value.temp.query).then(() => {
+    pStore.clearSearchParameters()
+    pStore.searchParameters.query = searchHandler.value.temp.query
+    pStore.searchProspects().then(() => {
       if (pStore.searchResults.length > 0) {
         const dlg = document.getElementById(searchHandler.value.id)
         const tbox = dlg?.querySelector("input") as HTMLInputElement

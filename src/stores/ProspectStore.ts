@@ -44,6 +44,17 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   const prospWorking = ref<string|null>(null)
   const censusWorking = ref<string|null>(null)
 
+  const refreshQuote = (quote:any):void => {
+    const qid = quote.id
+    quotes.value.forEach((q) => {
+      if (q.id == qid) {
+        // TODO: See if we can just update the quote directly
+        // so it shows in Prospect tab correctly
+        getProspect(q.prospect_id)
+      }
+    })
+  }
+
   async function removeMeFromRecents() {
     const fetcher = new BQAPIFetcher()
     if (!prospect.value) return
@@ -496,6 +507,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     prospect, createProspect, updateProspect, getProspect,
     searchProspects, searchResults, searchParameters, clearSearchParameters,
     deleteProspect,
+    refreshQuote,
     removeMeFromRecents, setFavorite, isCurrentlyFavorite, setCensusDirty };
   }
 );

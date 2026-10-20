@@ -121,10 +121,5 @@ const props = defineProps({
 
     /* p { color: var(--form-prompt-color); } */
   }
-  .truncate-text {
-    white-space: nowrap;      /* 1. Prevents the text from wrapping to a new line */
-    overflow: hidden;         /* 2. Hides the text that overflows the element's box */
-    text-overflow: ellipsis;  /* 3. Adds the actual '...' to the end of the truncated text */
-    width: 100%;              /* 4. Gives the element a boundary (can also be a max-width or fixed px/rem width) */
-  }
+
 </style>

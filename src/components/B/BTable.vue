@@ -8,6 +8,7 @@ interface IColumn {
   heading: string
   width?: string
   cellclass?: string
+  hide?: boolean
 }
 const emit = defineEmits(["pick", "unpick", "dblpick", "hdrclick"])
 const props = defineProps({
@@ -119,9 +120,11 @@ const getCellRef = (rn:any, cn:any) => {
     <table :style="{ width: props.config.width }" :class="{'nohover': (props.config.hover != undefined && props.config.hover == false)}">
     <thead @click="handleTableHeadClick($event)">
       <tr>
-        <th v-for="col in props.config.columns" :key="col.id" :style="deduceTHStyle(col)">
+        <template v-for="col in props.config.columns" :key="col.id">
+        <th v-if="col.hide == undefined || !col.hide" :style="deduceTHStyle(col)">
           {{ col.heading }}
         </th>
+        </template>
       </tr>
     </thead>
     <tbody
@@ -129,13 +132,15 @@ const getCellRef = (rn:any, cn:any) => {
         @dblclick="handleTableBodyClick($event, true)"
         >
         <tr v-for="(row,rn) in props.rows" :key="row" :class="{picked : toRaw(props.config.pickedRow) == toRaw(row)}">
-          <td v-for="(col,cn) in props.config.columns" :class="col.cellclass" :key="col.id" :style="deduceTDStyle(col)"
+          <template v-for="(col,cn) in props.config.columns" :key="col.id">
+          <td :class="col.cellclass" :style="deduceTDStyle(col)"
             ref="tdRef"
             >
             <slot v-if="row" :name="'column_' + col.id" :row="row" :rn="rn" :td="getCellRef(rn, cn)" :col="col" :cn="cn">
               {{ getCellValue(row, col) }}
             </slot>
           </td>
+          </template>
         </tr>
         <tr v-if="(!props.rows || props.rows.length == 0) && props.config.no_rows_text && props.config.no_rows_text != ''" class="no_rows_text">
           <td :colspan="props.config.columns.length" :innweHTML="props.config.no_rows_text" />
