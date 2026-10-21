@@ -7,6 +7,8 @@ import BIcon from '@/components/B/BIcon.vue'
 import { B } from '@/composables/BUtils'
 import { appProspectStore } from '@/stores/ProspectStore'
 const pStore = appProspectStore()
+import { appUserStore } from '@/stores/AppUserStore'
+const uStore = appUserStore()
 import { ref } from 'vue'
 import { useSearchProspectPopup } from './useSearchProspectPopup'
 const { popRef, closeSearch, loadProspect } = useSearchProspectPopup()
@@ -48,11 +50,21 @@ const setSearchStatus = (code:string):void => {
   pStore.searchParameters.status = code
   statusPicker.value?.close()
 }
+const headingText = ():string => {
+  let txt = "Search "
+  const scope = uStore.user?.rights.SEARCH_SCOPE.value
+  if (scope == "GLOBAL") txt += "All "
+  else if (scope == "AGENCY") txt += "Your Agency "
+  else txt += "Your "
+  txt += "Prospects "
+  return txt
+}
+
 
 </script>
 <template>
   <dialog ref="popRef">
-    <div class="titlebar"><BIcon icon="solid filter_"/>Prospect Search
+    <div class="titlebar"><BIcon icon="solid filter_"/>{{  headingText() }}
       <span style="font-size: 1rem;"><BButton class="anchor" @click="pStore.clearSearchParameters()" icon="solid rotate-left"/></span>
     </div>
     <form @submit.prevent="searchHandler.search()">

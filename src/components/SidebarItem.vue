@@ -39,7 +39,11 @@ const props = defineProps({
 
 <template>
   <div class="content" :class="{'picked': props.current}">
-    <BIcon :working="props.working" :icon='props.icon' style="font-size: 1.3em; margin-right: .05em; margin-bottom: .2em;" /><span v-html="props.shortname"/>
+    <div class="iconbox">
+    <BIcon :working="props.working" :icon='props.icon' style="font-size: 1.3em; margin-right: .05em; margin-bottom: .2em;" />
+    </div>
+    <span v-html="props.shortname"/>
+
       <p class="truncate-text" style="font-size: .8em;" v-html="props.longname"></p>
   </div>
 </template>
@@ -49,7 +53,7 @@ const props = defineProps({
   display: block;
   padding-top: .3em;
   cursor: pointer;
-
+  position: relative;
   padding-bottom: .3em;
   border-bottom: 1px solid var(--table-row-border-color);
   padding-left: .3em;
@@ -79,7 +83,13 @@ const props = defineProps({
 
 
 }
-
+.iconbox {
+  display: inline-block;
+  height: 1.4em;
+  width: 1.4em;
+  margin-right: .3em;
+  margin-bottom: .2em;
+}
 
   .xcontent {
     display: block;

@@ -251,6 +251,20 @@ const formatProspectName = (row:any, td:HTMLTableCellElement | null) => {
   td.style.width = "5em"
   td.innerHTML = `<p class='truncate-text'>${row.name}</p>`
 }
+const headingText = ():string => {
+  let txt = ""
+  const scope = uStore.user?.rights.SEARCH_SCOPE.value
+  if (scope == "GLOBAL") txt += "All "
+  else if (scope == "AGENCY") txt += "Your Agency "
+  else txt += "Your "
+  txt += "Quotes for "
+  txt += quoteListHandler.eff.value
+
+  if (quoteListHandler.status.value != '') {
+    txt += " with status '" + B.codeToText.quoteStatus(quoteListHandler.status.value) + "'"
+  }
+  return txt
+}
 
 </script>
 <template>
@@ -277,7 +291,7 @@ const formatProspectName = (row:any, td:HTMLTableCellElement | null) => {
     @force="quoteHandler.revertToINPROG()"
     @save="() => quoteHandler.save()"></EditQuoteDialog>
   <dialog :id="quoteListHandler.popId">
-    <div class="titlebar">Dashboard Quotes for {{ quoteListHandler.eff }}<span v-if="quoteListHandler.status.value != ''"> status <BIcon :icon="B.statusIcon(quoteListHandler.status.value)" />{{ B.codeToText.quoteStatus(quoteListHandler.status.value) }}</span></div>
+    <div class="titlebar">{{ headingText() }}</div>
     <BTable :config="quoteListHandler.status.value == '' ? quoteListConfig : quoteListWithoutStatusConfig" :rows="quoteListRows">
       <template #column_name="{row, td}">{{ formatProspectName(row, td) }}</template>
       <template #column_effdat="{row}">{{ B.format.effdat(row.quote.effdat) }}</template>
