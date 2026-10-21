@@ -16,4 +16,5 @@ export interface user {
   faves: any[]
   agency_id: number
   agency_descr: string
+  agency_users: any[]
 }

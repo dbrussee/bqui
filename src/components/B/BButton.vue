@@ -4,6 +4,11 @@ import BIcon from './BIcon.vue'
 const emit = defineEmits(["click"])
 
 const props = defineProps({
+  prevent: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
   icon: {
     type: String,
     required: false,
@@ -38,10 +43,14 @@ const props = defineProps({
     default: false
   }
 })
+const handleClick = (event:MouseEvent) => {
+  if (props.prevent) event?.preventDefault()
+  emit('click')
+}
 </script>
 
 <template>
-  <button :disabled="props.disabled || props.working" @click="emit('click')"
+  <button :disabled="props.disabled || props.working" @click="handleClick($event)"
       :style="{marginRight: props.gapright ? '.4em' : '', marginLeft: props.gapleft ? '.4em' : ''}">
     <BIcon :disabled="props.disabled || props.working" :icon="props.icon" :source="props.source"><slot/></BIcon>
   </button>

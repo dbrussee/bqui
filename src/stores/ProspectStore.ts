@@ -10,6 +10,14 @@ import type { prospect } from "@/types/prospect";
 
 export const appProspectStore = defineStore("appProspectStore", () => {
   const prospect = ref<prospect | null>(null);
+  const searchParameters = ref({
+    query: '',
+    min: '',
+    max: '',
+    eff: '',
+    status: 'ANY',
+    agent: ''
+  })
   const clearSearchParameters = () => {
     const sp = searchParameters.value
     sp.query = ""
@@ -17,14 +25,8 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     sp.max = ""
     sp.eff = ''
     sp.status = 'ANY'
+    sp.agent = ''
   }
-  const searchParameters = ref({
-    query: '',
-    min: '',
-    max: '',
-    eff: '',
-    status: 'ANY'
-  })
   // const searchQuery = ref<string>("")
   const searchResults = ref<any[]>([])
   const quotes = ref<any[]>([])

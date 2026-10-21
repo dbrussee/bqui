@@ -13,9 +13,9 @@ p {
 }
 select {
   /* Step 1: Clear Safari enhancements */
-  -webkit-appearance: none;
+  /* -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: none;
+  appearance: none; */
 
   /* Step 2: Harmonize the layout structure */
   box-sizing: border-box;
@@ -23,10 +23,10 @@ select {
   /* Step 3: Handle long text safely */
 
   /* Step 4: Re-add a reliable cross-browser arrow graphic */
-  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://w3.org" width="292.4" height="292.4" viewBox="0 0 292.4 292.4"><path fill="%23333" d="M287 69.4a17.6 17.6 0 0 0-13-5.4H18.4c-5 0-9.3 1.8-12.9 5.4A17.6 17.6 0 0 0 0 82.2c0 5 1.8 9.3 5.4 12.9l128 127.9c3.6 3.6 7.8 5.4 12.8 5.4s9.2-1.8 12.8-5.4L287 95c3.5-3.5 5.4-7.8 5.4-12.8 0-5-1.9-9.2-5.5-12.8z"/></svg>');
+  /* background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://w3.org" width="292.4" height="292.4" viewBox="0 0 292.4 292.4"><path fill="%23333" d="M287 69.4a17.6 17.6 0 0 0-13-5.4H18.4c-5 0-9.3 1.8-12.9 5.4A17.6 17.6 0 0 0 0 82.2c0 5 1.8 9.3 5.4 12.9l128 127.9c3.6 3.6 7.8 5.4 12.8 5.4s9.2-1.8 12.8-5.4L287 95c3.5-3.5 5.4-7.8 5.4-12.8 0-5-1.9-9.2-5.5-12.8z"/></svg>');
   background-repeat: no-repeat;
   background-position: right 12px top 50%;
-  background-size: 10px auto;
+  background-size: 10px auto; */
 
   border-radius: .2em;
   /* border: 1px solid black; */

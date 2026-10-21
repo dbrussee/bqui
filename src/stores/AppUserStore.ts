@@ -25,6 +25,12 @@ export const appUserStore = defineStore("appUserStore", () => {
     relogin();
   }
 
+  function clearSearch() {
+    const pStore = appProspectStore()
+    pStore.clearSearchParameters()
+    pStore.searchResults = []
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function login(uid: string, pwd: string = "") {
     if (uid == "") return
@@ -58,6 +64,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     msgStore.getMessages()
     getMostRecentProspect()
     getDashboard()
+    console.dir(user.value)
     return user.value;
   }
 
@@ -141,6 +148,7 @@ export const appUserStore = defineStore("appUserStore", () => {
       user.value = fetcher.resp;
       useToast().addToast(`Added role ${code}`, "info")
       getDashboard()
+      clearSearch()
     } else {
       useToast().addToast(fetcher.issue, "error")
     }
@@ -153,6 +161,7 @@ export const appUserStore = defineStore("appUserStore", () => {
       user.value = fetcher.resp;
       useToast().addToast(`Removed role ${code}`, "info")
       getDashboard()
+      clearSearch()
     } else {
       useToast().addToast(fetcher.issue, "error")
     }
@@ -165,7 +174,8 @@ export const appUserStore = defineStore("appUserStore", () => {
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
       getDashboard()
-      localStorage.setItem('bq-ui-theme', code)
+      clearSearch()
+      if (thing == "theme") localStorage.setItem('bq-ui-theme', code)
     }
   }
 
@@ -185,6 +195,8 @@ export const appUserStore = defineStore("appUserStore", () => {
 
   const isUserReadOnly = ():boolean => {
     if (!user.value) return true
+    if (!user.value.config) return true
+    if (!user.value.config.roles) return true
     if (user.value.config.roles.indexOf('READONLY') >= 0) return true
     return false
   }
@@ -204,6 +216,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
       getDashboard()
+      clearSearch()
       useToast().addToast(`Set right override for ${code} to ${value}`, "info")
     } else {
       useToast().addToast(fetcher.issue, "error")
@@ -217,6 +230,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
       getDashboard()
+      clearSearch()
       useToast().addToast(`Removed override for ${code}`, "info")
     } else {
       useToast().addToast(fetcher.issue, "error")
