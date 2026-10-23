@@ -1,6 +1,7 @@
 export interface Iquote {
   id: number
   prospect_id: number
+  prospect_name: string
   rlob: string
   status: 'INPROG' | 'QUOTED' | 'READY' | 'RATEREQ' | 'PENDING' | 'ENROLLED' | 'EXPIRED'
   effdat: Date | null

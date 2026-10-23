@@ -58,7 +58,7 @@ const props = defineProps({
 
         <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
 
-        <tr><th>Prospect:</th><td colspan="3" class="info">{{ props.prospect?.name }} ({{ props.prospect?.id }})</td></tr>
+        <tr><th>Prospect:</th><td colspan="3" class="info">{{ props.quote?.prospect_name }} ({{ props.quote?.prospect_id }})</td></tr>
         <tr>
           <th :style="{color:props.quote?.descr == '' ? 'red' : ''}">Name:</th>
           <td colspan="3">{{ props.quote?.descr }}</td>

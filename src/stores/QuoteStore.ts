@@ -16,6 +16,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     descr: '',
     id: -1,
     prospect_id: -1,
+    prospect_name: '',
     status: 'INPROG',
     size_cd: '',
     qtype: '',
@@ -57,11 +58,12 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       return null
     }
   }
-  const blankQuote = (qtype:string):void => {
+  const blankQuote = (qtype:string, pid:number, pname:string):void => {
     quote.value = {
       id: -1,
       descr: '',
-      prospect_id: -1,
+      prospect_id: pid,
+      prospect_name: pname,
       status: 'INPROG',
       size_cd: '',
       qtype: qtype,
@@ -92,7 +94,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         prospStore.prospect.last_quote = {...newLastQuote}
         prospStore.prospect.last_quote_id = newLastQuote.id
       }
-      blankQuote(quote.value.qtype)
+      blankQuote(quote.value.qtype, prospStore.prospect.id, prospStore.prospect.name)
       appProspectStore().quotes = appProspectStore().quotes.filter((q) => {
         return q.id != qid
       })
@@ -138,9 +140,8 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   const initializeNewQuoteOptions = (qtype:string = 'MED', pickedQuote:any = null) => {
     const prospStore = appProspectStore()
     if (!prospStore.prospect) return
-    blankQuote(qtype)
+    blankQuote(qtype, prospStore.prospect.id, prospStore.prospect.name)
     const q = quote.value
-    q.prospect_id = prospStore.prospect.id
     q.size_cd = prospStore.prospect.size_cd
     if (pickedQuote != null) q.effdat = B.dateFromYYYYMMDD(pickedQuote.effdat)
     // opts.grandfathered = false
@@ -154,6 +155,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     opts.descr = q.descr as string
     if (!opts.descr.endsWith("- Copy")) opts.descr += ' - Copy'
     opts.prospect_id = prospStore.prospect.id
+    opts.prospect_name = prospStore.prospect.name
     opts.size_cd = prospStore.prospect.size_cd
     opts.qtype = q.qtype
     opts.effdat = B.dateFromYYYYMMDD(q.effdat)

@@ -44,6 +44,7 @@ const props = defineProps({
         <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
         </template>
 
+        <tr><th>Prospect:</th><td colspan="3" class="info">{{ qStore.quote.prospect_name }} ({{ qStore.quote.prospect_id }})</td></tr>
         <tr><th>Product:</th><td colspan="3" class="info">{{ B.codeToText.rlob(qStore.quote.rlob) }} ({{ qStore.quote.rlob }})</td></tr>
         <tr><th>Effective:</th><td colspan="3" class="info">{{ B.format.effdat(qStore.quote.effdat) }}</td></tr>
         <tr v-if="qStore.quote.status != 'INPROG'">

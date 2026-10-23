@@ -50,11 +50,11 @@ const doSearch = (row:any, col:any):void => {
 }
 
 const setCount = (setStyle:any, setHtml:any, count:number) => {
-  if (!count) return
+  // if (!count) return
   setStyle((td:HTMLTableCellElement) => {
     td.classList.add("anchor")
   })
-  setHtml(count.toString())
+  setHtml(count ? count.toString() : '')
 }
 const setEff = (row:any, setStyle:any, setHtml:any) => {
   setStyle((td:HTMLTableCellElement) => {
@@ -214,39 +214,41 @@ const quoteHandler = {
         quoteQuote.value.descr = tempDescr
         uStore.getDashboard()
         pStore.refreshQuote(quoteQuote.value)
+        this.close()
+
       }
     })
   },
   save() { // Quote is already set
-    if (!quoteQuote.value) return
-    qStore.updateQuote(quoteQuote.value, "updated").then((updatedQuote:any) => {
-      if (updatedQuote && quoteQuote.value) {
+    if (!qStore.quote) return
+    qStore.updateQuote(qStore.quote, "updated").then((updatedQuote:any) => {
+      if (updatedQuote && qStore.quote) {
         uStore.getDashboard()
-        pStore.refreshQuote(quoteQuote.value)
+        pStore.refreshQuote(qStore.quote)
       }
       this.close()
     })
   },
   submit() { // Quote is already set
-    if (!quoteQuote.value) return
+    if (!qStore.quote) return
     let toastMessage = 'unchanged'
-    switch(quoteQuote.value.nonstd) {
+    switch(qStore.quote.nonstd) {
       case 'N':
-        quoteQuote.value.status = 'READY'
+        qStore.quote.status = 'READY'
         toastMessage = 'submitted'
         break
       case 'Y':
-        quoteQuote.value.status = 'RATEREQ'
+        qStore.quote.status = 'RATEREQ'
         toastMessage = 'rates requested'
         break
       case 'C':
-        quoteQuote.value.status = 'PENDING'
+        qStore.quote.status = 'PENDING'
         toastMessage = 'pending approval'
     }
-    qStore.updateQuote(quoteQuote.value, toastMessage).then((updatedQuote:any) => {
+    qStore.updateQuote(qStore.quote, toastMessage).then((updatedQuote:any) => {
       if (updatedQuote) {
-        pStore.refreshQuote(quoteQuote.value)
         uStore.getDashboard()
+        pStore.refreshQuote(qStore.quote)
       }
       this.close()
     })
