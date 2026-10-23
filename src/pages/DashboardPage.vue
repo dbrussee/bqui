@@ -21,7 +21,7 @@ const salutation = ():string => {
   const msg = timeOfDay()
   const user = uStore.user
   if (!user) return msg
-  return `${msg}, ${user.fstnam}`
+  return `${msg}, ${user.fstnam} ${user.lstnam}`
 }
 
 const timeOfDay = ():string => {
@@ -174,8 +174,8 @@ const quoteHandler = {
     this.action = "viewing";
   },
   delete() {
-    if (!quoteQuote.value) return
-    qStore.deleteQuote(quoteQuote.value.id)
+    if (!qStore.quote) return
+    qStore.deleteQuote(qStore.quote.id)
     uStore.getDashboard()
     this.close()
   },
