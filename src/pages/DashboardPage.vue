@@ -14,6 +14,8 @@ import BTable from '@/components/B/BTable.vue'
 import BIcon from '@/components/B/BIcon.vue'
 import BButton from '@/components/B/BButton.vue'
 import EditQuoteDialog from '@/dialogs/EditQuoteDialog.vue'
+import ViewQuoteDialog from '@/dialogs/ViewQuoteDialog.vue'
+import type { Iquote, Iprospect } from '@/types'
 
 const salutation = ():string => {
   const msg = timeOfDay()
@@ -30,14 +32,13 @@ const timeOfDay = ():string => {
 }
 
 const doSearch = (row:any, col:any):void => {
-  if (!row) return
-  if (!uStore.dashdata[row]) return
-  // console.dir(col)
+  if (!row) return // No row picked
+  if (!uStore.dashdata[row]) return // No data for that row (eff date)
   const parts = row.split("/")
-  const eff = parts[0] + "/" + parts[2]
+  const eff = parts[0] + "/" + parts[2] // Short eff (mm/yyyy)
   let status = ""
   if (col.id != 'eff' && col.id != 'total') {
-    if (!uStore.dashdata[row].breakout[col.id]) return
+    if (!uStore.dashdata[row].breakout[col.id]) return // No data for that status
     status = col.id
   }
   uStore.getDashboardQuotes(eff, status).then((list:any) => {
@@ -46,36 +47,26 @@ const doSearch = (row:any, col:any):void => {
     quoteListHandler.status.value = status
     quoteListHandler.open()
   })
-
-  // pStore.clearSearchParameters()
-  // pStore.searchParameters.eff = eff
-  // if (col.id != 'eff' && col.id != 'total') {
-  //   if (!uStore.dashdata[row].breakout[col.id]) return
-  //   pStore.searchParameters.status = col.id
-  // }
-  // pStore.searchProspects()
-  // useSearchProspectPopup().openSearch()
 }
 
-const setCount = (td:HTMLTableCellElement | null, count:number) => {
-  if (!td) return
+const setCount = (setStyle:any, setHtml:any, count:number) => {
   if (!count) return
-  td.classList.add("anchor")
-  return count.toString()
+  setStyle((td:HTMLTableCellElement) => {
+    td.classList.add("anchor")
+  })
+  setHtml(count.toString())
 }
-const setEff = (row:any, rn:number, td:HTMLTableCellElement | null) => {
-  if (!td) return
+const setEff = (row:any, setStyle:any, setHtml:any) => {
+  setStyle((td:HTMLTableCellElement) => {
+    const tr = td.closest("tr") as HTMLTableRowElement
+    if (!uStore.dashdata[row]) {
+      tr.style.display = "none"
+    } else {
+      tr.style.display = ""
+    }
+  })
   const txt = B.format.effdat(row).toString()
-  // if (rn > 0 && !txt.startsWith("Jan")) {
-  //   txt = txt.split(" ")[0] as string
-  // }
-  const tr = td.closest("tr") as HTMLTableRowElement
-  if (!uStore.dashdata[row]) {
-    tr.style.display = "none"
-  } else {
-    tr.style.display = ""
-  }
-  td.innerHTML = txt
+  setHtml(txt)
 }
 
 const monthsRange = computed(() => {
@@ -123,8 +114,8 @@ const quoteListHandler = {
   popId: useId(),
   eff: ref(""),
   status: ref(""),
-  open() { (document.getElementById(this.popId) as HTMLDialogElement).showModal() },
-  close() { (document.getElementById(this.popId) as HTMLDialogElement).close() },
+  open() { B.popup.showModal(this.popId) },
+  close() { B.popup.close(this.popId) },
 }
 const quoteListRows = ref<any>([])
 const quoteListConfig = ref({
@@ -161,95 +152,122 @@ const quoteListWithoutStatusConfig = ref({
   ]
 })
 
+const quotePlans = ref<any>(null)
+const quoteAttrs = ref<any>(null)
+const quoteProspect = ref<Iprospect | null>(null)
+const quoteQuote = ref<Iquote | null>(null)
 const quoteHandler = {
   action: "",
   editPopid: useId(),
+  viewPopid: useId(),
   lastQtype: '',
-  openEdit() { (document.getElementById(this.editPopid) as HTMLDialogElement).showModal(); this.action = "editing"; },
-  closeEdit() { (document.getElementById(this.editPopid) as HTMLDialogElement).close(); this.action = ""; },
+  close() {
+    B.popup.close(this.editPopid, this.viewPopid)
+    this.action = "";
+  },
+  openEdit() {
+    B.popup.showModal(this.editPopid, this.viewPopid)
+    this.action = "editing";
+  },
+  openView() {
+    B.popup.showModal(this.viewPopid, this.editPopid)
+    this.action = "viewing";
+  },
   delete() {
-    qStore.deleteQuote(qStore.quote.id)
+    if (!quoteQuote.value) return
+    qStore.deleteQuote(quoteQuote.value.id)
     uStore.getDashboard()
-    this.closeEdit()
+    this.close()
   },
-  edit(quote:any) {
+  edit(quote:Iquote) {
     if (!pStore.prospect) return
-    qStore.quote = {...quote}
-    qStore.getPlanList(pStore.prospect.id)
-    this.openEdit()
+    const status = quote.status
+    if (status == "READY" || status == "RATEREQ" || status == "PENDING") {
+      this.view(quote)
+    } else {
+      qStore.quote = {...quote}
+      qStore.getPlanList(quote)
+      this.openEdit()
+    }
   },
-  revertToINPROG() {
-    qStore.quote.status = 'INPROG'
-    qStore.updateQuote(qStore.quote, "set back to In Progress").then((updatedQuote:any) => {
-      if (updatedQuote) {
+  view(quote:Iquote) {
+    quoteQuote.value = {...quote}
+    quotePlans.value = null
+    quoteAttrs.value = null
+    quoteProspect.value = null
+    // Call the API to get details... This is async, so the
+    // dialog will open with empty data (from above) and then
+    // get populated after the async promise completes
+    qStore.getPlansForQuote(quoteQuote.value.id).then((data:any) => {
+      quotePlans.value = data.resp.plans || null
+      quoteAttrs.value = data.resp.attrs || null
+      quoteProspect.value = data.resp.prospect || null
+      this.openView()
+    })
+  },
+  revertToINPROG() { // Quote is already set
+    if (!quoteQuote.value) return
+    const tempDescr = quoteQuote.value.descr
+    quoteQuote.value.status = 'INPROG'
+    qStore.updateQuote(quoteQuote.value, "set back to In Progress").then((updatedQuote:any) => {
+      if (updatedQuote && quoteQuote.value) {
+        quoteQuote.value.descr = tempDescr
         uStore.getDashboard()
-        pStore.refreshQuote(qStore.quote)
-        this.closeEdit()
+        pStore.refreshQuote(quoteQuote.value)
       }
     })
   },
-  save() {
-    if (qStore.quote.id < 0) {
-      qStore.createQuote().then(() => {
+  save() { // Quote is already set
+    if (!quoteQuote.value) return
+    qStore.updateQuote(quoteQuote.value, "updated").then((updatedQuote:any) => {
+      if (updatedQuote && quoteQuote.value) {
         uStore.getDashboard()
-        pStore.refreshQuote(qStore.quote)
-        this.closeEdit()
-      })
-    } else {
-      qStore.updateQuote(qStore.quote, "updated").then((updatedQuote:any) => {
-        if (updatedQuote) {
-          pStore.refreshQuote(qStore.quote)
-          uStore.getDashboard()
-        }
-        this.closeEdit()
-      })
-    }
+        pStore.refreshQuote(quoteQuote.value)
+      }
+      this.close()
+    })
   },
-  submit() {
+  submit() { // Quote is already set
+    if (!quoteQuote.value) return
     let toastMessage = 'unchanged'
-    switch(qStore.quote.nonstd) {
+    switch(quoteQuote.value.nonstd) {
       case 'N':
-        qStore.quote.status = 'READY'
+        quoteQuote.value.status = 'READY'
         toastMessage = 'submitted'
         break
       case 'Y':
-        qStore.quote.status = 'RATEREQ'
+        quoteQuote.value.status = 'RATEREQ'
         toastMessage = 'rates requested'
         break
       case 'C':
-        qStore.quote.status = 'PENDING'
+        quoteQuote.value.status = 'PENDING'
         toastMessage = 'pending approval'
     }
-    if (qStore.quote.id < 0) {
-      qStore.createQuote().then(() => {
-        pStore.refreshQuote(qStore.quote)
+    qStore.updateQuote(quoteQuote.value, toastMessage).then((updatedQuote:any) => {
+      if (updatedQuote) {
+        pStore.refreshQuote(quoteQuote.value)
         uStore.getDashboard()
-        this.closeEdit()
-      })
-    } else {
-      qStore.updateQuote(qStore.quote, toastMessage).then((updatedQuote:any) => {
-        if (updatedQuote) {
-          pStore.refreshQuote(qStore.quote)
-          uStore.getDashboard()
-        }
-        this.closeEdit()
-      })
-    }
+      }
+      this.close()
+    })
   },
   abort() {
-    this.closeEdit()
+    this.close()
   }
 }
-const formatStatusCell = (row:any, td:HTMLTableCellElement | null) => {
-  if (td == null) return
-  const classname = "status" + row.quote.status
-  td.classList.add(classname)
+
+const formatStatusCell = (row:any, setStyle:any) => {
+  setStyle((td:HTMLTableCellElement) => {
+    const classname = "status" + row.quote.status
+    td.classList.add(classname)
+  })
   return B.codeToText.quoteStatus(row.quote.status)
 }
-const formatProspectName = (row:any, td:HTMLTableCellElement | null) => {
-  if (td == null) return
-  td.style.width = "5em"
-  td.innerHTML = `<p class='truncate-text'>${row.name}</p>`
+const formatProspectName = (row:any, setStyle:any, setHtml:any) => {
+  setStyle((td:HTMLTableCellElement) => {
+    td.style.width = "5em"
+  })
+  setHtml(`<p class='truncate-text'>${row.name}</p>`)
 }
 const headingText = ():string => {
   let txt = ""
@@ -272,14 +290,14 @@ const headingText = ():string => {
     {{ salutation() }}
   </p>
   <BTable class="centerme" :config="dashConfig" :rows="monthsRange">
-    <template #column_eff="{row, td, rn}">{{ setEff(row, rn, td) }}</template>
-    <template #column_total="{row, td}">{{ setCount(td, uStore.dashdata[row]?.total) }}</template>
-    <template #column_INPROG="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.INPROG) }}</template>
-    <template #column_PENDING="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.PENDING) }}</template>
-    <template #column_RATEREQ="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.RATEREQ) }}</template>
-    <template #column_READY="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.READY) }}</template>
-    <template #column_ENROLLED="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.ENROLLED) }}</template>
-    <template #column_EXPIRED="{row, td}">{{ setCount(td, uStore.dashdata[row]?.breakout.EXPIRED) }}</template>
+    <template #column_eff="{row, setStyle, setHtml}">{{ setEff(row, setStyle, setHtml) }}</template>
+    <template #column_total="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.total) }}</template>
+    <template #column_INPROG="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.INPROG) }}</template>
+    <template #column_PENDING="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.PENDING) }}</template>
+    <template #column_RATEREQ="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.RATEREQ) }}</template>
+    <template #column_READY="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.READY) }}</template>
+    <template #column_ENROLLED="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.ENROLLED) }}</template>
+    <template #column_EXPIRED="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.EXPIRED) }}</template>
     <!-- <template #footer>
         <BButton class="anchor" :disabled="!dashConfig.pickedRow" icon="solid magnifying-glass" @click="doSearch()">Search...</BButton>
     </template> -->
@@ -290,13 +308,21 @@ const headingText = ():string => {
     @submit="quoteHandler.submit()"
     @force="quoteHandler.revertToINPROG()"
     @save="() => quoteHandler.save()"></EditQuoteDialog>
+  <ViewQuoteDialog :popupid="quoteHandler.viewPopid"
+    :quote="quoteQuote as Iquote"
+    :prospect="quoteProspect as Iprospect"
+    :plans="quotePlans"
+    :attrs="quoteAttrs"
+    @force="quoteHandler.revertToINPROG()"
+    @abort="quoteHandler.abort()"></ViewQuoteDialog>
+
   <dialog :id="quoteListHandler.popId">
     <div class="titlebar">{{ headingText() }}</div>
     <BTable :config="quoteListHandler.status.value == '' ? quoteListConfig : quoteListWithoutStatusConfig" :rows="quoteListRows">
-      <template #column_name="{row, td}">{{ formatProspectName(row, td) }}</template>
+      <template #column_name="{row, setStyle, setHtml}">{{ formatProspectName(row, setStyle, setHtml) }}</template>
       <template #column_effdat="{row}">{{ B.format.effdat(row.quote.effdat) }}</template>
       <template #column_product="{row}">{{ row.quote.qtype }} {{ row.quote.rlob }}</template>
-      <template #column_status="{row, td}"><BIcon :icon="B.statusIcon(row.quote.status)">{{ formatStatusCell(row, td) }}</BIcon></template>
+      <template #column_status="{row, setStyle}"><BIcon :icon="B.statusIcon(row.quote.status)">{{ formatStatusCell(row, setStyle) }}</BIcon></template>
       <template #column_nonstd="{row}">
         <span :class="{
           'nonstdY': row.quote.nonstd == 'Y',

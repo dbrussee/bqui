@@ -6,10 +6,10 @@ import { appProspectStore } from "./ProspectStore";
 import { ref } from "vue";
 import { useToast } from "@/composables/useToast";
 import { B } from "@/composables/BUtils";
-import type { user } from "@/types/user";
+import type { Iuser } from "@/types/user";
 
 export const appUserStore = defineStore("appUserStore", () => {
-  const user = ref<user | null>(null);
+  const user = ref<Iuser | null>(null);
   const dashdata = ref<any>({})
   // const otherUser = ref<any>(null);
   const meta = ref<any>(null);
@@ -64,7 +64,6 @@ export const appUserStore = defineStore("appUserStore", () => {
     msgStore.getMessages()
     getMostRecentProspect()
     getDashboard()
-    console.dir(user.value)
     return user.value;
   }
 

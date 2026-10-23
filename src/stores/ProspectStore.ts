@@ -6,18 +6,10 @@ import { B } from "@/composables/BUtils";
 import { appUserStore } from "./AppUserStore";
 import { useToast } from '../composables/useToast'
 import * as XLSX from "xlsx";
-import type { prospect } from "@/types/prospect";
+import type { Iprospect } from "@/types/prospect";
 
 export const appProspectStore = defineStore("appProspectStore", () => {
-  const prospect = ref<prospect | null>(null);
-  const searchParameters = ref({
-    query: '',
-    min: '',
-    max: '',
-    eff: '',
-    status: 'ANY',
-    agent: ''
-  })
+  const prospect = ref<Iprospect | null>(null);
   const clearSearchParameters = () => {
     const sp = searchParameters.value
     sp.query = ""
@@ -27,6 +19,14 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     sp.status = 'ANY'
     sp.agent = ''
   }
+  const searchParameters = ref({
+    query: '',
+    min: '',
+    max: '',
+    eff: '',
+    status: 'ANY',
+    agent: ''
+  })
   // const searchQuery = ref<string>("")
   const searchResults = ref<any[]>([])
   const quotes = ref<any[]>([])

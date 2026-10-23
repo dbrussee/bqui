@@ -1,6 +1,6 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { computed, ref, toRaw } from 'vue'
+import { toRaw, ref, computed } from 'vue'
 
 interface IColumn {
   id: string
@@ -23,7 +23,6 @@ const props = defineProps({
   },
 })
 
-const tdRef = ref(null)
 
 const deduceTDStyle = (col: IColumn) => {
   const style = {} as Record<string, string>
@@ -49,18 +48,6 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
     }
   }
 };
-
-const getCellValue = computed(() => {
-  return (row:any, col:any):string => {
-    if (typeof row == 'string') return row
-    const dotList:string[] = col.id.split(".")
-    let value = row
-    dotList.forEach(element => {
-      value = value[element]
-    });
-    return value as string
-  }
-})
 
 const handleTableHeadClick = (event:MouseEvent) => {
   event.stopImmediatePropagation()
@@ -96,12 +83,45 @@ const handleTableBodyClick = (event:MouseEvent, isDouble:boolean) => {
   doPick(isDouble, row, tr.rowIndex - 1, col, cell.cellIndex as number)
 }
 
-const getCellRef = (rn:any, cn:any) => {
-  const rownum = rn as number
-  const colnum = cn as number
-  const offset:number = (rownum * props.config.columns.length) + colnum
-  return tdRef.value?.[offset] || null
-}
+// Mainly culled from Google AI with extensive prompting
+// Coordinate maps to bind layouts strictly to absolute row_col identifiers
+const cellStylesMap = ref<Record<string, (el: HTMLTableCellElement) => void>>({});
+const cellHtmlMap = ref<Record<string, string>>({});
+
+// 1. Hook to capture container element mutation strategies from slots
+const registerStyle = (rn: string | number, cn: string | number, callback: (el: HTMLTableCellElement) => void) => {
+  cellStylesMap.value[`${rn}_${cn}`] = callback;
+  return ''; // Outputs nothing to the mustache text node
+};
+
+// 2. Hook to capture custom raw text markup structures from slots
+const registerHtml = (rn: string | number, cn: string | number, htmlString: string) => {
+  cellHtmlMap.value[`${rn}_${cn}`] = htmlString;
+  return ''; // Outputs nothing to the mustache text node
+};
+
+// 3. Post-render lifecycle execution handler triggered natively by Vue
+const applyStyleRef = (el: any, rn: string | number, cn: string | number) => {
+  if (el) {
+    const cell = el as HTMLTableCellElement;
+    const customizer = cellStylesMap.value[`${rn}_${cn}`];
+    if (customizer) {
+      customizer(cell);
+    }
+  }
+};
+
+const getCellValue = computed(() => {
+  return (row:any, col:any):string => {
+    if (typeof row == 'string') return row
+    const dotList:string[] = col.id.split(".")
+    let value = row
+    dotList.forEach(element => {
+      value = value[element]
+    });
+    return value as string
+  }
+})
 
 </script>
 
@@ -131,16 +151,29 @@ const getCellRef = (rn:any, cn:any) => {
         @click="handleTableBodyClick($event, false)"
         @dblclick="handleTableBodyClick($event, true)"
         >
-        <tr v-for="(row,rn) in props.rows" :key="row" :class="{picked : toRaw(props.config.pickedRow) == toRaw(row)}">
-          <template v-for="(col,cn) in props.config.columns" :key="col.id">
-          <td :class="col.cellclass" :style="deduceTDStyle(col)"
-            ref="tdRef"
+        <tr v-for="(row,rn) in props.rows" :key="row"
+            :class="{picked : toRaw(props.config.pickedRow) == toRaw(row)}">
+          <td v-for="(col,cn) in props.config.columns" :key="col.id"
+              :class="col.cellclass"
+              :style="deduceTDStyle(col)"
+              :ref="(el) => applyStyleRef(el, rn, cn)"
             >
-            <slot v-if="row" :name="'column_' + col.id" :row="row" :rn="rn" :td="getCellRef(rn, cn)" :col="col" :cn="cn">
+            <template v-if="$slots['column_' + col.id]">
+            <slot v-if="row"
+                :name="'column_' + col.id"
+                :row="row"
+                :rn="rn"
+                :col="col"
+                :cn="cn"
+                :setHtml="(htmlStr:string) => registerHtml(rn, cn, htmlStr)"
+                :setStyle="(styleCb:any) => registerStyle(rn, cn, styleCb)">
+              </slot>
+            </template>
+            <template v-else>
               {{ getCellValue(row, col) }}
-            </slot>
+            </template>
+            <span v-if="cellHtmlMap[`${rn}_${cn}`]" v-html="cellHtmlMap[`${rn}_${cn}`]"></span>
           </td>
-          </template>
         </tr>
         <tr v-if="(!props.rows || props.rows.length == 0) && props.config.no_rows_text && props.config.no_rows_text != ''" class="no_rows_text">
           <td :colspan="props.config.columns.length" :innweHTML="props.config.no_rows_text" />

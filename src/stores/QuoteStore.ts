@@ -5,14 +5,14 @@ import { appProspectStore } from './ProspectStore'
 import { useToast } from '@/composables/useToast'
 import { appUserStore } from './AppUserStore'
 import BQAPIFetcher from '@/components/BQAPI'
-import type { quote } from '@/types/quote'
+import type { Iquote } from '@/types/quote'
 import { ref } from 'vue'
 
 export const QuoteStore = defineStore('QuoteStore', () => {
   const NUMBER_OF_EFFDATES = 10
   const INITIAL_EFFDATE_OFFSET = -2
   const working = ref<any>(null)
-  const quote = ref<quote>({
+  const quote = ref<Iquote>({
     descr: '',
     id: -1,
     prospect_id: -1,
@@ -129,6 +129,11 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     return sorted
   }
 
+  const getPlansForQuote = (qid:number) => {
+    const fetcher = new BQAPIFetcher()
+    return fetcher.callAPI(`/quoteplans/${qid}`, 'GET')
+  }
+
 
   const initializeNewQuoteOptions = (qtype:string = 'MED', pickedQuote:any = null) => {
     const prospStore = appProspectStore()
@@ -142,7 +147,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
 
     getRLOBList(prospStore.prospect.id)
   }
-  const initializeFromQuote = (q:quote) => {
+  const initializeFromQuote = (q:Iquote) => {
     const prospStore = appProspectStore()
     if (!prospStore.prospect) return
     const opts = quote.value
@@ -233,15 +238,13 @@ export const QuoteStore = defineStore('QuoteStore', () => {
 
   const planList = ref<any[]>([])
   const drugPlanList = ref<any[]>([])
-  const getPlanList = async (pid:number) => {
+  const getPlanList = async (quote: Iquote) => {
     B.working.set(working, "Getting avaiable plan codes...")
     planList.value.length = 0
     drugPlanList.value.length = 0
-    const family = quote.value.qtype // Quote qtype is a plancode family (MED, VIS, DEN)
-    const rlob = quote.value.rlob
-    const eff = B.format.dateMDYYYY(quote.value.effdat)
+    const eff = B.format.dateMDYYYY(quote.effdat)
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/plancodes/${pid}/${family}?eff=${eff}&rlob=${rlob}&macomp=N&gfther=N`, 'GET')
+    await fetcher.callAPI(`/plancodes/${quote.prospect_id}/${quote.qtype}?eff=${eff}&rlob=${quote.rlob}&macomp=N&gfther=N`, 'GET')
     // console.dir(fetcher.resp)
     if (fetcher.issue) {
       useToast().addToast(`Error getting plan codes: ${fetcher.issue.error}`, "error")
@@ -250,15 +253,15 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         planList.value = fetcher.resp || []
         // console.dir(planList.value)
         if (planList.value.length == 1) {
-          if (quote.value.qtype == 'MED') quote.value.med_plan = planList.value[0].plncod
-          if (quote.value.qtype == 'DEN') quote.value.den_plan = planList.value[0].plncod
-          if (quote.value.qtype == 'VIS') quote.value.vis_plan = planList.value[0].plncod
+          if (quote.qtype == 'MED') quote.med_plan = planList.value[0].plncod
+          if (quote.qtype == 'DEN') quote.den_plan = planList.value[0].plncod
+          if (quote.qtype == 'VIS') quote.vis_plan = planList.value[0].plncod
         }
       }
     }
-    if (family == 'MED') {
+    if (quote.qtype == 'MED') {
       // When getting plans for Medical;, get Drug plans too
-      await fetcher.callAPI(`/plancodes/${pid}/DRU?eff=${eff}&macomp=N&gfther=N`, 'GET')
+      await fetcher.callAPI(`/plancodes/${quote.prospect_id}/DRU?eff=${eff}&macomp=N&gfther=N`, 'GET')
       // console.dir(fetcher.resp)
       if (fetcher.issue) {
         useToast().addToast(`Error getting plan codes: ${fetcher.issue.error}`, "error")
@@ -267,7 +270,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
           drugPlanList.value = fetcher.resp || []
           // console.dir(planList.value)
           if (drugPlanList.value.length == 1) {
-            quote.value.dru_plan = drugPlanList.value[0].plncod
+            quote.dru_plan = drugPlanList.value[0].plncod
           }
         }
       }
@@ -282,6 +285,6 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     planList, drugPlanList, getPlanList,
     initializeNewQuoteOptions, initializeFromQuote,
     initial_effdate_offset: INITIAL_EFFDATE_OFFSET, number_of_effdates: NUMBER_OF_EFFDATES,
-    createQuote, deleteQuote, updateQuote
+    createQuote, deleteQuote, updateQuote, getPlansForQuote
   }
 })

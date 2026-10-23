@@ -72,7 +72,7 @@ const headingText = ():string => {
         <tbody>
           <tr>
             <th><BIcon icon="solid magnifying-glass"/>Search Text:</th>
-            <td><input ref="queryTextRef" style="width: 30em;" v-model="pStore.searchParameters.query"><BButton>Search</BButton></td>
+            <td><input autofocus ref="queryTextRef" style="width: 30em;" v-model="pStore.searchParameters.query"><BButton>Search</BButton></td>
           </tr>
           </tbody>
         </table>

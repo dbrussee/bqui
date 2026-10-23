@@ -145,9 +145,10 @@ export const B = {
      * const desc = B.codeToText.qtype('MED') // Medical
      * ```
      */
-    qtype: (code: string) => {
+    qtype: (code: string) => { // Can also be used for plncod "family"
       switch (code) {
         case "MED": return "Medical";
+        case "DRU": return "Drug"; // Quote Type (qtype) would actually be MED with this plan
         case "DEN": return "Dental";
         case "VIS": return "Vision";
         case "WEL": return "Wellness";
@@ -456,6 +457,27 @@ export const B = {
       return `${value} ${units}`
     }
 
+  },
+  findElement: <K extends keyof HTMLElementTagNameMap>(id:string, tag:K) => {
+    const el = document.getElementById(id) // Find the elemnt in the DOM
+    if (!el) return // Did not find it
+    if (el.tagName != tag.trim().toUpperCase()) return // It's not the right kind of element
+    return el as HTMLElementTagNameMap[K] // Refer to it as the thing you want
+  },
+  popup: {
+    showModal: (popid:string, ...closeList: string[]) => {
+      const el = B.findElement(popid, "dialog") // Find the elemnt in the DOM
+      if (el) { // Found it
+        B.popup.close(...closeList) // close others (if any)
+        el.showModal()
+      }
+    },
+    close: (...idlist: string[]) => {
+      idlist.forEach((popid) => {
+        const el = B.findElement(popid, "dialog") // Find the elemnt in the DOM
+        if (el) el.close() // and close it
+      })
+    }
   },
   getJsonDiff: (obj1:any, obj2:any) => {
     // If both are identical primitives or point to the same reference, no difference

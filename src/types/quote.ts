@@ -1,4 +1,4 @@
-export interface quote {
+export interface Iquote {
   id: number
   prospect_id: number
   rlob: string

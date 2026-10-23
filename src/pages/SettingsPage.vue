@@ -100,23 +100,24 @@ const rightsConfig = ref({
   width: "calc((100vw - 200px) / 2)"
 })
 
-const decodeSource = (configRight:any, td:any):void => {
-  const cell = td as HTMLTableCellElement
-  if (!cell) return
-  const rightCode = configRight.code
-  if (!rightCode) cell.innerHTML = "What?"
-  const userRight = uStore.user?.rights[rightCode]
-  if (userRight.source == "@USER") {
-    cell.style.color = "goldenrod"
-    cell.innerHTML = "User";
-  } else if (userRight.source == "@DFLT") {
-    cell.style.color = ""
-    cell.innerHTML = "";
-  } else {
-    cell.style.color = ""
-    cell.classList.add("mono")
-    cell.innerHTML = '<i>' + userRight.source + "</i>";
-  }
+const decodeSource = (configRight:any, setStyle:any, setHtml:any):void => {
+  setStyle((cell:HTMLTableCellElement) => {
+    if (!cell) return
+    const rightCode = configRight.code
+    if (!rightCode) setHtml("What?")
+    const userRight = uStore.user?.rights[rightCode]
+    if (userRight.source == "@USER") {
+      cell.style.color = "goldenrod"
+      setHtml("User")
+    } else if (userRight.source == "@DFLT") {
+      cell.style.color = ""
+      setHtml("")
+    } else {
+      cell.style.color = ""
+      cell.classList.add("mono")
+      setHtml('<i>' + userRight.source + "</i>")
+    }
+  })
 }
 const decodeValue = (configRight:any):string => {
   const rightCode = configRight.code
@@ -223,7 +224,7 @@ const getRightLongDescription = ():string => {
       <td style="vertical-align: top;">
         <BTable :config="rightsConfig" :rows="computedRightsList">
           <template #column_descr="{row}">{{ row.descr }}</template>
-          <template #column_source="{row,td}">{{ decodeSource(row,td) }}</template>
+          <template #column_source="{row, setStyle, setHtml}">{{ decodeSource(row, setStyle, setHtml) }}</template>
           <template #column_value="{row}">{{ decodeValue(row) }}</template>
           <template #footer>
             <BAnchor :disabled="!rightsConfig.pickedRow" icon="solid edit_" @click="rightHandler.open()">Set User Override...</BAnchor>

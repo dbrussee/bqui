@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export interface user {
+export interface Iuser {
   id: string
   status: string
   fstnam: string

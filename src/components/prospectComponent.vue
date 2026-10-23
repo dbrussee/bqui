@@ -8,7 +8,7 @@ import { B } from "@/composables/BUtils";
 import { useId, ref } from "vue";
 import BIcon from "./B/BIcon.vue";
 import BButton from "./B/BButton.vue";
-import BInfo from "./B/BInfo.vue";
+// import BInfo from "./B/BInfo.vue";
 import BConfirm from "./B/BConfirm.vue";
 import ClipboardIcon from "./ClipboardIcon.vue";
 
@@ -82,7 +82,7 @@ const prospectCSZ = (prosp:any) => {
       <table class="form-table" style="margin-left: 2em;">
         <tbody>
           <!-- <tr><th>Created:</th><td>{{ B.format.ts(prospStore.prospect.crttms) }}</td></tr> -->
-          <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.format.ts(pStore.prospect.last_quote?.crttms), 'No quotes') }}
+          <!-- <tr><th>Last Quoted:</th><td>{{ B.ifNull(B.format.ts(pStore.prospect.last_quote?.crttms), 'No quotes') }}
             <BInfo v-if="pStore.prospect.last_quote" pos="L" heading="Last Quote Details">
               <ul>
                 <li>{{ B.codeToText.nonstd(pStore.prospect.last_quote.nonstd) }}
@@ -99,8 +99,7 @@ const prospectCSZ = (prosp:any) => {
                 <li>Updated: {{ B.format.ts(pStore.prospect.last_quote.updtms) }} ({{ pStore.prospect.last_quote.updusr }})</li>
               </ul>
             </BInfo>
-
-          </td></tr>
+          </td></tr> -->
           <tr><th>Enrolled:</th><td>{{ B.ifNull(B.format.ts(pStore.prospect.enrolled_ts), "Not Enrolled") }}</td></tr>
         </tbody>
       </table>

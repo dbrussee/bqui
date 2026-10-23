@@ -1,7 +1,7 @@
-import type { quote } from "./quote"
+import type { Iquote } from "./quote"
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export interface prospect {
+export interface Iprospect {
   id: number
   grpnum: string
   name: string
@@ -22,7 +22,7 @@ export interface prospect {
   phone: string
   email: string
   census: any
-  last_quote: quote | null
+  last_quote: Iquote | null
   last_quote_id: number | null
   crtusr: string
   crttms: Date
