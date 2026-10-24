@@ -177,10 +177,8 @@ const qHandler = {
           <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="qHandler.startFromQuote(cfgQuotesList.pickedRow)" class="anchor" icon="clone_">Copy Selected</BButton></p>
         </template>
       </BPopup>
-      <!-- <BConfirm class="anchor gapright" @confirm="quoteStore.deleteQuote(cfgQuotesList.pickedRow.id)" :disabled="!cfgQuotesList.pickedRow || cfgQuotesList.pickedRow.status != 'INPROG'" pos="T2R" icon="trash-can_">Delete...</BConfirm> -->
-      <BButton class="anchor anchor-in-table-footer" gapleft gapright style="color: white" :disabled="!cfgQuotesList.pickedRow" :icon="uStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'" @click="qHandler.edit(cfgQuotesList.pickedRow)">{{ uStore.isUserReadOnly() ? 'View Quote...' : 'Edit Quote...' }}</BButton>
       <BButton class="anchor anchor-in-table-footer" gapleft style="color: white" :disabled="!cfgQuotesList.pickedRow" :icon="uStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'" @click="qHandler.edit(cfgQuotesList.pickedRow)">{{ uStore.isUserReadOnly() ? 'View Quote...' : 'Edit Quote...' }}</BButton>
-      <BButton class="anchor anchor-in-table-footer" style="color: white" disabled icon="file-pdf">Generate Proposal</BButton>
+      <BButton class="anchor anchor-in-table-footer" gapleft style="color: white" disabled icon="file-pdf">Generate Proposal</BButton>
     </template>
   </BTable>
 
