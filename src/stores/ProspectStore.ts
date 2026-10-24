@@ -7,6 +7,7 @@ import { appUserStore } from "./AppUserStore";
 import { useToast } from '../composables/useToast'
 import * as XLSX from "xlsx";
 import type { Iprospect } from "@/types/prospect";
+import type { Iquote } from "@/types";
 
 export const appProspectStore = defineStore("appProspectStore", () => {
   const prospect = ref<Iprospect | null>(null);
@@ -46,10 +47,11 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   const prospWorking = ref<string|null>(null)
   const censusWorking = ref<string|null>(null)
 
-  const refreshQuote = (quote:any):void => {
-    const qid = quote.id
+  const refreshQuote = (quote:Iquote):void => {
     quotes.value.forEach((q) => {
-      if (q.id == qid) {
+      if (q.id == quote.id) {
+        // Update quote list quote
+        q = {...quote}
         // TODO: See if we can just update the quote directly
         // so it shows in Prospect tab correctly
         getProspect(q.prospect_id)

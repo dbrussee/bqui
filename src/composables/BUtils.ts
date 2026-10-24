@@ -66,6 +66,7 @@ export const B = {
     quoteStatus: (code: string) => {
       switch (code) {
         case "ANY": return "Any Status";
+        case "NEW": return "New"
         case "QUOTED": return "Quoted";
         case "READY": return "Ready";
         case "RATEREQ": return "Rates Requested";
@@ -258,6 +259,7 @@ export const B = {
   },
   statusIcon: (statusCode:string) => {
     if ('ANY'.indexOf(statusCode) >= 0) return "solid check-double_"
+    if ('NEW'.indexOf(statusCode) >= 0) return "#red solid asterisk_"
     if ('INPROG'.indexOf(statusCode) >= 0) return "##FFBF00 solid wrench_"
     if ('RATEREQ,PENDING'.indexOf(statusCode) >= 0) return "#red clock_"
     if ('READY'.indexOf(statusCode) >= 0) return "#green solid check_"

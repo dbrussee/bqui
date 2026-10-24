@@ -36,7 +36,7 @@ const doContinue = () => {
 const getRlobList = async () => {
   if (!pStore.prospect) return
   const savedRlob = qStore.quote.rlob
-  await qStore.getRLOBList(pStore.prospect.id)
+  await qStore.getRLOBList(qStore.quote)
   if (qStore.quote && props.qtype) {
     // console.dir(quoteStore.rlobList)
     const list = qStore.rlobList[props.qtype]
@@ -53,7 +53,7 @@ const getRlobList = async () => {
 </script>
 
 <template>
-  <dialog :id="popupid">
+  <dialog :id="props.popupid">
   <div class="titlebar">New {{ B.codeToText.qtype(props.qtype) }} Quote</div>
   <form @submit.stop.prevent="doContinue()">
   <table class="form-table">

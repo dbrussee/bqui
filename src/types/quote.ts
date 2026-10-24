@@ -3,7 +3,7 @@ export interface Iquote {
   prospect_id: number
   prospect_name: string
   rlob: string
-  status: 'INPROG' | 'QUOTED' | 'READY' | 'RATEREQ' | 'PENDING' | 'ENROLLED' | 'EXPIRED'
+  status: 'INPROG' | 'QUOTED' | 'READY' | 'RATEREQ' | 'PENDING' | 'ENROLLED' | 'EXPIRED' | 'NEW'
   effdat: Date | null
   descr: string
   size_cd: string

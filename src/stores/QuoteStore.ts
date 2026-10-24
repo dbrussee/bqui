@@ -13,19 +13,12 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   const INITIAL_EFFDATE_OFFSET = -2
   const working = ref<any>(null)
   const quote = ref<Iquote>({
+    id: -1, status: 'NEW',
     descr: '',
-    id: -1,
-    prospect_id: -1,
-    prospect_name: '',
-    status: 'INPROG',
-    size_cd: '',
-    qtype: '',
-    effdat: B.firstOfMonth(1),
-    mass_compliant: false,
-    grandfathered: false,
-    nonstd: 'N',
-    rlob: '',
-    funding: 'FI',
+    prospect_id: -1, prospect_name: '',
+    size_cd: '', qtype: '', effdat: B.firstOfMonth(1),
+    mass_compliant: false, grandfathered: false,
+    nonstd: 'N', rlob: '', funding: 'FI',
     med_plan: '', dru_plan: '', vis_plan: '', den_plan: '',
     crtusr: '', crttms: new Date(), updusr: '', updtms: new Date()
   })
@@ -64,7 +57,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       descr: '',
       prospect_id: pid,
       prospect_name: pname,
-      status: 'INPROG',
+      status: 'NEW',
       size_cd: '',
       qtype: qtype,
       effdat: B.firstOfMonth(1),
@@ -102,7 +95,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       appUserStore().getDashboard()
     }
   }
-  const updateQuote = async (q:any, action:string):Promise<unknown> => {
+  const updateQuote = async (q:any):Promise<unknown> => {
     B.working.set(working, "Updating Quote...")
     const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'PUT', q)
     B.working.clear(working)
@@ -111,7 +104,6 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         useToast().addToast(`Error: ${fetcher.issue.error}`, "error")
         return null
       } else {
-        useToast().addToast(`Quote ${fetcher.resp.id} ${action}`, "success")
         appUserStore().getDashboard()
         return fetcher.resp
       }
@@ -131,9 +123,13 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     return sorted
   }
 
-  const getPlansForQuote = (qid:number) => {
+  const getPlansForQuote = (quote:Iquote) => {
     const fetcher = new BQAPIFetcher()
-    return fetcher.callAPI(`/quoteplans/${qid}`, 'GET')
+    if (quote.id < 0) {
+      return fetcher.callAPI(`/newquoteplans/${quote.prospect_id}`, "GET")
+    } else {
+      return fetcher.callAPI(`/quoteplans/${quote.id}`, 'GET')
+    }
   }
 
 
@@ -146,7 +142,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     if (pickedQuote != null) q.effdat = B.dateFromYYYYMMDD(pickedQuote.effdat)
     // opts.grandfathered = false
 
-    getRLOBList(prospStore.prospect.id)
+    getRLOBList(q)
   }
   const initializeFromQuote = (q:Iquote) => {
     const prospStore = appProspectStore()
@@ -160,7 +156,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     opts.qtype = q.qtype
     opts.effdat = B.dateFromYYYYMMDD(q.effdat)
     // opts.grandfathered = false
-    getRLOBList(prospStore.prospect.id)
+    getRLOBList(q)
     opts.rlob = q.rlob
     opts.funding = q.funding
     // opts.mass_compliant = false
@@ -197,16 +193,16 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     'VIS': ref<[]>([])
   }
 
-  const getRLOBList = async (pid:number) => {
+  const getRLOBList = async (quote:Iquote) => {
     B.working.set(working, "Getting avaiable product lines...")
-    const preRLOB = quote.value?.rlob || 'BEEF'
+    const preRLOB = quote.rlob || 'BEEF'
     rlobList.MED.value.length = 0
     rlobList.DRU.value.length = 0
     rlobList.VIS.value.length = 0
     rlobList.DEN.value.length = 0
-    const eff = B.format.dateMDYYYY(quote.value.effdat)
+    const eff = B.format.dateMDYYYY(quote.effdat)
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/plancodecounts/${pid}?eff=${eff}`, 'GET')
+    await fetcher.callAPI(`/plancodecounts/${quote.prospect_id}?eff=${eff}`, 'GET')
     B.working.clear(working)
     // console.dir(fetcher.resp)
     if (fetcher.issue) {
@@ -219,20 +215,20 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         rlobList.VIS.value = avail?.VIS || []
         rlobList.DEN.value = avail?.DEN || []
 
-        const list = rlobList[quote.value.qtype].value
+        const list = rlobList[quote.qtype].value
         if (list) {
           if (list.length == 1) {
-            quote.value.rlob = list[0]
+            quote.rlob = list[0]
           } else if (list.includes(preRLOB)) {
-            quote.value.rlob = preRLOB
+            quote.rlob = preRLOB
           } else {
-            quote.value.rlob = ''
+            quote.rlob = ''
           }
         } else {
-          quote.value.rlob = ''
+          quote.rlob = ''
         }
-        if (!verifyEffdatInRange(quote.value.effdat)) {
-          quote.value.effdat = null
+        if (!verifyEffdatInRange(quote.effdat)) {
+          quote.effdat = null
         }
       }
     }

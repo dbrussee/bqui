@@ -5,17 +5,17 @@ import { B } from '@/composables/BUtils'
 // import BIcon from '@/components/B/BIcon.vue'
 import { appUserStore } from '@/stores/AppUserStore'
 const uStore = appUserStore()
+import { QuoteStore } from '@/stores/QuoteStore'
 import { appProspectStore } from '@/stores/ProspectStore'
 const pStore = appProspectStore()
-import { QuoteStore } from '@/stores/QuoteStore'
 const qStore = QuoteStore()
 // import { useSearchProspectPopup } from '@/popups/SearchProspect/useSearchProspectPopup';
 import BTable from '@/components/B/BTable.vue'
 import BIcon from '@/components/B/BIcon.vue'
 import BButton from '@/components/B/BButton.vue'
-import EditQuoteDialog from '@/dialogs/EditQuoteDialog.vue'
-import ViewQuoteDialog from '@/dialogs/ViewQuoteDialog.vue'
-import type { Iquote, Iprospect } from '@/types'
+import { useToast } from '@/composables/useToast'
+import QuoteDialog from '@/dialogs/QuoteDialog.vue'
+import { type Iquote } from '@/types'
 
 const salutation = ():string => {
   const msg = timeOfDay()
@@ -122,7 +122,7 @@ const quoteListConfig = ref({
   height: "20em",
   onPick: (row:any) => {
     quoteListHandler.close()
-    quoteHandler.edit(row.quote)
+    qHandler.edit(row.quote)
   },
   columns: [
     { id: "pid", heading: "", flags: "R" },
@@ -139,7 +139,7 @@ const quoteListWithoutStatusConfig = ref({
   height: "20em",
   onPick: (row:any) => {
     quoteListHandler.close()
-    quoteHandler.edit(row.quote)
+    qHandler.edit(row.quote)
   },
   columns: [
     { id: "pid", heading: "", flags: "R" },
@@ -152,109 +152,86 @@ const quoteListWithoutStatusConfig = ref({
   ]
 })
 
-const quotePlans = ref<any>(null)
-const quoteAttrs = ref<any>(null)
-const quoteProspect = ref<Iprospect | null>(null)
-const quoteQuote = ref<Iquote | null>(null)
-const quoteHandler = {
-  action: "",
-  editPopid: useId(),
-  viewPopid: useId(),
-  lastQtype: '',
+const qHandler = {
+  quote: ref<Iquote | undefined>(undefined),
+  popid: useId(),
+
   close() {
-    B.popup.close(this.editPopid, this.viewPopid)
-    this.action = "";
+    B.popup.close(this.popid)
   },
-  openEdit() {
-    B.popup.showModal(this.editPopid, this.viewPopid)
-    this.action = "editing";
+  edit(quote:Iquote) {
+    this.quote.value = {...quote}
+    B.popup.showModal(this.popid)
   },
-  openView() {
-    B.popup.showModal(this.viewPopid, this.editPopid)
-    this.action = "viewing";
+  save(quote:Iquote) {
+    if (quote.id < 0) {
+      qStore.quote = {...quote}
+      qStore.createQuote().then(() => {
+        pStore.refreshQuote(quote)
+        uStore.getDashboard()
+        this.close()
+      })
+    } else {
+      qStore.updateQuote(quote).then((updatedQuote:any) => {
+        if (updatedQuote) {
+          pStore.refreshQuote(quote)
+          uStore.getDashboard()
+          useToast().addToast(`Quote ${updatedQuote.id} saved`, "success")
+        }
+        this.close()
+      })
+    }
   },
   delete() {
-    if (!qStore.quote) return
-    qStore.deleteQuote(qStore.quote.id)
+    if (!this.quote.value) return
+    qStore.deleteQuote(this.quote.value.id)
+    pStore.refreshQuote(this.quote.value)
     uStore.getDashboard()
     this.close()
   },
-  edit(quote:Iquote) {
-    if (!pStore.prospect) return
-    const status = quote.status
-    if (status == "READY" || status == "RATEREQ" || status == "PENDING") {
-      this.view(quote)
-    } else {
-      qStore.quote = {...quote}
-      qStore.getPlanList(quote)
-      this.openEdit()
-    }
-  },
-  view(quote:Iquote) {
-    quoteQuote.value = {...quote}
-    quotePlans.value = null
-    quoteAttrs.value = null
-    quoteProspect.value = null
-    // Call the API to get details... This is async, so the
-    // dialog will open with empty data (from above) and then
-    // get populated after the async promise completes
-    qStore.getPlansForQuote(quoteQuote.value.id).then((data:any) => {
-      quotePlans.value = data.resp.plans || null
-      quoteAttrs.value = data.resp.attrs || null
-      quoteProspect.value = data.resp.prospect || null
-      this.openView()
-    })
-  },
-  revertToINPROG() { // Quote is already set
-    if (!quoteQuote.value) return
-    const tempDescr = quoteQuote.value.descr
-    quoteQuote.value.status = 'INPROG'
-    qStore.updateQuote(quoteQuote.value, "set back to In Progress").then((updatedQuote:any) => {
-      if (updatedQuote && quoteQuote.value) {
-        quoteQuote.value.descr = tempDescr
-        uStore.getDashboard()
-        pStore.refreshQuote(quoteQuote.value)
-        this.close()
-
-      }
-    })
-  },
-  save() { // Quote is already set
-    if (!qStore.quote) return
-    qStore.updateQuote(qStore.quote, "updated").then((updatedQuote:any) => {
-      if (updatedQuote && qStore.quote) {
-        uStore.getDashboard()
-        pStore.refreshQuote(qStore.quote)
-      }
-      this.close()
-    })
-  },
-  submit() { // Quote is already set
-    if (!qStore.quote) return
+  submit(quote:Iquote) {
     let toastMessage = 'unchanged'
-    switch(qStore.quote.nonstd) {
+    switch(quote.nonstd) {
       case 'N':
-        qStore.quote.status = 'READY'
-        toastMessage = 'submitted'
+        quote.status = 'READY'
+        toastMessage = 'is ready to enroll'
         break
       case 'Y':
-        qStore.quote.status = 'RATEREQ'
-        toastMessage = 'rates requested'
+        quote.status = 'RATEREQ'
+        toastMessage = 'rates have been requested'
         break
       case 'C':
-        qStore.quote.status = 'PENDING'
-        toastMessage = 'pending approval'
+        quote.status = 'PENDING'
+        toastMessage = 'is pending approval'
+        break
     }
-    qStore.updateQuote(qStore.quote, toastMessage).then((updatedQuote:any) => {
-      if (updatedQuote) {
+    if (quote.id < 0) {
+      qStore.quote = {...quote}
+      qStore.createQuote().then(() => {
+        pStore.refreshQuote(quote)
         uStore.getDashboard()
-        pStore.refreshQuote(qStore.quote)
-      }
-      this.close()
-    })
+        this.close()
+      })
+    } else {
+      qStore.updateQuote(quote).then((updatedQuote:any) => {
+        if (updatedQuote) {
+          pStore.refreshQuote(updatedQuote)
+          uStore.getDashboard()
+          useToast().addToast(`Quote ${updatedQuote.id} ${toastMessage}`, "success")
+        }
+        this.close()
+      })
+    }
   },
-  abort() {
-    this.close()
+  force(quote:Iquote) {
+    quote.status = 'INPROG'
+    qStore.updateQuote(quote).then((updatedQuote:any) => {
+      if (updatedQuote) {
+        pStore.refreshQuote(updatedQuote)
+        uStore.getDashboard()
+        useToast().addToast(`Quote ${updatedQuote.id} set back to In Progress`, "success")
+      }
+    })
   }
 }
 
@@ -304,19 +281,6 @@ const headingText = ():string => {
         <BButton class="anchor" :disabled="!dashConfig.pickedRow" icon="solid magnifying-glass" @click="doSearch()">Search...</BButton>
     </template> -->
   </BTable>
-  <EditQuoteDialog  :popupid="quoteHandler.editPopid"
-    @abort="quoteHandler.abort()"
-    @delete="quoteHandler.delete()"
-    @submit="quoteHandler.submit()"
-    @force="quoteHandler.revertToINPROG()"
-    @save="() => quoteHandler.save()"></EditQuoteDialog>
-  <ViewQuoteDialog :popupid="quoteHandler.viewPopid"
-    :quote="quoteQuote as Iquote"
-    :prospect="quoteProspect as Iprospect"
-    :plans="quotePlans"
-    :attrs="quoteAttrs"
-    @force="quoteHandler.revertToINPROG()"
-    @abort="quoteHandler.abort()"></ViewQuoteDialog>
 
   <dialog :id="quoteListHandler.popId">
     <div class="titlebar">{{ headingText() }}</div>
@@ -336,6 +300,13 @@ const headingText = ():string => {
       <BButton @click="quoteListHandler.close()" class="anchor" icon="#red x">Cancel</BButton>
     </div>
   </dialog>
+  <QuoteDialog :popid="qHandler.popid"
+    @save="(q:Iquote) => qHandler.save(q)"
+    @close="qHandler.close()"
+    @delete="qHandler.delete()"
+    @submit="(q:Iquote) => qHandler.submit(q)"
+    @force="(q:Iquote) => qHandler.force(q)"
+    :quote="qHandler.quote.value"/>
 
 </template>
 <style lang="css" scoped>

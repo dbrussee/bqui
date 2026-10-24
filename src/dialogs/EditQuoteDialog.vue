@@ -23,7 +23,7 @@ const props = defineProps({
 
 <template>
   <dialog :id="props.popupid" style="position:relative">
-  <div v-if="qStore.quote.id < 0" class="titlebar">Edit New {{ B.codeToText.qtype(qStore.quote.qtype)}} Quote</div>
+  <div v-if="qStore.quote.status == 'NEW'" class="titlebar">Edit New {{ B.codeToText.qtype(qStore.quote.qtype)}} Quote</div>
   <div v-else class="titlebar">Edit {{ B.codeToText.qtype(qStore.quote.qtype)}} Quote #{{ qStore.quote.id }}</div>
   <div style="position: absolute; top: .5em; right: .5em;" class="info">
     Status: <BIcon :icon="B.statusIcon(qStore.quote.status)"/>{{ B.codeToText.quoteStatus(qStore.quote.status) }}
@@ -31,7 +31,7 @@ const props = defineProps({
   <form @submit.stop.prevent="emit('save')">
     <table class="form-table">
       <tbody>
-        <template v-if="qStore.quote.id >= 0">
+        <template v-if="qStore.quote.status != 'NEW'">
         <tr>
           <th style="width:6.5em;">Created:</th>
           <td colspan="3" class="info">{{ B.format.ts(qStore.quote.crttms) }} by {{ qStore.quote.crtusr }}</td>
