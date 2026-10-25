@@ -44,7 +44,7 @@ const deduceJustification = (style: Record<string, string>, col:any) => {
 const cfgCensus = ref({
   height: "calc(100vh - 9em)",
   columns: [
-    { id: "relation", heading: "", width: "3em" },
+    { id: "relation", heading: "", width: "3.5em" },
     { id: "lstnam", heading: " Last Name" },
     { id: "fstnam", heading: " First Name" },
     { id: "midnam", heading: "Mid", width: "2em", flags: "C" },
@@ -281,7 +281,7 @@ const hardSpace = (txt:string):string => {
             </td>
           </tr>
           <tr v-for="(dep, dn) in sub.deps" :key="dep">
-            <td><select class="mono" style="background-color: transparent; width: 2em;" @change="setRelation(rn as number, dn as number, $event)">
+            <td><select class="mono" style="background-color: transparent; width: 3.3em;" @change="setRelation(rn as number, dn as number, $event)">
                 <option class="mono" :selected="dep.relation == 'SUB'" value="SUB">SUB - Subscriber</option>
                 <option class="mono" :selected="dep.relation == 'SPS'" value="SPS">SPS - Spouse</option>
                 <option class="mono" :selected="dep.relation == 'DOM'" value="DOM">DOM - Domestic Partner</option>
