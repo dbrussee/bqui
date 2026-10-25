@@ -7,6 +7,7 @@ import { appUserStore } from './AppUserStore'
 import BQAPIFetcher from '@/components/BQAPI'
 import type { Iquote } from '@/types/quote'
 import { ref } from 'vue'
+import type { Iprospect } from '@/types'
 
 export const QuoteStore = defineStore('QuoteStore', () => {
   const NUMBER_OF_EFFDATES = 10
@@ -51,28 +52,47 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       return null
     }
   }
-  const blankQuote = (qtype:string, pid:number, pname:string):void => {
-    quote.value = {
+
+  const makeBlankQuote = (qtype:string, prospect:Iprospect, fromQuote:Iquote | null) => {
+    const q:Iquote = {
       id: -1,
-      descr: '',
-      prospect_id: pid,
-      prospect_name: pname,
       status: 'NEW',
-      size_cd: '',
       qtype: qtype,
-      effdat: B.firstOfMonth(1),
-      grandfathered: false,
-      mass_compliant: false,
-      nonstd: 'N',
-      rlob: '',
-      funding: 'FI',
+      descr: '',
+      size_cd: prospect.size_cd,
+      prospect_id: prospect.id, prospect_name: prospect.name,
+      effdat: fromQuote ? B.dateFromYYYYMMDD(fromQuote.effdat) : B.firstOfMonth(1),
+      grandfathered: false, mass_compliant: false,
+      nonstd: 'N', funding: 'FI', rlob: '',
       med_plan: 'M_NOPLN', dru_plan: 'R_NOPLN', vis_plan: 'V_NOPLN', den_plan: 'D_NOPLN',
       crtusr: '', crttms: new Date(), updusr: '', updtms: new Date()
     }
+    getRLOBList(q)
+    return q
   }
-  const deleteQuote = async (qid:number) => {
+
+  // const blankQuote = (qtype:string, pid:number, pname:string):void => {
+  //   quote.value = {
+  //     id: -1,
+  //     descr: '',
+  //     prospect_id: pid,
+  //     prospect_name: pname,
+  //     status: 'NEW',
+  //     size_cd: '',
+  //     qtype: qtype,
+  //     effdat: B.firstOfMonth(1),
+  //     grandfathered: false,
+  //     mass_compliant: false,
+  //     nonstd: 'N',
+  //     rlob: '',
+  //     funding: 'FI',
+  //     med_plan: 'M_NOPLN', dru_plan: 'R_NOPLN', vis_plan: 'V_NOPLN', den_plan: 'D_NOPLN',
+  //     crtusr: '', crttms: new Date(), updusr: '', updtms: new Date()
+  //   }
+  // }
+  const deleteQuote = async (quote:Iquote) => {
     B.working.set(working, "Deleting Quote...")
-    const fetcher = await new BQAPIFetcher().callAPI(`/quote/${qid}`, 'DELETE')
+    const fetcher = await new BQAPIFetcher().callAPI(`/quote/${quote.id}`, 'DELETE')
     B.working.clear(working)
     if (fetcher.issue) {
       useToast().addToast(`Error deleting quote: ${fetcher.issue.error}`, "error")
@@ -87,12 +107,13 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         prospStore.prospect.last_quote = {...newLastQuote}
         prospStore.prospect.last_quote_id = newLastQuote.id
       }
-      blankQuote(quote.value.qtype, prospStore.prospect.id, prospStore.prospect.name)
-      appProspectStore().quotes = appProspectStore().quotes.filter((q) => {
-        return q.id != qid
-      })
-      useToast().addToast(`Quote ${qid} deleted`, "success")
+      useToast().addToast(`Quote ${quote.id} deleted`, "success")
       appUserStore().getDashboard()
+      appProspectStore().quotes = appProspectStore().quotes.filter((q) => {
+        return q.id != quote.id
+      })
+
+      // blankQuote(quote.value.qtype, prospStore.prospect.id, prospStore.prospect.name)
     }
   }
   const updateQuote = async (q:any):Promise<unknown> => {
@@ -133,17 +154,17 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   }
 
 
-  const initializeNewQuoteOptions = (qtype:string = 'MED', pickedQuote:any = null) => {
-    const prospStore = appProspectStore()
-    if (!prospStore.prospect) return
-    blankQuote(qtype, prospStore.prospect.id, prospStore.prospect.name)
-    const q = quote.value
-    q.size_cd = prospStore.prospect.size_cd
-    if (pickedQuote != null) q.effdat = B.dateFromYYYYMMDD(pickedQuote.effdat)
-    // opts.grandfathered = false
+  // const initializeNewQuoteOptions = (qtype:string = 'MED', pickedQuote:any = null) => {
+  //   const prospStore = appProspectStore()
+  //   if (!prospStore.prospect) return
+  //   blankQuote(qtype, prospStore.prospect.id, prospStore.prospect.name)
+  //   const q = quote.value
+  //   q.size_cd = prospStore.prospect.size_cd
+  //   if (pickedQuote != null) q.effdat = B.dateFromYYYYMMDD(pickedQuote.effdat)
+  //   // opts.grandfathered = false
 
-    getRLOBList(q)
-  }
+  //   getRLOBList(q)
+  // }
   const initializeFromQuote = (q:Iquote) => {
     const prospStore = appProspectStore()
     if (!prospStore.prospect) return
@@ -177,7 +198,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
 
   const verifyEffdatInRange = (effdat:Date | null):boolean => {
     if (!effdat) return true// Empty is ok... but not valid
-    for (let i = 0; i < NUMBER_OF_EFFDATES; i++) {
+    for (let i = 0; i <= NUMBER_OF_EFFDATES; i++) {
       const test = B.firstOfMonth(i + INITIAL_EFFDATE_OFFSET)
       // console.log("Eff", effdat.getTime(), "Test", test.getTime())
       if (effdat.getTime() == test.getTime()) return true
@@ -281,7 +302,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     quote, working,
     rlobList, getRLOBList,
     planList, drugPlanList, getPlanList,
-    initializeNewQuoteOptions, initializeFromQuote,
+    initializeFromQuote, makeBlankQuote, //initializeNewQuoteOptions,
     initial_effdate_offset: INITIAL_EFFDATE_OFFSET, number_of_effdates: NUMBER_OF_EFFDATES,
     createQuote, deleteQuote, updateQuote, getPlansForQuote
   }

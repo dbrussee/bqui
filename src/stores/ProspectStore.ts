@@ -48,13 +48,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   const censusWorking = ref<string|null>(null)
 
   const refreshQuote = (quote:Iquote):void => {
-    quotes.value.forEach((q) => {
+    quotes.value.forEach((q, rn) => {
       if (q.id == quote.id) {
         // Update quote list quote
-        q = {...quote}
-        // TODO: See if we can just update the quote directly
-        // so it shows in Prospect tab correctly
-        getProspect(q.prospect_id)
+        quotes.value[rn] = {...quote}
       }
     })
   }

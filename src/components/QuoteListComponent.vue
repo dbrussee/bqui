@@ -27,15 +27,15 @@ watch(() => pStore.prospect, () => {
 
 
 const cfgQuotesList = ref({
-  onPick: (row:any, rn:number) => {
+  onPick: (row:any) => {
     cfgQuotesList.value.pickedRow = row
-    cfgQuotesList.value.pickedRowNumber = rn
+    // cfgQuotesList.value.pickedRowNumber = rn
   },
   onDblpick: () => { qHandler.edit(cfgQuotesList.value.pickedRow) },
   height: "calc(100vh - 11.7em)",
   width: "calc(100vw - 200px - .9em)",
   pickedRow: null as any,
-  pickedRowNumber: -1,
+  // pickedRowNumber: -1,
   no_rows_text: 'No quotes to display',
   columns: [
     { id: "id", heading: "Quote", width: "4em", flags: "R" },
@@ -65,12 +65,23 @@ const qHandler = {
     B.popup.close(this.popid)
   },
   start(qtype:string) {
-    qStore.initializeNewQuoteOptions(qtype, cfgQuotesList.value.pickedRow)
-    this.quote.value = {...qStore.quote}
+    if (!pStore.prospect) return
+    this.quote.value = qStore.makeBlankQuote(qtype, pStore.prospect, null)
     B.popup.showModal(this.popid)
   },
   startFromQuote(quote:Iquote) {
-    useToast().addToast(`Starting copy quote ${quote.id} not implemented`, "warning")
+    if (!uStore.user) return
+    const q = {...quote} // Clone it first
+    q.id = -1
+    q.status = "INPROG" // Bypass initial screen of New quote
+    q.crttms = new Date()
+    q.crtusr = uStore.user.id
+    q.updtms = quote.crttms
+    q.updusr = quote.crtusr
+    q.effdat = B.dateFromYYYYMMDD(quote.effdat)
+    qStore.getRLOBList(q)
+    this.quote.value = {...q}
+    B.popup.showModal(this.popid)
   },
   edit(quote:Iquote) {
     this.quote.value = {...quote}
@@ -81,13 +92,14 @@ const qHandler = {
       qStore.quote = {...quote}
       qStore.createQuote().then(() => {
         cfgQuotesList.value.pickedRow = qStore.quote
-        cfgQuotesList.value.pickedRowNumber = pStore.quotes.length - 1
+        // cfgQuotesList.value.pickedRowNumber = pStore.quotes.length - 1
         this.close()
       })
     } else {
       qStore.updateQuote(quote).then((updatedQuote:any) => {
         if (updatedQuote) {
-          pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+          pStore.refreshQuote(updatedQuote)
+          // pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
           cfgQuotesList.value.pickedRow = null
           useToast().addToast(`Quote ${updatedQuote.id} saved`, "success")
         }
@@ -104,7 +116,7 @@ const qHandler = {
   },
   delete() {
     if (!this.quote.value) return
-    qStore.deleteQuote(this.quote.value.id)
+    qStore.deleteQuote(this.quote.value)
     cfgQuotesList.value.pickedRow = null
     this.close()
   },
@@ -128,13 +140,14 @@ const qHandler = {
       qStore.quote = {...quote}
       qStore.createQuote().then(() => {
         cfgQuotesList.value.pickedRow = qStore.quote
-        cfgQuotesList.value.pickedRowNumber = pStore.quotes.length - 1
+        // cfgQuotesList.value.pickedRowNumber = pStore.quotes.length - 1
         this.close()
       })
     } else {
       qStore.updateQuote(quote).then((updatedQuote:any) => {
         if (updatedQuote) {
-          pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+          pStore.refreshQuote(updatedQuote)
+          // pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
           cfgQuotesList.value.pickedRow = null
           useToast().addToast(`Quote ${updatedQuote.id} ${toastMessage}`, "success")
         }
@@ -156,7 +169,6 @@ const qHandler = {
 
 <template>
   <BTable :config="cfgQuotesList" :rows="pStore.quotes">
-    <!-- <template #column_id="{row, rn, td}">{{ formatIDCell(row, rn, td) }}</template> -->
     <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
     <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
     <template #column_status="{row, setStyle}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon></template>
@@ -169,7 +181,7 @@ const qHandler = {
     <template #footer>
       <BPopup v-if="!uStore.isUserReadOnly()" class="action" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
         <template #body>
-          <p><BButton @click="qHandler.start('MED')" class="anchor" :icon="B.codeToText.qtypeIcon('MED')">New Medical &amp; Drug</BButton></p>
+          <p><BButton @click="qHandler.start('MED')" class="anchor" :icon="B.codeToText.qtypeIcon('MED')">Medical &amp; Drug</BButton></p>
           <p><BButton @click="qHandler.start('DEN')" class="anchor" :icon="B.codeToText.qtypeIcon('DEN')">Dental</BButton></p>
           <p><BButton @click="qHandler.start('VIS')" class="anchor" :icon="B.codeToText.qtypeIcon('VIS')">Vision</BButton></p>
           <p><BButton disabled @click="qHandler.start('WEL')" class="anchor" :icon="B.codeToText.qtypeIcon('WEL')">Wellness</BButton></p>

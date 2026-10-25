@@ -1,6 +1,6 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { toRaw, ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 
 interface IColumn {
   id: string
@@ -79,7 +79,8 @@ const handleTableBodyClick = (event:MouseEvent, isDouble:boolean) => {
   if (!cell) return
   const col = props.config.columns[cell.cellIndex]
   const tr = cell.closest('tr') as HTMLTableRowElement
-  const row = props.rows[tr.rowIndex - 1] // Skip thead row
+  // const row = props.rows[tr.rowIndex - 1] // Skip thead row
+  const row = rowsByIndex.value[tr.rowIndex - 1]?.val
   doPick(isDouble, row, tr.rowIndex - 1, col, cell.cellIndex as number)
 }
 
@@ -123,6 +124,13 @@ const getCellValue = computed(() => {
   }
 })
 
+const rowsByIndex = computed(() => {
+  return props.rows.map((value, rn) => ({
+    id: `row-${rn}`, // Stable DOM key that never changes positions
+    val: value      // The raw primitive value
+  }))
+})
+
 </script>
 
 
@@ -151,8 +159,8 @@ const getCellValue = computed(() => {
         @click="handleTableBodyClick($event, false)"
         @dblclick="handleTableBodyClick($event, true)"
         >
-        <tr v-for="(row,rn) in props.rows" :key="row"
-            :class="{picked : toRaw(props.config.pickedRow) == toRaw(row)}">
+        <tr v-for="(row, rn) in rowsByIndex" :key="row.id"
+            :class="{picked : props.config.pickedRow == row.val}">
           <td v-for="(col,cn) in props.config.columns" :key="col.id"
               :class="col.cellclass"
               :style="deduceTDStyle(col)"
@@ -161,7 +169,7 @@ const getCellValue = computed(() => {
             <template v-if="$slots['column_' + col.id]">
             <slot v-if="row"
                 :name="'column_' + col.id"
-                :row="row"
+                :row="row.val"
                 :rn="rn"
                 :col="col"
                 :cn="cn"
@@ -170,7 +178,7 @@ const getCellValue = computed(() => {
               </slot>
             </template>
             <template v-else>
-              {{ getCellValue(row, col) }}
+              {{ getCellValue(row.val, col) }}
             </template>
             <span v-if="cellHtmlMap[`${rn}_${cn}`]" v-html="cellHtmlMap[`${rn}_${cn}`]"></span>
           </td>

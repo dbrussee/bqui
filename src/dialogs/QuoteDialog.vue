@@ -170,8 +170,8 @@ const saveChanges = () => {
                   <div style="display: flex; flex-direction: column; gap: 0; height: 7.5em;">
                     <span v-if="qStore.working"><div class="spinner"></div>{{ qStore.working }}</span>
                     <span v-if="!qStore.working && qStore.rlobList[localQuote.qtype].length == 0" class="warning">
-                      <BIcon icon="#goldenrod face-frown_"/>No available product lines for the selected options.
-                        Try with different effective date, Grandfathered or Massachussetts Compliance options.
+                      <BIcon icon="#red face-frown_"/>There are no available product lines for the selected options.
+                        Try again with different Effective date, Funding, Grandfathered or Massachussetts Compliance options.
                     </span>
                     <label v-for="(rlob) in qStore.rlobList[localQuote.qtype]" :key="rlob">
                       <input type="radio" name="rlob_option" v-model="localQuote.rlob" :value="rlob"> {{ B.codeToText.rlob(rlob) }}
@@ -182,6 +182,7 @@ const saveChanges = () => {
 
             </template>
             <template v-else-if="localQuote.status == 'INPROG'">
+              <tr><th>Funding:</th><td colspan="3" class="info">{{ B.codeToText.funding(localQuote.funding) }}</td></tr>
               <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
               <tr>
                 <th :style="{color:localQuote.descr == '' ? 'red' : ''}">Name:</th>
@@ -193,14 +194,6 @@ const saveChanges = () => {
                   <label><input :disabled="uStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="localQuote.nonstd" value='N'> Standard</label>&nbsp;
                   <label><input :disabled="uStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="localQuote.nonstd" value='Y'> Non-Std</label>&nbsp;
                   <label><input :disabled="uStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="localQuote.nonstd" value='C'> Custom</label>
-                </td>
-              </tr>
-              <tr>
-                <th>Funding:</th>
-                <td colspan="3">
-                  <label><input :disabled="uStore.isUserReadOnly()" type="radio" name="funding_option" value="FI" v-model="localQuote.funding"> Fully Insured</label>&nbsp;&nbsp;
-                  <label><input :disabled="uStore.isUserReadOnly()" type="radio" name="funding_option" value="ASO" v-model="localQuote.funding"> ASO</label>&nbsp;&nbsp;
-                  <label><input :disabled="uStore.isUserReadOnly()" type="radio" name="funding_option" value="BF" v-model="localQuote.funding"> Balanced</label>
                 </td>
               </tr>
               <tr v-if="localQuote.qtype == 'MED'">
@@ -285,7 +278,7 @@ const saveChanges = () => {
         </table>
       </form>
       <div v-if="localQuote.status == 'NEW'" class="buttonbar">
-        <BButton class="anchor" icon="#red solid x_" @click="emit('close')">Cancel</BButton>&nbsp;
+        <BButton class="anchor" icon="#red solid x_" @click="emit('close')">Close</BButton>&nbsp;
         <BButton
           :disabled="localQuote.effdat == null
             || qStore.working != null
@@ -307,7 +300,7 @@ const saveChanges = () => {
           </template>
         </BConfirm>
 
-        <BButton class="anchor" icon="#red solid x_" @click="emit('close')">Cancel</BButton>&nbsp;
+        <BButton class="anchor" icon="#red solid x_" @click="emit('close')">Close</BButton>&nbsp;
         <BButton v-if="!uStore.isUserReadOnly()"
           :class="localQuote.status == 'INPROG' ? 'anchor' : 'modern'"
           icon="floppy-disk_"
@@ -359,7 +352,7 @@ const saveChanges = () => {
           may no longer be valid if you change plans or any other features of the quote.</p>
         </template>
       </BConfirm>
-      <BButton class="anchor" icon="#red solid x_" @click="emit('close')">Cancel</BButton>&nbsp;
+      <BButton class="anchor" icon="#red solid x_" @click="emit('close')">Close</BButton>&nbsp;
       <BButton v-if="!uStore.isUserReadOnly()"
         class="modern"
         icon="floppy-disk_"

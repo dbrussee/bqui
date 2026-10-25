@@ -45,9 +45,7 @@ const showBodyPopup = () => {
   const row = cfgHistory.value.pickedRow
   if (!row) return
   if (!row.body && !row.response) return
-  // if (row.body.length == 0) return
-  const popup = document.getElementById(bodyPopid) as HTMLDialogElement
-  popup?.showModal()
+  B.popup.showModal(bodyPopid)
 }
 const getPickedRowBody = ():string => {
   const row = cfgHistory.value.pickedRow
@@ -73,14 +71,15 @@ const getPickedRowError = ():string => {
   return ""
 }
 
-const setTimestamp = (row:any, td:any):void => {
-  if (!row || !td) return
-  td.innerHTML = B.format.ts(row.ts)
-  if (row.endpoint.indexOf("/login") >= 0 || row.endpoint.indexOf("/relogin") >= 0) {
-    const cell = td as HTMLTableCellElement
-    const tr = cell.closest("tr") as HTMLTableRowElement
-    tr.style.borderBottom = "3px solid sienna"
-  }
+const setTimestamp = (row:any, setStyle:any, setHtml:any):void => {
+  if (!row) return
+  setStyle((td:HTMLTableCellElement) => {
+    if (row.endpoint.indexOf("/login") >= 0 || row.endpoint.indexOf("/relogin") >= 0) {
+      const tr = td.closest("tr") as HTMLTableRowElement
+      tr.style.borderBottom = "3px solid sienna"
+    }
+  })
+  setHtml(B.format.ts(row.ts))
 }
 const getResultIcon = (row:any):string => {
   if (!row) return ""
@@ -120,7 +119,7 @@ const reQueryAPI = () => {
   <dialog :id="popid">
     <BTable :config="cfgHistory" :rows="uStore.apiHistory">
       <template #column_endpoint="{row}">{{ simplifyEndpoint(row) }}</template>
-      <template #column_ts="{row,td}">{{ setTimestamp(row, td) }}</template>
+      <template #column_ts="{row, setStyle, setHtml}">{{ setTimestamp(row, setStyle, setHtml) }}</template>
       <template #column_body="{row}"><BIcon v-if="row.body && row.body.length > 0" icon="solid code"/></template>
       <template #column_category="{row}"><BIcon :icon="getResultIcon(row)"/></template>
       <template #buttons>
@@ -137,6 +136,7 @@ const reQueryAPI = () => {
       <BButton icon="#red solid x_" @click="abort()">Close</BButton>
     </div>
     <dialog :id="bodyPopid" closedBy="any">
+      <div style="position: relative; overflow-y: scroll; height: calc(100vh - 8em);">
       <div v-if="cfgHistory.pickedRow?.body">
         <div class="titlebar">Request Body</div>
         <pre>{{ getPickedRowBody() }}</pre>
@@ -144,6 +144,10 @@ const reQueryAPI = () => {
       <div v-if="cfgHistory.pickedRow?.response" :style="{'margin-top': cfgHistory.pickedRow?.body ? '.5em' : ''}">
         <div class="titlebar">API Fetch Details</div>
         <pre>{{ getPickedRowError() }}</pre>
+      </div>
+      </div>
+      <div class="buttonbar">
+        <BButton icon="#red solid x_" @click="B.popup.close(bodyPopid)">Close</BButton>
       </div>
     </dialog>
 

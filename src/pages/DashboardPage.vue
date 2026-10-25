@@ -175,7 +175,6 @@ const qHandler = {
       qStore.updateQuote(quote).then((updatedQuote:any) => {
         if (updatedQuote) {
           pStore.refreshQuote(quote)
-          uStore.getDashboard()
           useToast().addToast(`Quote ${updatedQuote.id} saved`, "success")
         }
         this.close()
@@ -184,9 +183,8 @@ const qHandler = {
   },
   delete() {
     if (!this.quote.value) return
-    qStore.deleteQuote(this.quote.value.id)
+    qStore.deleteQuote(this.quote.value)
     pStore.refreshQuote(this.quote.value)
-    uStore.getDashboard()
     this.close()
   },
   submit(quote:Iquote) {
@@ -216,7 +214,6 @@ const qHandler = {
       qStore.updateQuote(quote).then((updatedQuote:any) => {
         if (updatedQuote) {
           pStore.refreshQuote(updatedQuote)
-          uStore.getDashboard()
           useToast().addToast(`Quote ${updatedQuote.id} ${toastMessage}`, "success")
         }
         this.close()
@@ -277,9 +274,6 @@ const headingText = ():string => {
     <template #column_READY="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.READY) }}</template>
     <template #column_ENROLLED="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.ENROLLED) }}</template>
     <template #column_EXPIRED="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.EXPIRED) }}</template>
-    <!-- <template #footer>
-        <BButton class="anchor" :disabled="!dashConfig.pickedRow" icon="solid magnifying-glass" @click="doSearch()">Search...</BButton>
-    </template> -->
   </BTable>
 
   <dialog :id="quoteListHandler.popId">
@@ -297,7 +291,7 @@ const headingText = ():string => {
       </template>
     </BTable>
     <div class="buttonbar">
-      <BButton @click="quoteListHandler.close()" class="anchor" icon="#red x">Cancel</BButton>
+      <BButton @click="quoteListHandler.close()" class="anchor" icon="#red solid x">Close</BButton>
     </div>
   </dialog>
   <QuoteDialog :popid="qHandler.popid"
