@@ -125,6 +125,7 @@ const getCellValue = computed(() => {
 })
 
 const rowsByIndex = computed(() => {
+  if (!props.rows) return []
   return props.rows.map((value, rn) => ({
     id: `row-${rn}`, // Stable DOM key that never changes positions
     val: value      // The raw primitive value

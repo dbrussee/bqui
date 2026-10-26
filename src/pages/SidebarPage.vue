@@ -9,6 +9,7 @@ import { appPageStore } from "@/stores/PageStore";
 const pageStore = appPageStore();
 import { appProspectStore } from "@/stores/ProspectStore";
 const pStore = appProspectStore();
+import { B } from "@/composables/BUtils";
 
 function getProspectID():string {
   if (!pStore.prospect?.id) return ""
@@ -23,9 +24,9 @@ function getProspectName():string {
 }
 function getProposalsCount():string {
   if (!pStore.prospect?.id) return "No Prospect"
-  // if (quoteStore.working) return quoteStore.working
-  if (pStore.prospect.name) return "None"
-  return 'Unknown '
+  if (!uStore.proposaldata) return "None"
+  const effCount = Object.keys(uStore.proposaldata).length
+  return `${effCount} ${B.format.plural(effCount, "Eff Date")}`
 }
 function getUnreadMessageCounts():string {
   if (msgStore.working) return msgStore.working
@@ -79,6 +80,7 @@ function getCensusCount():string {
         :longname="getProspectName()" />
     <SidebarItem @click="pageStore.page = 'PROPOSALS'" :current="pageStore.page == 'PROPOSALS'"
         icon="file-pdf_"
+        :working="uStore.proposalsworking"
         shortname="Proposals"
         :longname="getProposalsCount()" />
     <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"

@@ -86,6 +86,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   async function deleteProspect() {
     const fetcher = new BQAPIFetcher()
     if (!prospect.value) return
+    appUserStore().proposaldata = {}
     const pid = prospect.value.id
     B.working.set(prospWorking, "Deleting...");
     fetcher.callAPI(`/prospect/${pid}`, "DELETE").then(() => {
@@ -132,6 +133,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
   function getProspect(pid: string, registerRecent: boolean = false) {
     if (pid == "") return;
+    appUserStore().proposaldata = {}
     prospect.value = null;
     quotes.value.length = 0;
     issue.value = {}
@@ -151,6 +153,8 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       }
       prospect.value = fetcher.resp.prosp
       if (prospect.value == null) return
+
+      appUserStore().getProposals()
 
       // console.log(JSON.stringify(prospect.value, null, 2))
       prospect.value.census = sortCensus(fetcher.resp.prosp.census)

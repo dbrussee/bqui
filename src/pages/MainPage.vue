@@ -3,6 +3,11 @@ import AppHeader from "./AppHeader.vue";
 import HomePage from "./HomePage.vue";
 import SidebarPage from "./SidebarPage.vue";
 import { countersStore } from "../stores/CountersStore";
+import { appUserStore } from "@/stores/AppUserStore.ts";
+const uStore = appUserStore()
+import { appProspectStore } from "@/stores/ProspectStore.ts";
+const pStore = appProspectStore()
+import BConfirm from "@/components/B/BConfirm.vue";
 const counters = countersStore();
 
 </script>
@@ -20,24 +25,16 @@ const counters = countersStore();
         <tbody>
           <tr>
             <td style="text-align: left;">
-              <!-- v{{app.version()}}
-              <BInfo pos="T2R" :heading="'Application Ver ' + app.version()">
-                <ul>
-                  <li>Ver: {{ app.versionDescription() }}</li>
-                  <li>{{app.vers.release.getTime() < new Date().getTime() ? 'Released: ' : 'Scheduled Release: '}}{{app.vers.release.toLocaleDateString('en-US')}}</li>
-                </ul>
-              </BInfo> -->
-              <!-- &nbsp;&nbsp;
-              <BConfirm v-if="userStore.user"
+              <BConfirm v-if="uStore.user"
                   icon="solid arrow-right-from-bracket_"
-                  :warning="prospStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
+                  :warning="pStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
                   class="anchor"
-                  pos="T"
-                  @confirm="userStore.logout()">Logout?
+                  pos="T2R"
+                  @confirm="uStore.logout()">Logout?
                 <template #message>
-                  Log out user '{{ userStore.user.id }}'
+                  Log out user '{{ uStore.user.id }}'
                 </template>
-              </BConfirm> -->
+              </BConfirm>
             </td>
             <td style="text-align: center">
               Registered Trademark, blah, blah, blah
