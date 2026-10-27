@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import BQAPIFetcher from "@/components/BQAPI";
 import { appMessageStore } from "./MessagesStore";
 import { appProspectStore } from "./ProspectStore";
+import { proposalStore } from "./ProposalStore";
 import { ref } from "vue";
 import { useToast } from "@/composables/useToast";
 import { B } from "@/composables/BUtils";
@@ -11,13 +12,10 @@ import type { Iuser } from "@/types/user";
 export const appUserStore = defineStore("appUserStore", () => {
   const user = ref<Iuser | null>(null);
   const dashdata = ref<any>({})
-  const proposaldata = ref<any>({})
-  const currentProposal = ref<any>(null)
   const meta = ref<any>(null);
   const issue = ref<any>(null)
   const working = ref<any>(null)
   const dashworking = ref<any>(null)
-  const proposalsworking = ref<any>(null)
   const apiHistory = ref<any[]>([])
 
   initialize();
@@ -49,7 +47,7 @@ export const appUserStore = defineStore("appUserStore", () => {
       msgStore.getMessages()
       getMostRecentProspect()
       getDashboard()
-      getProposals()
+      proposalStore().getProposals()
     })
   }
   async function relogin() {
@@ -66,7 +64,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     msgStore.getMessages()
     getMostRecentProspect()
     getDashboard()
-    getProposals()
+    proposalStore().getProposals()
     return user.value;
   }
 
@@ -89,29 +87,6 @@ export const appUserStore = defineStore("appUserStore", () => {
     B.working.clear(dashworking)
     // dashdata.value = fetcher.resp.result
     return fetcher.resp as any[]
-  }
-
-  function getProposals():void {
-    const savedProposal = currentProposal.value
-    currentProposal.value = null
-    proposaldata.value = {}
-    const pStore = appProspectStore()
-    if (!pStore.prospect) return
-    if (!user.value) return
-    B.working.set(proposalsworking, "Loading...")
-    const fetcher = new BQAPIFetcher()
-    fetcher.callAPI(`/proposals/${pStore.prospect.id}`, "GET").then(() => {
-      B.working.clear(proposalsworking)
-      proposaldata.value = fetcher.resp.eff_dates
-      if (savedProposal && proposaldata.value) {
-        for (const eff of Object.keys(proposaldata.value)) {
-          proposaldata.value[eff].forEach((p:any) => {
-            if (p.id == savedProposal.id) currentProposal.value = {...p}
-          });
-        }
-      }
-      // console.dir(proposaldata.value)
-    })
   }
 
   function applyTheme(value:string | null = null) {
@@ -278,7 +253,6 @@ export const appUserStore = defineStore("appUserStore", () => {
   return { isLoading: working,
     relogin, login, logout, working,
     dashworking, getDashboard, getDashboardQuotes, dashdata,
-    getProposals, proposaldata, proposalsworking, currentProposal,
     saveSetting: saveUserSetting, applyTheme, getUserSetting,
     addRole, deleteRole,
     user, getUserRightValue, setUserRightValue, deleteUserRight, isUserReadOnly,

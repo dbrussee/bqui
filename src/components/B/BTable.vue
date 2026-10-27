@@ -185,7 +185,7 @@ const rowsByIndex = computed(() => {
           </td>
         </tr>
         <tr v-if="(!props.rows || props.rows.length == 0) && props.config.no_rows_text && props.config.no_rows_text != ''" class="no_rows_text">
-          <td :colspan="props.config.columns.length" :innweHTML="props.config.no_rows_text" />
+          <td :colspan="props.config.columns.length" :innerHTML="props.config.no_rows_text" />
         </tr>
       </tbody>
     </table>

@@ -55,10 +55,13 @@ const { toasts, removeToast, lockToast } = useToast()
 .locked { border: 3px solid black;}
 
 .toast-close {
+  position: absolute;
+  top: -5px;
+  right: 0;
   background: none;
   border: none;
   color: white;
-  font-size: 20px;
+  font-size: 25px;
   cursor: pointer;
   opacity: 0.7;
 }
