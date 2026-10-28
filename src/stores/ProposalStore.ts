@@ -45,15 +45,13 @@ export const proposalStore = defineStore("proposalStore", () => {
       // console.dir(proposaldata.value)
     })
   }
-  function createProposal(formData:any):void {
+  async function createProposal(formData:any) {
     const fetcher = new BQAPIFetcher()
-    fetcher.callAPI(`/proposal`, 'POST', formData).then((r) => {
-      console.dir(r)
-      proposaldata.value = fetcher.resp.eff_dates
-      const found = findProposal(fetcher.resp.newid)
-      currentProposal.value = found
-      useToast().addToast(`Proposal ${found.id} successfully created`)
-    })
+    await fetcher.callAPI(`/proposal`, 'POST', formData)
+    proposaldata.value = fetcher.resp.eff_dates
+    const found = findProposal(fetcher.resp.newid)
+    useToast().addToast(`Proposal successfully created`)
+    return found
   }
   function deleteProposal(id:number):void {
     const fetcher = new BQAPIFetcher()
@@ -61,7 +59,7 @@ export const proposalStore = defineStore("proposalStore", () => {
       console.dir(r)
       proposaldata.value = fetcher.resp.eff_dates
       currentProposal.value = null
-      useToast().addToast(`Proposal ${id} successfully deleted`)
+      useToast().addToast(`Proposal successfully deleted`)
     })
   }
   function renameProposal(proposal_id:number, newName:string):void {

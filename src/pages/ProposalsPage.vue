@@ -30,12 +30,13 @@ const cfgQuotesList = ref({
   width: "calc(100vw - 450px - .9em)",
   pickedRow: null as any,
   // pickedRowNumber: -1,
-  no_rows_text: "There are no quotes to display<br/>Add quotes to an existing proposal<br/>Pick a different proposal from the list<br/>Or create a new proposal",
+  no_rows_text: "No quotes have been added to this proposal",
   columns: [
     { id: "id", heading: "Quote", width: "4em", flags: "R" },
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
+    { id: "status", heading: "Status", width: "10em" },
     { id: "descr", heading: "Name" },
   ]
 })
@@ -45,13 +46,14 @@ const cfgAddQuoteList = ref({
     proposalHandler.addQuote(row.id)
   },
   height: "10em",
-  width: "600px",
+  width: "650px",
   // pickedRowNumber: -1,
   columns: [
     { id: "id", heading: "Quote", width: "4em", flags: "R" },
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
+    { id: "status", heading: "Status", width: "10em" },
     { id: "descr", heading: "Name" },
   ]
 })
@@ -66,7 +68,7 @@ const monthsRange = computed(() => {
   const startDate = new Date(today.getFullYear(), today.getMonth() - 3, 1);
 
   // 2. End 12 months past today (adjusting to cover that full month)
-  const endDate = new Date(today.getFullYear(), today.getMonth() + 18, 1);
+  const endDate = new Date(today.getFullYear(), today.getMonth() + 12, 1);
 
   // 3. Loop and push each month into the array
   const currentDate = new Date(startDate);
@@ -103,9 +105,18 @@ const proposalHandler = {
     ppStore.renameProposal(ppStore.currentProposal.id, newname)
   },
   create() {
-    if (this.model.value.effdat == '') return false
-    if (this.model.value.descr == '') return false
-    ppStore.createProposal(this.model.value)
+    if (this.model.value.effdat == '') return
+    if (this.model.value.descr == '') {
+      let descr = B.format.effdat(this.model.value.effdat)
+      descr += ' Proposal'
+      const effnode = ppStore.proposaldata[this.model.value.effdat]
+      if (effnode) descr += ' #' + (effnode.length + 1)
+      this.model.value.descr = descr
+    }
+    ppStore.createProposal(this.model.value).then((newProposal) => {
+      ppStore.currentProposal = newProposal
+      this.pickQuote()
+    })
     this.model.value.effdat = ''
     this.model.value.descr = ''
     B.popup.close(this.id)
@@ -117,13 +128,13 @@ const proposalHandler = {
     this.availableQuotes.value = pStore.quotes.filter((q:Iquote) => {
       const qeff = B.format.effdat(B.dateFromYYYYMMDD(q.effdat))
       const peff = B.format.effdat(ppStore.currentProposal.effdat)
-      const added = ppStore.currentProposal.quotes.find((pq:any) => {
+      const alreadyInList = ppStore.currentProposal.quotes.find((pq:any) => {
         return q.id == pq.id
       })
       // console.log("Compare quote", qeff, "with", peff, " status:", q.status)
       return qeff == peff
-        && q.status == 'READY'
-        && !added
+        && 'INPROG,EXPIRED'.indexOf(q.status) < 0
+        && !alreadyInList
     })
     // console.dir(this.availableQuotes)
     B.popup.showModal(this.quote_select_id)
@@ -149,7 +160,7 @@ const proposalHandler = {
     <!-- <BButton class="anchor" icon="solid rotate-left_" @click="refresh()">Refresh List</BButton>&nbsp;&nbsp; -->
     <BButton class="action" icon="square-plus_" @click="B.popup.showModal(proposalHandler.id)">New Proposal&hellip;</BButton>
     <span style="float: right;" v-if="ppStore.currentProposal">
-      <BConfirm class="anchor" pos="B2L" icon="#red trash-can_" @confirm="proposalHandler.delete">Delete Proposal
+      <BConfirm class="anchor" pos="B2L" icon="#red trash-can_" @confirm="proposalHandler.delete">Delete Proposal?
         <template #message>
           Delete this proposal?
           <p style='color:red'>This cannot be undone</p>
@@ -161,9 +172,13 @@ const proposalHandler = {
     <div v-if="Object.keys(ppStore.proposaldata).length == 0" style="width: 100%; text-align: center; color: silver">No Proposals</div>
     <template v-for="m of monthsRange" :key="m">
       <div class="info" v-if="ppStore?.proposaldata[m]" >- {{ B.format.effdat(m) }}</div>
-      <p :class="pp.id == ppStore.currentProposal?.id ? 'proposal-item picked' : 'proposal-item'" @click="ppStore.currentProposal = ppStore.proposaldata[m][index]"
-        v-for="(pp, index) of ppStore.proposaldata[m]" :key="index">
-        <BIcon :icon="B.statusIcon(ppStore.currentProposal?.status)" />{{ ppStore.proposaldata[m][index].descr || '< No Name >' }}</p>
+      <div v-for="(pp, index) of ppStore.proposaldata[m]" :key="index"
+        :class="pp.id == ppStore.currentProposal?.id ? 'proposal-item picked' : 'proposal-item'"
+        @click="ppStore.currentProposal = ppStore.proposaldata[m][index]">
+        <BIcon :icon="B.statusIcon(ppStore.proposaldata[m][index].status)"/>
+        {{ ppStore.proposaldata[m][index].descr }}<br/>
+        <span :style="{'font-size': '.8em', 'color': ppStore.proposaldata[m][index].quotes.length == 0 ? 'red' : ''}">&hellip;{{ B.format.valueWithUnits(ppStore.proposaldata[m][index].quotes.length, "quote") }}</span>
+      </div>
     </template>
   </div>
   <div v-else class="proposal_list">
@@ -185,7 +200,9 @@ const proposalHandler = {
     </table>
     <BTable :config="cfgQuotesList" :rows="ppStore.currentProposal?.quotes || []">
       <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
-      <template #column_status="{row, setStyle}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon></template>
+      <template #column_status="{row, setStyle}">
+        <BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon>
+      </template>
       <template #column_nonstd="{row}">
         <span :class="{
           'nonstdY': row.nonstd == 'Y',
@@ -193,7 +210,7 @@ const proposalHandler = {
         >{{ B.codeToText.nonstd(row.nonstd) }}</span>
       </template>
       <template #footer>
-        <BButton @click="proposalHandler.pickQuote()" class="modern" :disabled="!ppStore.currentProposal" gapright>Add Quote...</BButton>
+        <BButton @click="proposalHandler.pickQuote()" class="modern" icon="square-plus_" :disabled="!ppStore.currentProposal" gapright>Add Quote...</BButton>
         <BConfirm pos="T" @confirm="proposalHandler.removeQuote" :disabled="!cfgQuotesList.pickedRow" class="anchor" icon="#red trash-can_" gapleft>Remove Quote?</BConfirm>
       </template>
     </BTable>
@@ -202,8 +219,15 @@ const proposalHandler = {
     <div class="titlebar">New Proposal</div>
     <table class="form-table">
       <tbody>
-        <tr><th>Effective:</th><td><input v-model="proposalHandler.model.value.effdat"></td></tr>
-        <tr><th>Name:</th><td><input style="width: 30em;" v-model="proposalHandler.model.value.descr"></td></tr>
+        <tr><th>Effective:</th>
+            <td>
+              <select v-model="proposalHandler.model.value.effdat">
+                <option value="">Select</option>
+                <option v-for="m of monthsRange" :key="m" :value="m">{{ B.format.effdat(m) }}</option>
+              </select>
+            </td>
+        </tr>
+        <tr><th>Name:</th><td><input :placeholder="(B.format.effdat(proposalHandler.model.value.effdat) as string) + ' Proposal'" style="width: 30em;" v-model="proposalHandler.model.value.descr"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton class="anchor" @click="B.popup.close(proposalHandler.id)" icon="#red solid x">Cancel</BButton>&nbsp;
@@ -216,8 +240,8 @@ const proposalHandler = {
   <dialog :id="proposalHandler.quote_select_id">
     <div class="titlebar">Add Quote to Proposal</div>
     <div style="margin-bottom: .5em;" class="info">
-      Only quotes effective {{ B.format.effdat(ppStore.currentProposal?.effdat) }}, are in Ready status and are not already<br/>
-      included are listed. These are the only quotes that can be added.
+      Only quotes effective {{ B.format.effdat(ppStore.currentProposal?.effdat) }}, are not In Progress or Expired, and are<br/>
+       not already included are listed. These are the only quotes that can be added.
     </div>
     <BTable :config="cfgAddQuoteList" :rows="proposalHandler.availableQuotes.value || []">
       <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
