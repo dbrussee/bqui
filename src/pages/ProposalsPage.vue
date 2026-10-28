@@ -75,8 +75,11 @@ const monthsRange = computed(() => {
   while (currentDate <= endDate) {
     const dateAsString = B.format.dateMMDDYYYY(currentDate)
     dates.push(B.format.dateMMDDYYYY(currentDate))
-    const test = ppStore.proposaldata[dateAsString]
-    if (test) {
+    let foundEff = null
+    if (ppStore.proposaldata) {
+      foundEff = ppStore.proposaldata[dateAsString]
+    }
+    if (foundEff) {
       ppStore.proposaldata[dateAsString].forEach((pp:any) => {
         pp.effdat = B.dateFromYYYYMMDD(pp.effdat)
       })
@@ -109,8 +112,10 @@ const proposalHandler = {
     if (this.model.value.descr == '') {
       let descr = B.format.effdat(this.model.value.effdat)
       descr += ' Proposal'
-      const effnode = ppStore.proposaldata[this.model.value.effdat]
-      if (effnode) descr += ' #' + (effnode.length + 1)
+      if (ppStore.proposaldata) {
+        const effnode = ppStore.proposaldata[this.model.value.effdat]
+        if (effnode) descr += ' #' + (effnode.length + 1)
+      }
       this.model.value.descr = descr
     }
     ppStore.createProposal(this.model.value).then((newProposal) => {
@@ -189,7 +194,7 @@ const proposalHandler = {
       <tbody>
         <tr><th style="width:8em;">Effective:</th>
             <td>{{ B.format.effdat(ppStore.currentProposal?.effdat) }}
-                <span style="float: right">Proposal Status: <BIcon :icon="B.statusIcon(ppStore.currentProposal?.status)">{{ B.codeToText.quoteStatus(ppStore.currentProposal?.status) }}</BIcon></span>
+                <span v-if="ppStore.currentProposal" style="float: right">Proposal Status: <BIcon :icon="B.statusIcon(ppStore.currentProposal?.status)">{{ B.codeToText.quoteStatus(ppStore.currentProposal?.status) }}</BIcon></span>
             </td></tr>
         <tr><th>Proposal Name:</th>
             <td>{{ ppStore.currentProposal?.descr }}

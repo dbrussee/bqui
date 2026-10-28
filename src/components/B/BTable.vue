@@ -1,6 +1,8 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
+
+const tableRef = ref<HTMLTableElement | null>(null)
 
 interface IColumn {
   id: string
@@ -10,7 +12,7 @@ interface IColumn {
   cellclass?: string
   hide?: boolean
 }
-const emit = defineEmits(["pick", "unpick", "dblpick", "hdrclick"])
+// const emit = defineEmits(["pick", "unpick", "dblpick", "hdrclick"])
 const props = defineProps({
   config: {
     type: Object as () => any,
@@ -49,26 +51,31 @@ const deduceJustification = (style: Record<string, string>, col: IColumn) => {
   }
 };
 
-const handleTableHeadClick = (event:MouseEvent) => {
-  event.stopImmediatePropagation()
-  const el = event.target as HTMLElement // could be anything
-  const cell = el.closest('th') as HTMLTableCellElement | null
-  if (!cell) return
-  const col = props.config.columns[cell.cellIndex]
-  emit("hdrclick", col)
-}
+// const handleTableHeadClick = (event:MouseEvent) => {
+//   event.stopImmediatePropagation()
+//   const el = event.target as HTMLElement // could be anything
+//   const cell = el.closest('th') as HTMLTableCellElement | null
+//   if (!cell) return
+//   const col = props.config.columns[cell.cellIndex]
+//   emit("hdrclick", col)
+// }
 
+const pickedRowIndex = ref<number>(-1) // No row number
 const doPick = (isDouble:boolean, row:any, ri?:number, col?:IColumn, ci?:number) => {
   if (!isDouble) {
     if (row == props.config.pickedRow) {
-      emit('unpick', row, ri, col, ci)
-      if (props.config['onUnpick']) props.config.onUnpick(row, ri, col, ci)
+      pickedRowIndex.value = -1
+      // emit('unpick', row, ri, col, ci)
+      if (props.config['onUnpick']) {
+        props.config.onUnpick(row, ri, col, ci)
+      }
     } else {
-      emit('pick')
+      pickedRowIndex.value = ri as number
+      // emit('pick')
       if (props.config['onPick']) props.config.onPick(row, ri, col, ci)
     }
   } else if (isDouble) {
-      emit('dblpick', row, ri, col, ci)
+      // emit('dblpick', row, ri, col, ci)
       if (props.config['onDblpick']) props.config.onDblpick(row, ri, col, ci)
   }
 }
@@ -132,6 +139,83 @@ const rowsByIndex = computed(() => {
   }))
 })
 
+const scrollToSelectedRow = async () => {
+  // Wait for Vue to update the DOM classes (.is-selected)
+  await nextTick();
+
+  if (!tableRef.value) return;
+
+  // Find the row that currently has the selection class inside this component instance
+  const selectedRow = tableRef.value.querySelector('.picked') as HTMLElement;
+
+  if (selectedRow) {
+    selectedRow.scrollIntoView({
+      behavior: 'smooth', // 'smooth' for animated scrolling, 'auto' for instant jumping
+      block: 'nearest',   // 'nearest' prevents the page from aggressively bouncing around
+      inline: 'nearest'
+    });
+  }
+};
+const handleKeyDown = (event:KeyboardEvent) => {
+  // console.dir(event)
+  if (props.rows.length == 0) return // Nothing to pick
+  // No picked row indicator... cant pick rows!
+  if (props.config.onPick == undefined) return
+  if (pickedRowIndex.value < 0) {
+    if (event.key === 'ArrowDown') {
+      const row = rowsByIndex.value[0]
+      if (row) {
+        doPick(false, row.val, 0)
+        scrollToSelectedRow()
+      }
+    }
+    if (event.key === 'ArrowUp') {
+      const lastRowNumber = props.rows.length - 1
+      const row = rowsByIndex.value[lastRowNumber]
+      if (row) {
+        doPick(false, row.val, lastRowNumber)
+        scrollToSelectedRow()
+      }
+    }
+    return;
+  }
+
+  if (event.key === 'ArrowDown') {
+    event.preventDefault(); // Prevent page scrolling
+    if (pickedRowIndex.value < props.rows.length - 1) {
+      const newIndex = pickedRowIndex.value + 1
+      const row = rowsByIndex.value[newIndex]
+      if (row) {
+        doPick(false, row.val, newIndex)
+        scrollToSelectedRow()
+      }
+    }
+  } else if (event.key === 'ArrowUp') {
+    event.preventDefault(); // Prevent page scrolling
+    if (pickedRowIndex.value > 0) {
+      const newIndex = pickedRowIndex.value - 1
+      const row = rowsByIndex.value[newIndex]
+      if (row) {
+        doPick(false, row.val, newIndex)
+        scrollToSelectedRow()
+      }
+    }
+  } else if (event.key === 'Enter') {
+    event.preventDefault(); // Prevent page scrolling
+    if (pickedRowIndex.value >= 0) {
+      const index = pickedRowIndex.value
+      const row = rowsByIndex.value[index]
+      if (row) doPick(true, row.val, index)
+    }
+  } else if (event.key === 'Escape') {
+    event.preventDefault(); // Prevent page scrolling
+    if (pickedRowIndex.value >= 0) {
+      const index = pickedRowIndex.value
+      const row = rowsByIndex.value[index]
+      if (row) doPick(false, null, -1) // unpicks if allowed by implemention
+    }
+  }
+}
 </script>
 
 
@@ -141,13 +225,16 @@ const rowsByIndex = computed(() => {
     {{ props.config.heading }}
   </div>
   <div class="b-table-container"
+    tabindex="0"
+    @keydown="handleKeyDown"
     :style="{
       height: 'calc(' + props.config.height + ($slots.footer ? ' - 1.3em)' : ')'),
       'overflow-y': props.config.height == '' ? 'hidden' : 'auto',
     }"
   >
-    <table :style="{ width: props.config.width }" :class="{'nohover': (props.config.hover != undefined && props.config.hover == false)}">
-    <thead @click="handleTableHeadClick($event)">
+    <table ref="tableRef" :style="{ width: props.config.width }" :class="{'nohover': (props.config.hover != undefined && props.config.hover == false)}">
+    <!-- <thead @click="handleTableHeadClick($event)"> -->
+    <thead>
       <tr>
         <template v-for="col in props.config.columns" :key="col.id">
         <th v-if="col.hide == undefined || !col.hide" :style="deduceTHStyle(col)">
@@ -212,6 +299,7 @@ tr.no_rows_text {
   }
 }
 div.b-table-container {
+  outline: none;
   border-left: 1px solid black;
   width: fit-content;
   overscroll-behavior: none;
