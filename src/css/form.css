@@ -156,7 +156,10 @@ input {
     border-bottom: none !important;
   }
 }
-
+label input[type="checkbox"],
+label input[type="radio"] {
+  transform: translateY(.21em);
+}
 table.form-table {
   border-collapse: collapse;
   tr th {
