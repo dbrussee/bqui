@@ -400,6 +400,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
   const flattenCensus = ():any => {
     if (!prospect.value) return []
+    // console.dir(prospect.value.census)
     cleanCensus()
     const flat = [] as any[]
     prospect.value.census.forEach((sub: any, rn:number) => {
@@ -484,7 +485,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
           lstnam: mem["Last Name"], fstnam: mem["First Name"], midnam: mem["MI"],
           dob: mem["DOB"], sex: mem["Sex"],
           med: mem["MED"] != "", den: mem["DEN"] != "", vis: mem["VIS"] != "",
-          cobra: mem["COBRA"] != "", dis: mem["DIS"] != "",
+          cobra: mem["COBRA"] != "", dis: false,
           deps: []
         }
         addNodeIfNotNull(sub, "suffnam", mem["Suffix"])
@@ -496,7 +497,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
             lstnam: mem["Last Name"], fstnam: mem["First Name"], midnam: mem["MI"],
             dob: mem["DOB"], sex: mem["Sex"],
             med: mem["MED"] != "", den: mem["DEN"] != "", vis: mem["VIS"] != "",
-            cobra: mem["COBRA"] != "", dis: mem["DIS"] != ""
+            cobra: false, dis: relation == 'SPS' ? false : mem["Disabled"] != ""
           }
           addNodeIfNotNull(dep, "suffnam", mem["Suffix"])
           sub.deps.push(dep)
