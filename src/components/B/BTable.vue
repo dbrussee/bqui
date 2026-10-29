@@ -1,6 +1,6 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, toRaw } from 'vue'
 
 const tableRef = ref<HTMLTableElement | null>(null)
 
@@ -139,23 +139,40 @@ const rowsByIndex = computed(() => {
   }))
 })
 
+
 const scrollToSelectedRow = async () => {
-  // Wait for Vue to update the DOM classes (.is-selected)
   await nextTick();
 
   if (!tableRef.value) return;
 
-  // Find the row that currently has the selection class inside this component instance
-  const selectedRow = tableRef.value.querySelector('.picked') as HTMLElement;
+  const container = tableRef.value;
+  const selectedRow = container.querySelector('.picked') as HTMLElement;
+  const stickyHeader = container.querySelector('thead') as HTMLElement;
+
+  // Accurately checks the current pixel height of the header at this browser size
+  const headerHeight = stickyHeader ? stickyHeader.offsetHeight : 0;
 
   if (selectedRow) {
-    selectedRow.scrollIntoView({
-      behavior: 'smooth', // 'smooth' for animated scrolling, 'auto' for instant jumping
-      block: 'nearest',   // 'nearest' prevents the page from aggressively bouncing around
-      inline: 'nearest'
-    });
+    const containerTop = container.scrollTop;
+    // Captures the exact, live pixel equivalent of your 50vh value
+    const containerBottom = containerTop + container.clientHeight;
+
+    const rowTop = selectedRow.offsetTop;
+    const rowBottom = rowTop + selectedRow.offsetHeight;
+
+    const buffer = 0;
+
+    // Moving Down
+    if (rowBottom > containerBottom) {
+      container.scrollTop = rowBottom - container.clientHeight + buffer;
+    }
+    // Moving Up (Subtracting the sticky header space)
+    else if (rowTop - headerHeight < containerTop) {
+      container.scrollTop = rowTop - headerHeight - buffer;
+    }
   }
 };
+
 const handleKeyDown = (event:KeyboardEvent) => {
   // console.dir(event)
   if (props.rows.length == 0) return // Nothing to pick
@@ -200,7 +217,7 @@ const handleKeyDown = (event:KeyboardEvent) => {
         scrollToSelectedRow()
       }
     }
-  } else if (event.key === 'Enter') {
+  } else if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault(); // Prevent page scrolling
     if (pickedRowIndex.value >= 0) {
       const index = pickedRowIndex.value
@@ -208,13 +225,18 @@ const handleKeyDown = (event:KeyboardEvent) => {
       if (row) doPick(true, row.val, index)
     }
   } else if (event.key === 'Escape') {
-    event.preventDefault(); // Prevent page scrolling
+    // if (!props.config['onUnpick']) return
+    // event.preventDefault(); // Prevent page scrolling
     if (pickedRowIndex.value >= 0) {
       const index = pickedRowIndex.value
       const row = rowsByIndex.value[index]
       if (row) doPick(false, null, -1) // unpicks if allowed by implemention
     }
   }
+}
+
+const isPicked = (rowval:any):boolean => {
+  return toRaw(props.config.pickedRow) == toRaw(rowval)
 }
 </script>
 
@@ -225,6 +247,7 @@ const handleKeyDown = (event:KeyboardEvent) => {
     {{ props.config.heading }}
   </div>
   <div class="b-table-container"
+    ref="tableRef"
     tabindex="0"
     @keydown="handleKeyDown"
     :style="{
@@ -232,7 +255,7 @@ const handleKeyDown = (event:KeyboardEvent) => {
       'overflow-y': props.config.height == '' ? 'hidden' : 'auto',
     }"
   >
-    <table ref="tableRef" :style="{ width: props.config.width }" :class="{'nohover': (props.config.hover != undefined && props.config.hover == false)}">
+    <table :style="{ width: props.config.width }" :class="{'nohover': (props.config.hover != undefined && props.config.hover == false)}">
     <!-- <thead @click="handleTableHeadClick($event)"> -->
     <thead>
       <tr>
@@ -248,7 +271,7 @@ const handleKeyDown = (event:KeyboardEvent) => {
         @dblclick="handleTableBodyClick($event, true)"
         >
         <tr v-for="(row, rn) in rowsByIndex" :key="row.id"
-            :class="{picked : props.config.pickedRow == row.val}">
+            :class="{picked : isPicked(row.val)}">
           <td v-for="(col,cn) in props.config.columns" :key="col.id"
               :class="col.cellclass"
               :style="deduceTDStyle(col)"
