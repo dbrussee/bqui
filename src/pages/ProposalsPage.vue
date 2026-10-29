@@ -15,41 +15,32 @@ import BIcon from '@/components/B/BIcon.vue';
 import BPrompt from '@/components/B/BPrompt.vue';
 import type { Iquote } from '@/types';
 
-// const refresh = () => {
-//   cfgQuotesList.value.pickedRow = null
-//   currentProposal.value = null;
-//   uStore.getProposals()
-// }
-
-const cfgQuotesList = ref({
-  onPick: (row:any) => {
-    cfgQuotesList.value.pickedRow = row
-  },
-  // onDblpick: () => { qHandler.edit(cfgQuotesList.value.pickedRow) },
-  height: "calc(100vh - 13em)",
-  width: "calc(100vw - 450px - .9em)",
-  pickedRow: null as any,
-  // pickedRowNumber: -1,
-  no_rows_text: "No quotes have been added to this proposal",
-  columns: [
-    { id: "id", heading: "Quote", width: "4em", flags: "R" },
-    { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
-    { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
-    { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
-    { id: "status", heading: "Status", width: "10em" },
-    { id: "descr", heading: "Name" },
-  ]
-})
+// const cfgQuotesList = ref({
+//   onPick: (row:any) => cfgQuotesList.value.pickedRow = row,
+//   onDblpick: () => proposalHandler.pickQuote(),
+//   height: "calc(100vh - 13em)",
+//   width: "calc(100vw - 450px - .9em)",
+//   pickedRow: null as any,
+//   columns: [
+//     { id: "id", heading: "Quote", width: "4em", flags: "R" },
+//     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
+//     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
+//     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
+//     { id: "status", heading: "Status", width: "10em" },
+//     { id: "descr", heading: "Name" },
+//   ]
+// })
 
 const cfgAddQuoteList = ref({
   onPick: (row:any) => {
-    proposalHandler.addQuote(row.id)
+    proposalHandler.toggleQuote(row)
   },
   height: "10em",
-  width: "650px",
+  width: "800px",
   // pickedRowNumber: -1,
   columns: [
     { id: "id", heading: "Quote", width: "4em", flags: "R" },
+    { id: "custom", heading: "", width: ".1em" },
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
@@ -58,6 +49,34 @@ const cfgAddQuoteList = ref({
   ]
 })
 
+const quotesSummary = () => {
+  if (!ppStore.currentProposal) return "No Selected Proposal"
+  const total = ppStore.currentProposal.quotes.length
+  if (total == 0) return "No Quotes"
+  const totalText = B.format.valueWithUnits(total, "quote")
+  const readyCount = ppStore.currentProposal.quotes.filter((q:Iquote) => {
+    return q.status == "READY"
+  }).length
+  let readyText = ""
+  if (readyCount == total) {
+    switch(total) {
+      case 1: readyText = "Ready"; break;
+      case 2: readyText = "Both Ready"; break;
+      default: readyText = "All Ready"; break;
+    }
+  } else {
+    if (readyCount == 0) {
+      switch(total) {
+        case 1: readyText = "Not Ready"; break;
+        case 2: readyText = "Neither Ready"; break;
+        default: readyText = "None Ready"; break;
+      }
+    } else {
+      readyText = readyCount + " Ready"
+    }
+  }
+  return `${totalText} - ${readyText}`
+}
 
 const monthsRange = computed(() => {
   const dates = <any[]>[];
@@ -94,8 +113,18 @@ const formatStatusCell = (row:any, setStyle:any) => {
   setStyle((td:HTMLTableCellElement) => {
     const classname = "status" + row.status
     td.classList.add(classname)
+    // const tr = td.closest("tr") as HTMLTableRowElement
+    // if (tr) tr.style.textDecoration = (row.custom == 'Y' ? "line-through" : "none")
   })
   return B.codeToText.quoteStatus(row.status)
+}
+
+const isInProposalIcon = (row:Iquote) => {
+  if (row.custom == "Y") {
+    return "#green solid square-check"
+  } else {
+    return "square"
+  }
 }
 
 const proposalHandler = {
@@ -136,25 +165,31 @@ const proposalHandler = {
       const alreadyInList = ppStore.currentProposal.quotes.find((pq:any) => {
         return q.id == pq.id
       })
+      q.custom = alreadyInList ? "Y" : "N"
       // console.log("Compare quote", qeff, "with", peff, " status:", q.status)
       return qeff == peff
         && 'INPROG,EXPIRED'.indexOf(q.status) < 0
-        && !alreadyInList
+        // && !alreadyInList
     })
     // console.dir(this.availableQuotes)
     B.popup.showModal(this.quote_select_id)
   },
-  addQuote(qid:string) {
-    if (!qid || qid == '') return
-    B.popup.close(this.quote_select_id)
-    ppStore.addQuote(ppStore.currentProposal.id, qid)
+  async toggleQuote(quote_row:any) {
+    if (!quote_row.id || quote_row.id == '') return
+    if (quote_row.custom == 'Y') { // It's on the list
+      quote_row.custom = "N"
+      await ppStore.removeQuote(ppStore.currentProposal.id, quote_row.id)
+      // if (cfgQuotesList.value.pickedRow) {
+      //   if (cfgQuotesList.value.pickedRow.id == quote_row.id) {
+      //     cfgQuotesList.value.pickedRow = null
+      //   }
+      // }
+    } else {
+      quote_row.custom = "Y"
+      await ppStore.addQuote(ppStore.currentProposal.id, quote_row.id)
+    }
     // this.pickQuote()
   },
-  removeQuote() {
-    const qid = cfgQuotesList.value.pickedRow.id
-    ppStore.removeQuote(ppStore.currentProposal.id, qid)
-    cfgQuotesList.value.pickedRow = null
-  }
 }
 
 </script>
@@ -201,9 +236,23 @@ const proposalHandler = {
               <BPrompt v-if="ppStore.currentProposal" @change="proposalHandler.rename" :text="ppStore.currentProposal?.descr" prompt="Proposal Name"/>
             </td>
         </tr>
+        <tr><th>Quotes:</th><td>{{ quotesSummary() }}
+          <span class="anchor" @click="proposalHandler.pickQuote()">
+            <BIcon icon="solid pencil_"></BIcon>Add / Remove Quotes
+          </span>
+        </td></tr>
+        <tr><td class="breakline" colspan="2"><hr/></td></tr>
+        <tr><th>Include:</th><td><label><input type="checkbox"> Cover Page</label></td></tr>
+        <tr><th></th><td><label><input type="checkbox"> Group Application</label></td></tr>
+        <tr><th></th><td><label><input type="checkbox"> Benefit Details</label></td></tr>
+        <tr><th></th><td><label><input type="checkbox"> Benefit Comparisons</label></td></tr>
+        <tr><th></th><td><label><input type="checkbox"> Rate Sheets</label></td></tr>
+        <tr><th></th><td><label><input type="checkbox"> Rate Sheet Comparisons</label></td></tr>
+        <tr><th></th><td><label><input type="checkbox"> Legal Agreement Form</label></td></tr>
+        <tr><th></th><td><label><input type="checkbox"> Tax Preparation Documents</label></td></tr>
       </tbody>
     </table>
-    <BTable :config="cfgQuotesList" :rows="ppStore.currentProposal?.quotes || []">
+    <!-- <BTable :config="cfgQuotesList" :rows="ppStore.currentProposal?.quotes || []">
       <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
       <template #column_status="{row, setStyle}">
         <BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon>
@@ -215,10 +264,9 @@ const proposalHandler = {
         >{{ B.codeToText.nonstd(row.nonstd) }}</span>
       </template>
       <template #footer>
-        <BButton @click="proposalHandler.pickQuote()" class="modern" icon="square-plus_" :disabled="!ppStore.currentProposal" gapright>Add Quote...</BButton>
-        <BConfirm pos="T" @confirm="proposalHandler.removeQuote" :disabled="!cfgQuotesList.pickedRow" class="anchor" icon="#red trash-can_" gapleft>Remove Quote?</BConfirm>
+        <BButton @click="proposalHandler.pickQuote()" class="modern" icon="square-plus_" :disabled="!ppStore.currentProposal" gapright>Add / Remove Quotes...</BButton>
       </template>
-    </BTable>
+    </BTable> -->
   </div>
   <dialog :id="proposalHandler.id">
     <div class="titlebar">New Proposal</div>
@@ -249,6 +297,7 @@ const proposalHandler = {
        not already included are listed. These are the only quotes that can be added.
     </div>
     <BTable :config="cfgAddQuoteList" :rows="proposalHandler.availableQuotes.value || []">
+      <template #column_custom="{row}"><BIcon :icon="isInProposalIcon(row)"></BIcon></template>
       <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
       <template #column_status="{row, setStyle}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon></template>
       <template #column_nonstd="{row}">
@@ -306,5 +355,10 @@ div.proposal {
     color: var(--table-row-picked-text);
     background-color: var(--table-row-picked-bg);
   }
+}
+
+.breakline {
+  padding-top: .4em;
+  padding-bottom: .4em;
 }
 </style>

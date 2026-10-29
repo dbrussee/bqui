@@ -115,7 +115,7 @@ const decodeSource = (configRight:any, setStyle:any, setHtml:any):void => {
     } else {
       cell.style.color = ""
       cell.classList.add("mono")
-      setHtml('<i>' + userRight.source + "</i>")
+      setHtml(`<i>${userRight.source}</i>`)
     }
   })
 }

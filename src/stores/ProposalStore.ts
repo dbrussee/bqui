@@ -76,25 +76,30 @@ export const proposalStore = defineStore("proposalStore", () => {
     })
   }
 
-  function addQuote(pid:number, qid:string|number):void {
+  async function addQuote(pid:number, qid:string|number) {
     if (typeof qid == 'string') qid = parseInt(qid)
-    new BQAPIFetcher().callAPI(`/proposal/quote/${pid}/${qid}`, 'PUT').then((fetcher) => {
-      if (fetcher.issue) {
-        useToast().addToast(fetcher.issue.message, "warning")
-      } else {
-        proposaldata.value = fetcher.resp.eff_dates
-        currentProposal.value = findProposal(pid)
-        useToast().addToast(`Quote ${qid} added to proposal`)
-      }
-    })
-  }
-  function removeQuote(pid:number, qid:string|number):void {
-    if (typeof qid == 'string') qid = parseInt(qid)
-    new BQAPIFetcher().callAPI(`/proposal/quote/${pid}/${qid}`, 'DELETE').then((fetcher) => {
+    const fetcher = new BQAPIFetcher()
+    await fetcher.callAPI(`/proposal/quote/${pid}/${qid}`, 'PUT')
+    if (fetcher.issue) {
+      useToast().addToast(fetcher.issue.message, "warning")
+    } else {
       proposaldata.value = fetcher.resp.eff_dates
       currentProposal.value = findProposal(pid)
-      useToast().addToast(`Quote ${qid} removed from proposal`)
-    })
+      // useToast().addToast(`Quote ${qid} added to proposal`)
+    }
+    return qid
+  }
+  async function removeQuote(pid:number, qid:string|number) {
+    if (typeof qid == 'string') qid = parseInt(qid)
+    const fetcher = new BQAPIFetcher()
+    await fetcher.callAPI(`/proposal/quote/${pid}/${qid}`, 'DELETE')
+    if (fetcher.issue) {
+      useToast().addToast(fetcher.issue.message, "warning")
+    } else {
+      proposaldata.value = fetcher.resp.eff_dates
+      currentProposal.value = findProposal(pid)
+      // useToast().addToast(`Quote ${qid} removed from proposal`)
+    }
   }
 
   return { working,

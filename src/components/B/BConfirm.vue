@@ -101,13 +101,23 @@ const doBlur = ():void => {
     btn?.focus()
   })
 }
+
+const handleMainClick = (event:MouseEvent | KeyboardEvent) => {
+  if (event.shiftKey) {
+    event.preventDefault()
+    doBlur()
+    emit("confirm")
+  } else {
+    doBlur()
+  }
+}
 </script>
 
 <template>
   <button v-if="props.bypass" :disabled="props.disabled" :class="attrs.class" :style="[attrs.style, {marginRight: props.gapright ? '.4em' : '', marginLeft: props.gapleft ? '.4em' : ''}]" @click="doBlur(); emit('confirm')">
     <BIcon :icon="props.icon" :disabled="props.disabled" :source="props.source"><slot/></BIcon>
   </button>
-  <button v-if="!props.bypass" :popovertarget="popid" :disabled="props.disabled" :class="attrs.class" :style="[attrs.style, {marginRight: props.gapright ? '.4em' : '', marginLeft: props.gapleft ? '.4em' : ''}]" @click="doBlur()">
+  <button v-if="!props.bypass" :popovertarget="popid" :disabled="props.disabled" :class="attrs.class" :style="[attrs.style, {marginRight: props.gapright ? '.4em' : '', marginLeft: props.gapleft ? '.4em' : ''}]" @click="handleMainClick($event)">
     <BIcon :icon="props.icon" :source="props.source" :disabled="props.disabled"><slot/></BIcon>
   </button>
   <div :id="popid" popover :class="props.pos" :style="{maxWidth:props.width}">

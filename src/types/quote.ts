@@ -20,4 +20,5 @@ export interface Iquote {
   crttms: Date
   updusr: string
   updtms: Date
+  custom?: string
 }

@@ -66,12 +66,10 @@ const getPlansAndAttributes = () => {
   // Call the API to get details... This is async, so the
   // dialog will open with empty data (from above) and then
   // get populated after the async promise completes
-  console.log("Getting plans and attribute")
   qStore.getPlanList(localQuote.value)
   qStore.getPlansForQuote(localQuote.value).then((data:any) => {
     quotePlans.value = data.resp.plans || {}
     quoteAttrs.value = data.resp.attrs || {MED:[], DRU:[], DEN:[], VIS:[]}
-    console.log("Set plans and attributes")
   })
 }
 
@@ -85,7 +83,6 @@ const getPlansAndAttributes = () => {
 const localQuote = ref(structuredClone(toRaw(props.quote)))
 // Check if / when the parent quote changes
 watch(() => props.quote, (newValue) => {
-  console.log("Props quote watcher hit")
   localQuote.value = structuredClone(toRaw(newValue))
   if (localQuote.value && localQuote.value.status != 'NEW') {
     getPlansAndAttributes()
