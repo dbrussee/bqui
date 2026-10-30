@@ -12,7 +12,7 @@ export function useSearchProspectPopup() {
   function closeSearch() {
     popRef.value?.close()
   }
-  async function loadProspect(pid:string):Promise<void> {
+  async function loadProspect(pid:number):Promise<void> {
     appProspectStore().getProspect(pid, true)
     appPageStore().page = "PROSPECTS"
     closeSearch()

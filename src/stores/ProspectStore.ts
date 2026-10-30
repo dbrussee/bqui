@@ -132,8 +132,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     issue.value = fetcher.issue
   }
 
-  function getProspect(pid: string, registerRecent: boolean = false) {
-    if (pid == "") return;
+  function getProspect(pid: number, registerRecent: boolean = false) {
     proposalStore().proposaldata = {}
     prospect.value = null;
     quotes.value.length = 0;

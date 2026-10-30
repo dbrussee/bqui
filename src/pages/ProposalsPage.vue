@@ -49,34 +49,45 @@ const cfgAddQuoteList = ref({
   ]
 })
 
-const quotesSummary = () => {
-  if (!ppStore.currentProposal) return "No Selected Proposal"
+const quotesSummary = computed(() => {
+  const rslt = {total: "No Selected Proposal", ready: "", icon:""}
+  if (!ppStore.currentProposal) return rslt
   const total = ppStore.currentProposal.quotes.length
-  if (total == 0) return "No Quotes"
+  if (total == 0) {
+    rslt.total = "No Quotes"
+    return rslt
+  }
   const totalText = B.format.valueWithUnits(total, "quote")
-  const readyCount = ppStore.currentProposal.quotes.filter((q:Iquote) => {
-    return q.status == "READY"
+  const notReadyCount = ppStore.currentProposal.quotes.filter((q:Iquote) => {
+    return q.status != 'READY'
   }).length
   let readyText = ""
-  if (readyCount == total) {
+  if (notReadyCount == 0) {
     switch(total) {
       case 1: readyText = "Ready"; break;
       case 2: readyText = "Both Ready"; break;
       default: readyText = "All Ready"; break;
     }
   } else {
-    if (readyCount == 0) {
+    if (notReadyCount == total) {
       switch(total) {
         case 1: readyText = "Not Ready"; break;
         case 2: readyText = "Neither Ready"; break;
         default: readyText = "None Ready"; break;
       }
     } else {
-      readyText = readyCount + " Ready"
+      readyText = notReadyCount + " Not Ready"
     }
   }
-  return `${totalText} - ${readyText}`
-}
+  rslt.total = totalText
+  rslt.ready = readyText
+  if (notReadyCount == 0) {
+    rslt.icon = B.statusIcon("READY")
+  } else {
+    rslt.icon = B.statusIcon("RATEREQ")
+  }
+  return rslt
+})
 
 const monthsRange = computed(() => {
   const dates = <any[]>[];
@@ -168,7 +179,7 @@ const proposalHandler = {
       q.custom = alreadyInList ? "Y" : "N"
       // console.log("Compare quote", qeff, "with", peff, " status:", q.status)
       return qeff == peff
-        && 'INPROG,EXPIRED'.indexOf(q.status) < 0
+        && 'INPROG,EXPIRED,ENROLLED'.indexOf(q.status) < 0
         // && !alreadyInList
     })
     // console.dir(this.availableQuotes)
@@ -236,11 +247,14 @@ const proposalHandler = {
               <BPrompt v-if="ppStore.currentProposal" @change="proposalHandler.rename" :text="ppStore.currentProposal?.descr" prompt="Proposal Name"/>
             </td>
         </tr>
-        <tr><th>Quotes:</th><td>{{ quotesSummary() }}
-          <span class="anchor" @click="proposalHandler.pickQuote()">
-            <BIcon icon="solid pencil_"></BIcon>Add / Remove Quotes
+        <tr><th>Quotes:</th><td>{{ quotesSummary.total }}
+            {{ quotesSummary.ready == '' ? '' : ' - ' }}
+            <BIcon v-if="quotesSummary.icon != ''" :icon="quotesSummary.icon"/>{{ quotesSummary.ready }}
+          <span v-if="ppStore.currentProposal" class="anchor" @click="proposalHandler.pickQuote()">
+            &nbsp; <BIcon icon="solid pencil_"></BIcon>Add / Remove Quotes
           </span>
         </td></tr>
+        <template v-if="ppStore.currentProposal">
         <tr><td class="breakline" colspan="2"><hr/></td></tr>
         <tr><th>Include:</th><td><label><input type="checkbox"> Cover Page</label></td></tr>
         <tr><th></th><td><label><input type="checkbox"> Group Application</label></td></tr>
@@ -250,6 +264,7 @@ const proposalHandler = {
         <tr><th></th><td><label><input type="checkbox"> Rate Sheet Comparisons</label></td></tr>
         <tr><th></th><td><label><input type="checkbox"> Legal Agreement Form</label></td></tr>
         <tr><th></th><td><label><input type="checkbox"> Tax Preparation Documents</label></td></tr>
+        </template>
       </tbody>
     </table>
     <!-- <BTable :config="cfgQuotesList" :rows="ppStore.currentProposal?.quotes || []">
@@ -292,9 +307,9 @@ const proposalHandler = {
   </dialog>
   <dialog :id="proposalHandler.quote_select_id">
     <div class="titlebar">Add Quote to Proposal</div>
-    <div style="margin-bottom: .5em;" class="info">
-      Only quotes effective {{ B.format.effdat(ppStore.currentProposal?.effdat) }}, are not In Progress or Expired, and are<br/>
-       not already included are listed. These are the only quotes that can be added.
+    <div style="margin-bottom: .5em; text-align: center;" class="info">
+      Only quotes effective {{ B.format.effdat(ppStore.currentProposal?.effdat) }}
+      and are not In Progress or Expired are available.
     </div>
     <BTable :config="cfgAddQuoteList" :rows="proposalHandler.availableQuotes.value || []">
       <template #column_custom="{row}"><BIcon :icon="isInProposalIcon(row)"></BIcon></template>

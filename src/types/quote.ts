@@ -21,4 +21,8 @@ export interface Iquote {
   updusr: string
   updtms: Date
   custom?: string
+  proposals: {
+    id: number;
+    descr: string;
+  }[];
 }

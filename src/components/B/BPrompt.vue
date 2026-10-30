@@ -12,10 +12,15 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  placeholder: {
+    type: String,
+    required: false,
+    default: ""
+  },
   text: {
     type: String,
     required: false,
-    default: "Enter Value"
+    default: ""
   },
   class: {
     type: String,
@@ -65,7 +70,7 @@ const modelValue = ref(props.text)
 const emit = defineEmits(["change"])
 
 const handleChange = () => {
-  if (modelValue.value != props.text) emit("change", modelValue.value)
+  if (props.text == '' || modelValue.value != props.text) emit("change", modelValue.value)
   close()
 }
 const close = () => {
@@ -88,7 +93,13 @@ const close = () => {
       <div class="titlebar">{{ props.prompt }}</div>
       <table class="form-table">
         <tbody>
-          <tr><td><input name="temp" autofocus :style="{width: props.length + 'em'}" v-model="modelValue"></td></tr>
+          <tr><td>
+            <input name="temp"
+              :placeholder="props.placeholder"
+              autofocus
+              :style="{width: props.length + 'em'}"
+              v-model="modelValue">
+          </td></tr>
         </tbody>
       </table>
       <div class="buttonbar">

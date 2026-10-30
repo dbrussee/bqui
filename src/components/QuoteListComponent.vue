@@ -43,19 +43,31 @@ const cfgQuotesList = ref({
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
-    // { id: "nonstd", heading: "NS", width: "3em", flags: "C" },
-    { id: "status", heading: "Status", width: "11em" },
+    { id: "status", heading: "Status", width: "11.5em",
+      help: "Values in superscript indicate the number of proposals the quote is assigned to. 'In Progress' quotes cannot be added to proposals."},
+    // { id: "proposals", heading: "Prop", width: "3em", flags: "R" },
     { id: "descr", heading: "Name" },
   ]
 })
 
-
-const formatStatusCell = (row:any, setStyle:any) => {
+const formatStatusCell = (row:any, setStyle:any, setHtml:any) => {
   setStyle((td:HTMLTableCellElement) => {
     const classname = "status" + row.status
     td.classList.add(classname)
   })
-  return B.codeToText.quoteStatus(row.status)
+  let txt = B.codeToText.quoteStatus(row.status)
+  if ("INPROG,ENROLLED".indexOf(row.status) < 0) {
+    let cnt = 0
+    if (!row.proposals) {
+      cnt = 0
+    } else {
+      cnt = row.proposals.length
+    }
+    let sup = "<sup>"
+    if (cnt == 0) sup = "<sup style='color: firebrick; font-weight: bold'>"
+    txt += `${sup}${cnt}</sup>`
+  }
+  setHtml(txt)
 }
 const qHandler = {
   quote: ref<Iquote | undefined>(undefined),
@@ -170,8 +182,9 @@ const qHandler = {
 <template>
   <BTable :config="cfgQuotesList" :rows="pStore.quotes">
     <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
+    <!-- <template #column_proposals="{row}">{{ proposalCount(row) }}</template> -->
     <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
-    <template #column_status="{row, setStyle}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon></template>
+    <template #column_status="{row, setStyle, setHtml}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle, setHtml) }}</BIcon></template>
     <template #column_nonstd="{row}">
       <span :class="{
         'nonstdY': row.nonstd == 'Y',

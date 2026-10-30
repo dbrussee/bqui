@@ -33,12 +33,12 @@ const recentPopover = ref()
 
 const pickedFave = ref("");
 const pickedRecent = ref("");
-function pickFave(pid: string) {
+function pickFave(pid: number) {
   pStore.getProspect(pid, true);
   pickedFave.value = "";
   favesPopover.value?.close();
 }
-function pickRecent(pid: string) {
+function pickRecent(pid: number) {
   pStore.getProspect(pid, true);
   pickedRecent.value = "";
   recentPopover.value?.close();

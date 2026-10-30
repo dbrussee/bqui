@@ -2,17 +2,21 @@
 <script setup lang="ts">
 import { B } from '@/composables/BUtils';
 import type { Iquote } from '@/types';
-import { ref, watch, toRaw, type PropType } from 'vue';
+import { ref, watch, type PropType, useId, computed } from 'vue';
 import { appUserStore } from '@/stores/AppUserStore';
 const uStore = appUserStore()
 import { QuoteStore } from '@/stores/QuoteStore';
 const qStore = QuoteStore()
 import { appProspectStore } from '@/stores/ProspectStore';
 const pStore = appProspectStore()
+import { proposalStore } from '@/stores/ProposalStore.ts';
+const ppStore = proposalStore()
 import BIcon from '@/components/B/BIcon.vue';
 import BButton from '@/components/B/BButton.vue';
 import BConfirm from '@/components/B/BConfirm.vue';
 import ViewQuotePlanDetails from './ViewQuotePlanDetails.vue';
+import BTable from '@/components/B/BTable.vue';
+import BPrompt from '@/components/B/BPrompt.vue';
 
 const emit = defineEmits<{
   (e: 'save', payload: Iquote): void
@@ -38,6 +42,34 @@ const props = defineProps({
     default: null
   }
 })
+
+const cfgProposals = ref({
+  onPick: async (row:any) => {
+    // const eff = B.format.dateMMDDYYYY(localQuote.value.effdat);
+    if (row.hasQuote) {
+      await ppStore.removeQuote(row.id, localQuote.value.id)
+      localQuote.value.proposals = localQuote.value.proposals.filter((p:any) => {
+        return p.id != row.id
+      })
+    } else {
+      await ppStore.addQuote(row.id, localQuote.value.id)
+      localQuote.value.proposals.push(row)
+    }
+
+    // cfgQuotesList.value.pickedRowNumber = rn
+  },
+  height: "10em",
+  pickedRow: null as any,
+  // pickedRowNumber: -1,
+  no_rows_text: 'No Proposals for this Effective Date',
+  columns: [
+    { id: "id", heading: "ID", width: "4em", flags: "R" },
+    { id: "hasQuote", heading: "", width: "2em", flags: "C" },
+    { id: "status", heading: "Proposal Status", width: "11em" },
+    { id: "descr", heading: "Proposal Name", width: "30em" },
+  ]
+})
+
 
 const getRlobList = async () => {
   if (!pStore.prospect) return
@@ -80,25 +112,66 @@ const getPlansAndAttributes = () => {
 // to the parent - or possibly just make the backend update
 // calls directly?
 // structuredClone is used to make the local copy
-const localQuote = ref(structuredClone(toRaw(props.quote)))
+const localQuote = ref(JSON.parse(JSON.stringify(props.quote)))
 // Check if / when the parent quote changes
 watch(() => props.quote, (newValue) => {
-  localQuote.value = structuredClone(toRaw(newValue))
+  localQuote.value = JSON.parse(JSON.stringify(newValue))
   if (localQuote.value && localQuote.value.status != 'NEW') {
     getPlansAndAttributes()
   }
 }, { deep: true })
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const saveChanges = () => {
-  // emit('update:modelValue', structuredClone(localQuote.value))
+const proposalsHandler = {
+  popid: useId(),
+  open: function() { B.popup.showModal(this.popid) },
+  close: function() { B.popup.close(this.popid) },
+  createProposal: function(newname:string) {
+    if (!pStore.prospect) return
+    if (!newname) newname = B.format.effdat(localQuote.value.effdat) + " Proposal"
+    const eff = B.format.dateMMDDYYYY(localQuote.value.effdat)
+    if (ppStore.proposaldata) {
+      if (ppStore.proposaldata[eff]) {
+        if (ppStore.proposaldata[eff].length > 0) {
+          newname += ` #${ppStore.proposaldata[eff].length + 1}`
+        }
+      }
+    }
+    const formData = {
+      prospect_id: pStore.prospect.id,
+      effdat: eff,
+      descr: newname
+    }
+    ppStore.createProposal(formData)
+  }
 }
 
+const formatStatusCell = (row:any, setStyle:any) => {
+  setStyle((td:HTMLTableCellElement) => {
+    const classname = "status" + row.status
+    td.classList.add(classname)
+  })
+  return B.codeToText.quoteStatus(row.status)
+}
+const proposalsList = computed(() => {
+  if (!localQuote.value) return []
+  const eff = B.format.dateMMDDYYYY(localQuote.value.effdat)
+  if (!ppStore.proposaldata) return []
+  if (!ppStore.proposaldata[eff]) return []
+  const list = [... ppStore.proposaldata[eff]]
+  list.forEach((proposal:any) => {
+    proposal.hasQuote = false
+    const hasQuote = proposal.quotes.find((q:Iquote) => {
+      return q.id == localQuote.value.id
+    })
+    if (hasQuote) proposal.hasQuote = true
+  });
+  return list
+})
 
 </script>
 
 <template>
-    <dialog :id="props.popid">
+  <dialog :id="props.popid">
     <div v-if="localQuote">
       <div v-if="localQuote.id < 0"
           class="titlebar"
@@ -238,6 +311,13 @@ const saveChanges = () => {
                 <th :style="{color:localQuote.descr == '' ? 'red' : ''}">Name:</th>
                 <td colspan="3"><input :readonly="uStore.isUserReadOnly()" v-model="localQuote.descr" style="width: 25em;" autofocus required></td>
               </tr>
+              <tr><td colspan="4" style="text-align: center; padding-top: .4em;">
+                  <button type="button" :class="localQuote.proposals.length == 0 ? 'bad' : 'action'" @click.prevent="proposalsHandler.open()">
+                    {{ localQuote.proposals.length == 0 ?
+                          'Not In Any Proposals' :
+                          `Found in ${B.format.valueWithUnits(localQuote.proposals.length, 'Proposal')}` }}
+                  </button>
+              </td></tr>
               <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
               <tr><td colspan="4">
                 <div class="planlist">
@@ -355,8 +435,46 @@ const saveChanges = () => {
         icon="floppy-disk_"
         @click="emit('save', localQuote)"
         :disabled="qStore.working != null || localQuote.descr == ''">Save Changes</BButton>&nbsp;
-</div>
-</div>
+    </div>
+  </div>
+
+  <Teleport to="body">
+  <dialog :id="proposalsHandler.popid" style="width: 700px;">
+    <div class="titlebar">{{ B.format.effdat(localQuote?.effdat) }} Proposals Containing Quote #{{ props.quote?.id }}</div>
+    <BTable v-if="proposalsList.length > 0" :config="cfgProposals" :rows="proposalsList">
+      <template #column_status="{row, setStyle}">
+        <BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon>
+      </template>
+      <template #column_hasQuote="{row}">
+        <BIcon :icon="row.hasQuote ? '#green solid square-check' : 'square'"/>
+      </template>
+
+    </BTable>
+    <table class="centerme" v-if="proposalsList.length == 0">
+      <thead>
+        <tr><td>There are no proposals for this Effective Date.</td></tr>
+        <!-- <tr><td>&nbsp;</td></tr>
+        <tr><td style="text-align: center;">
+          <BPrompt
+            @change="proposalsHandler.createProposal($event)"
+            prompt="Proposal Name"
+            :placeholder="B.format.effdat(localQuote?.effdat) + ' Proposal'"
+            >Create New Proposal</BPrompt></td></tr> -->
+        <!-- <tr><td style="text-align: center;"><BButton  @click="proposalsHandler.createProposal" class="action">Create {{ B.format.effdat(localQuote?.effdat) }} Proposal</BButton></td></tr> -->
+        <tr><td>&nbsp;</td></tr>
+      </thead>
+    </table>
+    <div class="buttonbar">
+      <BPrompt class="action"
+        pos="T2L"
+        @change="proposalsHandler.createProposal($event)"
+        prompt="Proposal Name"
+        :placeholder="B.format.effdat(localQuote?.effdat) + ' Proposal'"
+        >Create New Proposal</BPrompt>
+      <BButton gapleft class="anchor" @click="proposalsHandler.close()" icon="#red solid x_">Close</BButton>
+    </div>
+  </dialog>
+  </Teleport>
 </dialog>
 </template>
 

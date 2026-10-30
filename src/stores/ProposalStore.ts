@@ -6,6 +6,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { appProspectStore } from "./ProspectStore";
 import { appUserStore } from "./AppUserStore";
+import type { Iquote } from "@/types";
 
 export const proposalStore = defineStore("proposalStore", () => {
   const proposaldata = ref<any>({})
@@ -56,10 +57,11 @@ export const proposalStore = defineStore("proposalStore", () => {
   function deleteProposal(id:number):void {
     const fetcher = new BQAPIFetcher()
     fetcher.callAPI(`/proposal/${id}`, 'DELETE').then((r) => {
-      console.dir(r)
       proposaldata.value = fetcher.resp.eff_dates
       currentProposal.value = null
       useToast().addToast(`Proposal successfully deleted`)
+      const pStore = appProspectStore()
+      if (pStore.prospect) pStore.getProspect(pStore.prospect.id, false);
     })
   }
   function renameProposal(proposal_id:number, newName:string):void {
@@ -85,7 +87,15 @@ export const proposalStore = defineStore("proposalStore", () => {
     } else {
       proposaldata.value = fetcher.resp.eff_dates
       currentProposal.value = findProposal(pid)
-      // useToast().addToast(`Quote ${qid} added to proposal`)
+      const pStore = appProspectStore()
+      if (pStore.prospect) {
+        const quote = pStore.quotes.find((q:Iquote) => q.id == qid)
+        if (!quote.proposals) quote.proposals = []
+        const qeff = B.format.dateMMDDYYYY(quote.effdat)
+        const proposal = proposaldata.value[qeff].find((p:any) => p.id=pid)
+        quote.proposals.push({id:proposal.id, descr:proposal.descr})
+        // proposal.quotes.push(quote)
+      }
     }
     return qid
   }
@@ -98,7 +108,17 @@ export const proposalStore = defineStore("proposalStore", () => {
     } else {
       proposaldata.value = fetcher.resp.eff_dates
       currentProposal.value = findProposal(pid)
-      // useToast().addToast(`Quote ${qid} removed from proposal`)
+      const pStore = appProspectStore()
+      if (pStore.prospect) {
+        const quote = pStore.quotes.find((q:Iquote) => q.id == qid)
+        if (quote.proposals) {
+          quote.proposals = quote.proposals.filter((p:any) => p.id != pid)
+        }
+        // const qeff = B.format.dateMMDDYYYY(quote.effdat)
+        // const proposal = proposaldata.value[qeff].find((p:any) => p.id=pid)
+        // console.dir(proposal)
+        // proposaldata.value[qeff].quotes = proposal.quotes.filter((q:Iquote) => q.id != qid)
+      }
     }
   }
 

@@ -85,16 +85,16 @@ function getCensusCount():string {
         :working="pStore.prospWorking"
         :shortname="`Prospect<span style='font-size: .8em;'>${ getProspectID() }</span>`"
         :longname="getProspectName()" />
-    <SidebarItem @click="pageStore.page = 'PROPOSALS'" :current="pageStore.page == 'PROPOSALS'"
-        icon="file-pdf_"
-        :working="ppStore.working"
-        shortname="Proposals"
-        :longname="getProposalsCount()" />
     <SidebarItem @click="pageStore.page = 'CENSUS'" :current="pageStore.page == 'CENSUS'"
         :icon="pStore.censusDirty ? '#red solid people-group_' : 'solid people-group_'"
         :working="pStore.censusWorking"
         shortname="Census"
         :longname="getCensusCount()" />
+    <SidebarItem @click="pageStore.page = 'PROPOSALS'" :current="pageStore.page == 'PROPOSALS'"
+        icon="file-pdf_"
+        :working="ppStore.working"
+        shortname="Proposals"
+        :longname="getProposalsCount()" />
     <SidebarItem @click="pageStore.page = 'MSGS'" :current="pageStore.page == 'MSGS'"
         :badge="msgStore.unreadCount()"
         icon="envelope_"

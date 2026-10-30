@@ -117,6 +117,16 @@ button.action {
     background-color: var(--btn-primary-hover-bg);
   }
 }
+button.bad {
+  color: yellow;
+  background-color: firebrick;
+  border: 1px solid firebrick;
+  /* border-color: salmon; */
+  /* border: none; */
+  &:hover {
+    background-color: red;
+  }
+}
 pre {
   white-space: pre-wrap;       /* Triggers natural word wrapping */
   overflow-wrap: break-word;   /* Safely breaks un-spaced URLs or massive words */

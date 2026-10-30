@@ -1,6 +1,7 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { ref, computed, nextTick, toRaw } from 'vue'
+import BInfo from './BInfo.vue';
 
 const tableRef = ref<HTMLTableElement | null>(null)
 
@@ -81,6 +82,7 @@ const doPick = (isDouble:boolean, row:any, ri?:number, col?:IColumn, ci?:number)
 }
 const handleTableBodyClick = (event:MouseEvent, isDouble:boolean) => {
   event.stopImmediatePropagation()
+  event.preventDefault()
   const el = event.target as HTMLElement // could be anything
   const cell = el.closest('td') as HTMLTableCellElement | null
   if (!cell) return
@@ -261,14 +263,14 @@ const isPicked = (rowval:any):boolean => {
       <tr>
         <template v-for="col in props.config.columns" :key="col.id">
         <th v-if="col.hide == undefined || !col.hide" :style="deduceTHStyle(col)">
-          {{ col.heading }}
+          <span :innerHTML="col.heading"/><BInfo v-if="col.help && col.help != ''" width="22em">{{ col.help }}</BInfo>
         </th>
         </template>
       </tr>
     </thead>
     <tbody
-        @click="handleTableBodyClick($event, false)"
-        @dblclick="handleTableBodyClick($event, true)"
+        @click.prevent="handleTableBodyClick($event, false)"
+        @dblclick.prevent="handleTableBodyClick($event, true)"
         >
         <tr v-for="(row, rn) in rowsByIndex" :key="row.id"
             :class="{picked : isPicked(row.val)}">
