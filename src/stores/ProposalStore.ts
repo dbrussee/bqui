@@ -56,7 +56,7 @@ export const proposalStore = defineStore("proposalStore", () => {
   }
   function deleteProposal(id:number):void {
     const fetcher = new BQAPIFetcher()
-    fetcher.callAPI(`/proposal/${id}`, 'DELETE').then((r) => {
+    fetcher.callAPI(`/proposal/${id}`, 'DELETE').then(() => {
       proposaldata.value = fetcher.resp.eff_dates
       currentProposal.value = null
       useToast().addToast(`Proposal successfully deleted`)
