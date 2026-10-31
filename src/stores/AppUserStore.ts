@@ -75,7 +75,11 @@ export const appUserStore = defineStore("appUserStore", () => {
     const fetcher = new BQAPIFetcher()
     fetcher.callAPI(`/dashboard`, "GET").then(() => {
       B.working.clear(dashworking)
-      dashdata.value = fetcher.resp.result
+      if (fetcher.resp.result == null) {
+        dashdata.value = {}
+      } else {
+        dashdata.value = fetcher.resp.result
+      }
       // console.dir(dashdata.value)
     })
   }

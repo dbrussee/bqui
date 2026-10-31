@@ -115,7 +115,8 @@ const getPlansAndAttributes = () => {
 const localQuote = ref(JSON.parse(JSON.stringify(props.quote)))
 // Check if / when the parent quote changes
 watch(() => props.quote, (newValue) => {
-  localQuote.value = JSON.parse(JSON.stringify(newValue))
+  // localQuote.value = JSON.parse(JSON.stringify(newValue))
+  localQuote.value = newValue
   if (localQuote.value && localQuote.value.status != 'NEW') {
     getPlansAndAttributes()
   }
@@ -127,12 +128,14 @@ const proposalsHandler = {
   close: function() { B.popup.close(this.popid) },
   createProposal: function(newname:string) {
     if (!pStore.prospect) return
-    if (!newname) newname = B.format.effdat(localQuote.value.effdat) + " Proposal"
     const eff = B.format.dateMMDDYYYY(localQuote.value.effdat)
-    if (ppStore.proposaldata) {
-      if (ppStore.proposaldata[eff]) {
-        if (ppStore.proposaldata[eff].length > 0) {
-          newname += ` #${ppStore.proposaldata[eff].length + 1}`
+    if (!newname) {
+      newname = B.format.effdat(localQuote.value.effdat) + " Proposal"
+      if (ppStore.proposaldata) {
+        if (ppStore.proposaldata[eff]) { // Find the eff date
+          if (ppStore.proposaldata[eff].length > 0) {
+            newname += ` #${ppStore.proposaldata[eff].length + 1}`
+          }
         }
       }
     }
@@ -154,7 +157,7 @@ const formatStatusCell = (row:any, setStyle:any) => {
 }
 const proposalsList = computed(() => {
   if (!localQuote.value) return []
-  const eff = B.format.dateMMDDYYYY(localQuote.value.effdat)
+  const eff = localQuote.value.effdat
   if (!ppStore.proposaldata) return []
   if (!ppStore.proposaldata[eff]) return []
   const list = [... ppStore.proposaldata[eff]]
@@ -312,10 +315,10 @@ const proposalsList = computed(() => {
                 <td colspan="3"><input :readonly="uStore.isUserReadOnly()" v-model="localQuote.descr" style="width: 25em;" autofocus required></td>
               </tr>
               <tr><td colspan="4" style="text-align: center; padding-top: .4em;">
-                  <button type="button" :class="localQuote.proposals.length == 0 ? 'bad' : 'action'" @click.prevent="proposalsHandler.open()">
-                    {{ localQuote.proposals.length == 0 ?
+                  <button type="button" :class="localQuote.proposals?.length == 0 ? 'bad' : 'action'" @click.prevent="proposalsHandler.open()">
+                    {{ localQuote.proposals?.length == 0 ?
                           'Not In Any Proposals' :
-                          `Found in ${B.format.valueWithUnits(localQuote.proposals.length, 'Proposal')}` }}
+                          `Used in ${B.format.valueWithUnits(localQuote.proposals?.length, 'Proposal')}` }}
                   </button>
               </td></tr>
               <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>

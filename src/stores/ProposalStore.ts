@@ -23,7 +23,7 @@ export const proposalStore = defineStore("proposalStore", () => {
     }
     return null
   }
-  function getProposals():void {
+  async function getProposals() {
     const savedProposal = currentProposal.value
     currentProposal.value = null
     proposaldata.value = {}
@@ -33,18 +33,18 @@ export const proposalStore = defineStore("proposalStore", () => {
     if (!uStore.user) return
     B.working.set(working, "Loading...")
     const fetcher = new BQAPIFetcher()
-    fetcher.callAPI(`/proposals/${pStore.prospect.id}`, "GET").then(() => {
-      B.working.clear(working)
-      proposaldata.value = fetcher.resp.eff_dates
-      if (savedProposal && proposaldata.value) {
-        for (const eff of Object.keys(proposaldata.value)) {
-          proposaldata.value[eff].forEach((p:any) => {
-            if (p.id == savedProposal.id) currentProposal.value = {...p}
-          });
-        }
+    await fetcher.callAPI(`/proposals/${pStore.prospect.id}`, "GET")
+    B.working.clear(working)
+    proposaldata.value = fetcher.resp.eff_dates
+    // console.log(JSON.stringify(proposaldata.value, null, 2))
+    if (savedProposal && proposaldata.value) {
+      for (const eff of Object.keys(proposaldata.value)) {
+        proposaldata.value[eff].forEach((p:any) => {
+          if (p.id == savedProposal.id) currentProposal.value = {...p}
+        });
       }
-      // console.dir(proposaldata.value)
-    })
+    }
+    // console.dir(proposaldata.value)
   }
   async function createProposal(formData:any) {
     const fetcher = new BQAPIFetcher()

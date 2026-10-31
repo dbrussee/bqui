@@ -7,8 +7,13 @@ import { appUserStore } from "@/stores/AppUserStore.ts";
 const uStore = appUserStore()
 import { appProspectStore } from "@/stores/ProspectStore.ts";
 const pStore = appProspectStore()
+// import { QuoteStore } from "@/stores/QuoteStore.ts";
+// const qStore = QuoteStore()
 import BConfirm from "@/components/B/BConfirm.vue";
 const counters = countersStore();
+
+// import { B } from "@/composables/BUtils.ts";
+// import type { Iquote } from "@/types/quote.ts";
 
 </script>
 <template>

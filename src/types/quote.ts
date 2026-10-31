@@ -4,7 +4,7 @@ export interface Iquote {
   prospect_name: string
   rlob: string
   status: 'INPROG' | 'QUOTED' | 'READY' | 'RATEREQ' | 'PENDING' | 'ENROLLED' | 'EXPIRED' | 'NEW'
-  effdat: Date | null
+  effdat: string // MM/DD/YYYY on browser, Date in database
   descr: string
   size_cd: string
   qtype: string

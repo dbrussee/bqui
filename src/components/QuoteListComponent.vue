@@ -90,7 +90,7 @@ const qHandler = {
     q.crtusr = uStore.user.id
     q.updtms = quote.crttms
     q.updusr = quote.crtusr
-    q.effdat = B.dateFromYYYYMMDD(quote.effdat)
+    q.effdat = quote.effdat
     qStore.getRLOBList(q)
     this.quote.value = {...q}
     B.popup.showModal(this.popid)
@@ -153,7 +153,7 @@ const qHandler = {
       qStore.createQuote().then(() => {
         cfgQuotesList.value.pickedRow = qStore.quote
         // cfgQuotesList.value.pickedRowNumber = pStore.quotes.length - 1
-        this.close()
+        // this.close()
       })
     } else {
       qStore.updateQuote(quote).then((updatedQuote:any) => {
@@ -163,7 +163,7 @@ const qHandler = {
           cfgQuotesList.value.pickedRow = null
           useToast().addToast(`Quote ${updatedQuote.id} ${toastMessage}`, "success")
         }
-        this.close()
+        // this.close()
       })
     }
   },
@@ -202,8 +202,14 @@ const qHandler = {
           <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="qHandler.startFromQuote(cfgQuotesList.pickedRow)" class="anchor" icon="clone_">Copy Selected</BButton></p>
         </template>
       </BPopup>
-      <BButton class="anchor anchor-in-table-footer" gapleft style="color: white" :disabled="!cfgQuotesList.pickedRow" :icon="uStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'" @click="qHandler.edit(cfgQuotesList.pickedRow)">{{ uStore.isUserReadOnly() ? 'View Quote...' : 'Edit Quote...' }}</BButton>
-      <BButton class="anchor anchor-in-table-footer" gapleft style="color: white" disabled icon="file-pdf">Generate Proposal</BButton>
+      <BButton class="anchor anchor-in-table-footer"
+        gapleft
+        style="color: white"
+        :disabled="!cfgQuotesList.pickedRow"
+        :icon="uStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'"
+        @click="qHandler.edit(cfgQuotesList.pickedRow)"
+        @xclick="qHandler.edit(cfgQuotesList.pickedRow)"
+      >{{ uStore.isUserReadOnly() ? 'View Quote...' : 'Edit Quote...' }}</BButton>
     </template>
   </BTable>
 

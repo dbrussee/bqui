@@ -380,20 +380,9 @@ export const B = {
       return finalString;
       // Output: "Jul 30, 2026 08:12:10a"
     },
-    dateMMDDYYYY: (d: string | null | Date = new Date()):string => {
-      if (!d) return ""
-      let date:Date
-      if (typeof d == "string") {
-        if (B.isYYYYMMDD(d, '-')) {
-          date = B.dateFromYYYYMMDD(d)
-        } else if (B.isYYYYMMDD(d, '/')) {
-          date = B.dateFromYYYYMMDD(d)
-        } else {
-          date = new Date(d)
-        }
-      } else {
-        date = d
-      }
+    dateMMDDYYYY: (date:string | Date = new Date()):string => {
+      if (!date) return ""
+      if (typeof date == "string") date = new Date(date)
       let mm = (date.getMonth() + 1).toString()
       if (mm.length == 1) mm = "0" + mm
       let dd = (date.getDate()).toString()

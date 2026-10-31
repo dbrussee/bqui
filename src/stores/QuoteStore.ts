@@ -15,9 +15,9 @@ export const QuoteStore = defineStore('QuoteStore', () => {
   const working = ref<any>(null)
   const quote = ref<Iquote>({
     id: -1, status: 'NEW',
-    descr: '',
+    descr: '', proposals: [],
     prospect_id: -1, prospect_name: '',
-    size_cd: '', qtype: '', effdat: B.firstOfMonth(1),
+    size_cd: '', qtype: '', effdat: B.format.dateMMDDYYYY(B.firstOfMonth(1)),
     mass_compliant: false, grandfathered: false,
     nonstd: 'N', rlob: '', funding: 'FI',
     med_plan: '', dru_plan: '', vis_plan: '', den_plan: '',
@@ -26,7 +26,9 @@ export const QuoteStore = defineStore('QuoteStore', () => {
 
   const createQuote = async ():Promise<any> => {
     B.working.set(working, "Creating Quote...")
-    const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'POST', quote.value)
+    const clone = JSON.parse(JSON.stringify(quote.value))
+    clone.effdat = B.format.dateMMDDYYYY(new Date(clone.effdat))
+    const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'POST', clone)
     B.working.clear(working)
     if (fetcher.resp != null) {
       const q:any = {...fetcher.resp}
@@ -53,20 +55,21 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     }
   }
 
-  const makeBlankQuote = (qtype:string, prospect:Iprospect, fromQuote:Iquote | null) => {
+  const makeBlankQuote = (qtype:string, prospect:Iprospect | null, fromQuote:Iquote | null) => {
     const q:Iquote = {
       id: -1,
       status: 'NEW',
       qtype: qtype,
-      descr: '',
-      size_cd: prospect.size_cd,
-      prospect_id: prospect.id, prospect_name: prospect.name,
-      effdat: fromQuote ? B.dateFromYYYYMMDD(fromQuote.effdat) : B.firstOfMonth(1),
+      descr: '', proposals: [],
+      size_cd: prospect?.size_cd || "1",
+      prospect_id: prospect?.id || -1, prospect_name: prospect?.name || '',
+      effdat: fromQuote ? fromQuote.effdat : B.format.dateMMDDYYYY(B.firstOfMonth(1)),
       grandfathered: false, mass_compliant: false,
       nonstd: 'N', funding: 'FI', rlob: '',
       med_plan: 'M_NOPLN', dru_plan: 'R_NOPLN', vis_plan: 'V_NOPLN', den_plan: 'D_NOPLN',
       crtusr: '', crttms: new Date(), updusr: '', updtms: new Date()
     }
+    console.dir(q)
     getRLOBList(q)
     return q
   }
@@ -116,7 +119,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       // blankQuote(quote.value.qtype, prospStore.prospect.id, prospStore.prospect.name)
     }
   }
-  const updateQuote = async (q:any):Promise<unknown> => {
+  const updateQuote = async (q:Iquote):Promise<unknown> => {
     B.working.set(working, "Updating Quote...")
     const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'PUT', q)
     B.working.clear(working)
@@ -144,13 +147,15 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     return sorted
   }
 
-  const getPlansForQuote = (quote:Iquote) => {
+  const getPlansForQuote = async (quote:Iquote) => {
     const fetcher = new BQAPIFetcher()
-    if (quote.id < 0) {
-      return fetcher.callAPI(`/newquoteplans/${quote.prospect_id}`, "GET")
+    let rslt = {}
+    if (quote.id < 0) {ealr:
+      rslt = await fetcher.callAPI(`/newquoteplans/${quote.prospect_id}`, "GET")
     } else {
-      return fetcher.callAPI(`/quoteplans/${quote.id}`, 'GET')
+      rslt = await fetcher.callAPI(`/quoteplans/${quote.id}`, 'GET')
     }
+    return rslt;
   }
 
 
@@ -175,7 +180,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     opts.prospect_name = prospStore.prospect.name
     opts.size_cd = prospStore.prospect.size_cd
     opts.qtype = q.qtype
-    opts.effdat = B.dateFromYYYYMMDD(q.effdat)
+    opts.effdat = q.effdat
     // opts.grandfathered = false
     getRLOBList(q)
     opts.rlob = q.rlob
@@ -186,18 +191,19 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     opts.vis_plan = q.vis_plan
     opts.den_plan = q.den_plan
 
-    if (!verifyEffdatInRange(opts.effdat)) {
+    const test = new Date(opts.effdat)
+    if (!verifyEffdatInRange(test)) {
       // Try adding a year for renewal quotes
-      const test = new Date(opts.effdat)
       test.setMonth(test.getMonth() + 12)
       if (verifyEffdatInRange(test)) {
-        opts.effdat = test
+        opts.effdat = B.format.dateMMDDYYYY(test)
       }
     }
   }
 
   const verifyEffdatInRange = (effdat:Date | null):boolean => {
     if (!effdat) return true// Empty is ok... but not valid
+    // const effdat:Date = new Date(test)
     for (let i = 0; i <= NUMBER_OF_EFFDATES; i++) {
       const test = B.firstOfMonth(i + INITIAL_EFFDATE_OFFSET)
       // console.log("Eff", effdat.getTime(), "Test", test.getTime())
@@ -221,7 +227,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     rlobList.DRU.value.length = 0
     rlobList.VIS.value.length = 0
     rlobList.DEN.value.length = 0
-    const eff = B.format.dateMDYYYY(quote.effdat)
+    const eff = B.format.dateMMDDYYYY(quote.effdat)
     const fetcher = new BQAPIFetcher()
     await fetcher.callAPI(`/plancodecounts/${quote.prospect_id}?eff=${eff}`, 'GET')
     B.working.clear(working)
@@ -248,9 +254,9 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         } else {
           quote.rlob = ''
         }
-        if (!verifyEffdatInRange(quote.effdat)) {
-          quote.effdat = null
-        }
+        // if (!verifyEffdatInRange(quote.effdat)) {
+        //   quote.effdat = null
+        // }
       }
     }
   }
@@ -261,7 +267,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     B.working.set(working, "Getting avaiable plan codes...")
     planList.value.length = 0
     drugPlanList.value.length = 0
-    const eff = B.format.dateMDYYYY(quote.effdat)
+    const eff = B.format.dateMMDDYYYY(quote.effdat)
     const fetcher = new BQAPIFetcher()
     await fetcher.callAPI(`/plancodes/${quote.prospect_id}/${quote.qtype}?eff=${eff}&rlob=${quote.rlob}&macomp=N&gfther=N`, 'GET')
     // console.dir(fetcher.resp)
