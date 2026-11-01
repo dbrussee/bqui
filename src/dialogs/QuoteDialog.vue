@@ -91,7 +91,7 @@ const getRlobList = async () => {
 
 const quotePlans = ref<any>({})
 const quoteAttrs = ref<any>({MED:[], DRU:[], DEN:[], VIS:[]})
-const getPlansAndAttributes = () => {
+const getPlansAndAttributes = async () => {
   if (!localQuote.value) return
   quotePlans.value = {}
   quoteAttrs.value = {MED:[], DRU:[], DEN:[], VIS:[]}
@@ -99,10 +99,9 @@ const getPlansAndAttributes = () => {
   // dialog will open with empty data (from above) and then
   // get populated after the async promise completes
   qStore.getPlanList(localQuote.value)
-  qStore.getPlansForQuote(localQuote.value).then((data:any) => {
-    quotePlans.value = data.resp.plans || {}
-    quoteAttrs.value = data.resp.attrs || {MED:[], DRU:[], DEN:[], VIS:[]}
-  })
+  const data = await qStore.getPlansForQuote(localQuote.value)
+  quotePlans.value = data.plans || {}
+  quoteAttrs.value = data.attrs || {MED:[], DRU:[], DEN:[], VIS:[]}
 }
 
 
@@ -111,15 +110,23 @@ const getPlansAndAttributes = () => {
 // do so, we will call methods to emit the changes back
 // to the parent - or possibly just make the backend update
 // calls directly?
-// structuredClone is used to make the local copy
 const localQuote = ref(JSON.parse(JSON.stringify(props.quote)))
+
 // Check if / when the parent quote changes
 watch(() => props.quote, (newValue) => {
-  // localQuote.value = JSON.parse(JSON.stringify(newValue))
-  localQuote.value = newValue
-  if (localQuote.value && localQuote.value.status != 'NEW') {
-    getPlansAndAttributes()
+  if (!newValue) return // Nothing to set to
+  if (!localQuote.value) { // No current... load it
+    localQuote.value = newValue
+  } else if (localQuote.value.id != newValue.id) { // New is different that old
+    localQuote.value = newValue
+  } else if (localQuote.value.status != newValue.status) { // Same ID, new status
+    localQuote.value = newValue
+  } else if (localQuote.value.nonstd != newValue.nonstd) { // Same ID, new status
+    localQuote.value = newValue
   }
+  // Always load new attributes
+  if (localQuote.value.status != 'NEW') getPlansAndAttributes()
+
 }, { deep: true })
 
 const proposalsHandler = {
@@ -171,6 +178,12 @@ const proposalsList = computed(() => {
   return list
 })
 
+const handleSave = () => {
+  emit('save', localQuote.value)
+}
+const updateQuoteName = (newName:string) => {
+  localQuote.value.descr = newName
+}
 </script>
 
 <template>
@@ -188,7 +201,7 @@ const proposalsList = computed(() => {
       <div style="position: absolute; top: .5em; right: .5em;" class="info">
         Status: <BIcon :icon="B.statusIcon(localQuote.status)"/>{{ B.codeToText.quoteStatus(localQuote.status) }}
       </div>
-      <form @submit.stop.prevent="emit('save', localQuote)">
+      <form @submit.prevent="handleSave">
         <table class="form-table" style="width: 100%">
           <tbody>
             <tr v-if="localQuote.id >= 0">
@@ -204,6 +217,7 @@ const proposalsList = computed(() => {
             <tr><th>Prospect:</th><td colspan="3" class="info">{{ localQuote.prospect_name }} ({{ localQuote.prospect_id }})</td></tr>
             <tr v-if="localQuote.status != 'NEW'"><th>Product:</th><td colspan="3" class="info">{{ B.codeToText.rlob(localQuote.rlob) }} ({{ localQuote.rlob }})</td></tr>
             <tr v-if="localQuote.status != 'NEW'"><th>Effective:</th><td colspan="3" class="info">{{ B.format.effdat(localQuote.effdat) }}</td></tr>
+
             <template v-if="localQuote.status == 'NEW'">
               <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
               <tr>
@@ -256,17 +270,19 @@ const proposalsList = computed(() => {
             </template>
             <template v-else-if="localQuote.status == 'INPROG'">
               <tr><th>Funding:</th><td colspan="3" class="info">{{ B.codeToText.funding(localQuote.funding) }}</td></tr>
-              <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
               <tr>
                 <th :style="{color:localQuote.descr == '' ? 'red' : ''}">Name:</th>
-                <td colspan="3"><input :readonly="uStore.isUserReadOnly()" v-model="localQuote.descr" style="width: 25em;" autofocus required></td>
+                <td colspan="3">{{ localQuote.descr }}
+                  <BPrompt required @change="updateQuoteName" :text="localQuote.descr" prompt="Quote Name"/>
+                </td>
               </tr>
+              <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
               <tr>
                 <th>Design:</th>
                 <td colspan="3">
-                  <label><input :disabled="uStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="localQuote.nonstd" value='N'> Standard</label>&nbsp;
-                  <label><input :disabled="uStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="localQuote.nonstd" value='Y'> Non-Std</label>&nbsp;
-                  <label><input :disabled="uStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="localQuote.nonstd" value='C'> Custom</label>
+                  <label><input @click.prevent="getPlansAndAttributes()" :disabled="uStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="localQuote.nonstd" value='N'> Standard</label>&nbsp;
+                  <label><input @click.prevent="getPlansAndAttributes()" :disabled="uStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="localQuote.nonstd" value='Y'> Non-Std</label>&nbsp;
+                  <label><input @click.prevent="getPlansAndAttributes()" :disabled="uStore.isUserReadOnly()" type='radio' name="nonstd_value" v-model="localQuote.nonstd" value='C'> Custom</label>
                 </td>
               </tr>
               <tr v-if="localQuote.qtype == 'MED'">
@@ -307,20 +323,25 @@ const proposalsList = computed(() => {
             </template>
             <template v-else><!-- Post-INPROG status of any kind -->
               <tr>
-                  <th>Design:</th><td class="info">{{ B.codeToText.nonstd(localQuote.nonstd) }}</td>
-                  <th>Funding:</th><td class="info">{{ B.codeToText.funding(localQuote.funding) }}</td></tr>
-              <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
+                <th>Design:</th><td class="info">{{ B.codeToText.nonstd(localQuote.nonstd) }}</td>
+                <th>Funding:</th><td class="info">{{ B.codeToText.funding(localQuote.funding) }}</td>
+              </tr>
               <tr>
                 <th :style="{color:localQuote.descr == '' ? 'red' : ''}">Name:</th>
-                <td colspan="3"><input :readonly="uStore.isUserReadOnly()" v-model="localQuote.descr" style="width: 25em;" autofocus required></td>
+                <td colspan="3">{{ localQuote.descr }}
+                  <BPrompt required @change="updateQuoteName" :text="localQuote.descr" prompt="Quote Name"/>
+                </td>
               </tr>
-              <tr><td colspan="4" style="text-align: center; padding-top: .4em;">
+              <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
+              <tr>
+                <td colspan="4" style="text-align: center; padding-top: .4em;">
                   <button type="button" :class="localQuote.proposals?.length == 0 ? 'bad' : 'action'" @click.prevent="proposalsHandler.open()">
                     {{ localQuote.proposals?.length == 0 ?
                           'Not In Any Proposals' :
                           `Used in ${B.format.valueWithUnits(localQuote.proposals?.length, 'Proposal')}` }}
                   </button>
-              </td></tr>
+                </td>
+              </tr>
               <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
               <tr><td colspan="4">
                 <div class="planlist">

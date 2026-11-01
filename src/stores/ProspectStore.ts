@@ -53,6 +53,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       if (q.id == quote.id) {
         // Update quote list quote
         quotes.value[rn] = {...quote}
+        console.log("Updated quote row", rn, quotes.value[rn])
       }
     })
   }

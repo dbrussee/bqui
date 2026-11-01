@@ -117,7 +117,7 @@ const handleClick = () => {
   <i v-if="props.icon != '' && working == null"
     :class="[getClasses, attrs.classes]"
     :style="[getStyle, attrs.style]"
-    @click="handleClick()"
+    @click="handleClick"
   /><span :class="[$attrs.classes]" :style="[$attrs.style]"><slot/></span>
 </template>
 

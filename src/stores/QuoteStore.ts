@@ -119,7 +119,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       // blankQuote(quote.value.qtype, prospStore.prospect.id, prospStore.prospect.name)
     }
   }
-  const updateQuote = async (q:Iquote):Promise<unknown> => {
+  const updateQuote = async (q:Iquote) => {
     B.working.set(working, "Updating Quote...")
     const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'PUT', q)
     B.working.clear(working)
@@ -149,13 +149,12 @@ export const QuoteStore = defineStore('QuoteStore', () => {
 
   const getPlansForQuote = async (quote:Iquote) => {
     const fetcher = new BQAPIFetcher()
-    let rslt = {}
-    if (quote.id < 0) {ealr:
-      rslt = await fetcher.callAPI(`/newquoteplans/${quote.prospect_id}`, "GET")
+    if (quote.id < 0) {
+      await fetcher.callAPI(`/newquoteplans/${quote.prospect_id}`, "GET")
     } else {
-      rslt = await fetcher.callAPI(`/quoteplans/${quote.id}`, 'GET')
+      await fetcher.callAPI(`/quoteplans/${quote.id}`, 'GET')
     }
-    return rslt;
+    return fetcher.resp
   }
 
 

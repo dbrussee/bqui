@@ -93,24 +93,13 @@ const monthsRange = computed(() => {
   // 1. Start on the 1st of the month, 3 months prior
   const startDate = new Date(today.getFullYear(), today.getMonth() - 3, 1);
 
-  // 2. End 12 months past today (adjusting to cover that full month)
-  const endDate = new Date(today.getFullYear(), today.getMonth() + 12, 1);
+  // 2. End 18 months past today (adjusting to cover that full month)
+  const endDate = new Date(today.getFullYear(), today.getMonth() + 18, 1);
 
   // 3. Loop and push each month into the array
   const currentDate = new Date(startDate);
   while (currentDate <= endDate) {
-    const dateAsString = B.format.dateMMDDYYYY(currentDate)
     dates.push(B.format.dateMMDDYYYY(currentDate))
-    let foundEff = null
-    if (ppStore.proposaldata) {
-      foundEff = ppStore.proposaldata[dateAsString]
-    }
-    if (foundEff) {
-      ppStore.proposaldata[dateAsString].forEach((pp:any) => {
-        pp.effdat = B.dateFromYYYYMMDD(pp.effdat)
-      })
-    }
-    // Move to the next month
     currentDate.setMonth(currentDate.getMonth() + 1);
   }
 
@@ -141,6 +130,7 @@ const proposalHandler = {
   model: ref<any>({ effdat:"", descr:"", prospect_id:pStore.prospect?.id }),
   availableQuotes: ref<any[]>([]),
   rename(newname:string) {
+    if (newname == '') return
     ppStore.renameProposal(ppStore.currentProposal.id, newname)
   },
   async create() {
@@ -166,7 +156,7 @@ const proposalHandler = {
   },
   pickQuote() {
     this.availableQuotes.value = pStore.quotes.filter((q:Iquote) => {
-      const qeff = B.format.effdat(B.dateFromYYYYMMDD(q.effdat))
+      const qeff = B.format.effdat(q.effdat)
       const peff = B.format.effdat(ppStore.currentProposal.effdat)
       const alreadyInList = ppStore.currentProposal.quotes.find((pq:any) => {
         return q.id == pq.id
@@ -220,7 +210,7 @@ const setCurrent = (effmonth:string, index:number) => {
   <div v-if="uStore && ppStore.proposaldata" class="proposal_list">
     <div v-if="Object.keys(ppStore.proposaldata).length == 0" style="width: 100%; text-align: center; color: silver">No Proposals</div>
     <template v-for="m of monthsRange" :key="m">
-      <div class="info" v-if="ppStore?.proposaldata[m]" >- {{ B.format.effdat(m) }}</div>
+      <div class="effdat-title info" v-if="ppStore?.proposaldata[m]" >- {{ B.format.effdat(m) }} -</div>
       <div v-for="(pp, index) of ppStore.proposaldata[m]" :key="index"
         :class="pp.id == ppStore.currentProposal?.id ? 'proposal-item picked' : 'proposal-item'"
         @click="setCurrent(m, index as number)">
@@ -237,12 +227,12 @@ const setCurrent = (effmonth:string, index:number) => {
     <table class="form-table" style="margin-bottom: .3em; width: 100%;">
       <tbody>
         <tr><th style="width:8em;">Effective:</th>
-            <td colspan="2">{{ ppStore.currentProposal?.effdat }}
+            <td colspan="2">{{ B.format.effdat(ppStore.currentProposal?.effdat) }}
                 <span v-if="ppStore.currentProposal" style="float: right">Proposal Status: <BIcon :icon="B.statusIcon(ppStore.currentProposal?.status)">{{ B.codeToText.quoteStatus(ppStore.currentProposal?.status) }}</BIcon></span>
             </td></tr>
         <tr><th>Proposal Name:</th>
             <td colspan="2">{{ ppStore.currentProposal?.descr }}
-              <BPrompt v-if="ppStore.currentProposal" @change="proposalHandler.rename" :text="ppStore.currentProposal?.descr" prompt="Proposal Name"/>
+              <BPrompt required v-if="ppStore.currentProposal" @change="proposalHandler.rename" :text="ppStore.currentProposal?.descr" prompt="Proposal Name"/>
             </td>
         </tr>
         <tr><th>Quotes:</th><td colspan="2">{{ quotesSummary.total }}
@@ -357,6 +347,11 @@ div.proposal {
     color: var(--table-row-picked-text);
     background-color: var(--table-row-picked-bg);
   }
+}
+.effdat-title {
+  padding: .3em;
+  font-size: 1.1em;
+  text-align: center;
 }
 
 .breakline {

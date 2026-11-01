@@ -99,7 +99,7 @@ const qHandler = {
     this.quote.value = {...quote}
     B.popup.showModal(this.popid)
   },
-  save(quote:Iquote) {
+  async save(quote:Iquote) {
     if (quote.id < 0) {
       qStore.quote = {...quote}
       qStore.createQuote().then(() => {
@@ -108,15 +108,15 @@ const qHandler = {
         this.close()
       })
     } else {
-      qStore.updateQuote(quote).then((updatedQuote:any) => {
-        if (updatedQuote) {
-          pStore.refreshQuote(updatedQuote)
-          // pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
-          cfgQuotesList.value.pickedRow = null
-          useToast().addToast(`Quote ${updatedQuote.id} saved`, "success")
-        }
-        this.close()
-      })
+      const updatedQuote = await qStore.updateQuote(quote)
+      // updatedQuote = toRaw(updatedQuote)
+      if (updatedQuote?.quote) {
+        pStore.refreshQuote(updatedQuote.quote as Iquote)
+        // pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+        cfgQuotesList.value.pickedRow = null
+        useToast().addToast(`Quote ${updatedQuote.quote.id} saved`, "success")
+      }
+      this.close()
     }
   },
   continue(quote:Iquote) { // Change from NEW to INPROG (still not saved)
@@ -132,7 +132,7 @@ const qHandler = {
     cfgQuotesList.value.pickedRow = null
     this.close()
   },
-  submit(quote:Iquote) {
+  async submit(quote:Iquote) {
     let toastMessage = 'unchanged'
     switch(quote.nonstd) {
       case 'N':
@@ -156,15 +156,13 @@ const qHandler = {
         // this.close()
       })
     } else {
-      qStore.updateQuote(quote).then((updatedQuote:any) => {
-        if (updatedQuote) {
-          pStore.refreshQuote(updatedQuote)
-          // pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
-          cfgQuotesList.value.pickedRow = null
-          useToast().addToast(`Quote ${updatedQuote.id} ${toastMessage}`, "success")
-        }
-        // this.close()
-      })
+      const updatedQuote = await qStore.updateQuote(quote)
+      if (updatedQuote) {
+        pStore.refreshQuote(updatedQuote.quote)
+        // pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+        cfgQuotesList.value.pickedRow = null
+        useToast().addToast(`Quote ${updatedQuote.quote.id} ${toastMessage}`, "success")
+      }
     }
   },
   force(quote:Iquote) {
