@@ -160,6 +160,9 @@ const qHandler = {
     B.popup.close(this.popid)
   },
   edit(quote:Iquote) {
+    if (quote.prospect_id != pStore.prospect?.id) {
+      pStore.getProspect(quote.prospect_id)
+    }
     this.quote.value = {...quote}
     B.popup.showModal(this.popid)
   },
@@ -241,9 +244,9 @@ const formatStatusCell = (row:any, setStyle:any) => {
 }
 const formatProspectName = (row:any, setStyle:any, setHtml:any) => {
   setStyle((td:HTMLTableCellElement) => {
-    td.style.width = "5em"
+    td.style.anchorName=''
   })
-  setHtml(`<p class='truncate-text'>${row.name}</p>`)
+  setHtml(`<span style='width: 100%' class='truncate-text'>${row.name}</span>`)
 }
 const headingText = ():string => {
   let txt = ""

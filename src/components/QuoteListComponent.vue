@@ -44,8 +44,12 @@ const cfgQuotesList = ref({
     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
     { id: "status", heading: "Status", width: "11.5em",
-      help: "Values in superscript indicate the number of proposals the quote is assigned to. 'In Progress' quotes cannot be added to proposals."},
-    // { id: "proposals", heading: "Prop", width: "3em", flags: "R" },
+      help: `<p>Values in<sup>superscript</sup> indicate the number
+      of proposals the quote is assigned to.</p>
+      <p>'In Progress' quotes cannot be added to proposals.</p>
+      <p>If the number shows as<sup style='color:red;'><b>0</b></sup>&nbsp;then it
+      will not be able to be enrolled. ONLY quotes in proposals can be
+      enrolled</p>`},
     { id: "descr", heading: "Name" },
   ]
 })
@@ -102,19 +106,16 @@ const qHandler = {
   async save(quote:Iquote) {
     if (quote.id < 0) {
       qStore.quote = {...quote}
-      qStore.createQuote().then(() => {
-        cfgQuotesList.value.pickedRow = qStore.quote
-        // cfgQuotesList.value.pickedRowNumber = pStore.quotes.length - 1
-        this.close()
-      })
+      const newQuote = await qStore.createQuote()
+      cfgQuotesList.value.pickedRow = newQuote as Iquote
+      this.close()
     } else {
       const updatedQuote = await qStore.updateQuote(quote)
       // updatedQuote = toRaw(updatedQuote)
-      if (updatedQuote?.quote) {
-        pStore.refreshQuote(updatedQuote.quote as Iquote)
-        // pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
+      if (updatedQuote) {
+        pStore.refreshQuote(updatedQuote as Iquote)
         cfgQuotesList.value.pickedRow = null
-        useToast().addToast(`Quote ${updatedQuote.quote.id} saved`, "success")
+        useToast().addToast(`Quote ${updatedQuote.id} saved`, "success")
       }
       this.close()
     }
@@ -150,29 +151,25 @@ const qHandler = {
     }
     if (quote.id < 0) {
       qStore.quote = {...quote}
-      qStore.createQuote().then(() => {
-        cfgQuotesList.value.pickedRow = qStore.quote
-        // cfgQuotesList.value.pickedRowNumber = pStore.quotes.length - 1
-        // this.close()
-      })
+      const newQuote = await qStore.createQuote()
+      cfgQuotesList.value.pickedRow = newQuote
     } else {
       const updatedQuote = await qStore.updateQuote(quote)
       if (updatedQuote) {
-        pStore.refreshQuote(updatedQuote.quote)
+        pStore.refreshQuote(updatedQuote)
         // pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
         cfgQuotesList.value.pickedRow = null
-        useToast().addToast(`Quote ${updatedQuote.quote.id} ${toastMessage}`, "success")
+        useToast().addToast(`Quote ${updatedQuote.id} ${toastMessage}`, "success")
       }
     }
   },
-  force(quote:Iquote) {
+  async force(quote:Iquote) {
     quote.status = 'INPROG'
-    qStore.updateQuote(quote).then((updatedQuote:any) => {
-      if (updatedQuote) {
-        cfgQuotesList.value.pickedRow.status = 'INPROG'
-        useToast().addToast(`Quote ${updatedQuote.id} set back to In Progress`, "success")
-      }
-    })
+    const updatedQuote = await qStore.updateQuote(quote)
+    if (updatedQuote) {
+      cfgQuotesList.value.pickedRow.status = 'INPROG'
+      useToast().addToast(`Quote ${updatedQuote.id} set back to In Progress`, "success")
+    }
   }
 }
 </script>

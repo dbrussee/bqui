@@ -120,16 +120,5 @@ const props = defineProps({
     /* p { color: var(--form-prompt-color); } */
 
   }
-  .xpicked {
-    /* color: var(--table-row-picked-text) !important; */
-    color: black !important;
-    i.fa {
-      color: black;
-    }
-    p { color: black; }
-    background-color: var(--table-row-picked-bg);
-
-    /* p { color: var(--form-prompt-color); } */
-  }
 
 </style>

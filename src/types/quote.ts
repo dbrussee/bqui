@@ -2,6 +2,9 @@ export interface Iquote {
   id: number
   prospect_id: number
   prospect_name: string
+  agent_id: string
+  agent_fstnam: string
+  agent_lstnam: string
   rlob: string
   status: 'INPROG' | 'QUOTED' | 'READY' | 'RATEREQ' | 'PENDING' | 'ENROLLED' | 'EXPIRED' | 'NEW'
   effdat: string // MM/DD/YYYY on browser, Date in database

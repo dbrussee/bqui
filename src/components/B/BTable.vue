@@ -263,7 +263,7 @@ const isPicked = (rowval:any):boolean => {
       <tr>
         <template v-for="col in props.config.columns" :key="col.id">
         <th v-if="col.hide == undefined || !col.hide" :style="deduceTHStyle(col)">
-          <span :innerHTML="col.heading"/><BInfo v-if="col.help && col.help != ''" width="22em">{{ col.help }}</BInfo>
+          <span :innerHTML="col.heading"/><BInfo v-if="col.help && col.help != ''" width="22em" :message="col.help" pos="B"></BInfo>
         </th>
         </template>
       </tr>

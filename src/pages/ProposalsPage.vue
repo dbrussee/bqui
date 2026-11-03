@@ -197,7 +197,9 @@ const setCurrent = (effmonth:string, index:number) => {
 
   <div class="drop_menu">
     <!-- <BButton class="anchor" icon="solid rotate-left_" @click="refresh()">Refresh List</BButton>&nbsp;&nbsp; -->
-    <BButton class="action" icon="square-plus_" @click="B.popup.showModal(proposalHandler.id)">New Proposal&hellip;</BButton>
+    <BButton class="action" icon="square-plus_" @click="B.popup.showModal(proposalHandler.id)" gapright>New Proposal&hellip;</BButton>
+    <BConfirm icon="thumbs-up_" class="modern">Enroll Prospect?</BConfirm>
+
     <span style="float: right;" v-if="ppStore.currentProposal">
       <BConfirm class="anchor" pos="B2L" icon="#red trash-can_" @confirm="proposalHandler.delete">Delete Proposal?
         <template #message>
@@ -238,8 +240,8 @@ const setCurrent = (effmonth:string, index:number) => {
         <tr><th>Quotes:</th><td colspan="2">{{ quotesSummary.total }}
             {{ quotesSummary.ready == '' ? '' : ' - ' }}
             <BIcon v-if="quotesSummary.icon != ''" :icon="quotesSummary.icon"/>{{ quotesSummary.ready }}
-          <span v-if="ppStore.currentProposal" class="anchor" @click="proposalHandler.pickQuote()">
-            &nbsp; <BIcon icon="solid pencil_"></BIcon>Add / Remove Quotes
+          &nbsp;<span v-if="ppStore.currentProposal" class="anchor" @click="proposalHandler.pickQuote()">
+            <BIcon icon="solid pencil_"></BIcon>Add / Remove Quotes
           </span>
         </td></tr>
         <template v-if="ppStore.currentProposal">
@@ -256,8 +258,7 @@ const setCurrent = (effmonth:string, index:number) => {
       </tbody>
     </table>
     <div class="buttonbar" v-if="ppStore.currentProposal">
-      <BConfirm :disabled="quotesSummary.counts.total == 0" icon="file-pdf_" class="modern" gapright>Generate PDF</BConfirm>
-      <BConfirm :disabled="quotesSummary.counts.total == 0 || (quotesSummary.counts.total != quotesSummary.counts.ready)" icon="thumbs-up_" class="action">Start Enrollment</BConfirm>
+      <BConfirm :disabled="quotesSummary.counts.total == 0" icon="file-pdf_" class="modern">Generate PDF</BConfirm>
     </div>
   </div>
   <dialog :id="proposalHandler.id">
