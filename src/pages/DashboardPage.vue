@@ -55,7 +55,9 @@ const setTotalCount = (row:any, setStyle:any, setHtml:any) => {
   }
   const onlyCurrent = uStore.getUserSetting('dashboard_filter', 'N')
   const foundAny = pStore.quotes.some((q:Iquote) => {
-    return (q.prospect_id == pStore.prospect!.id)
+    return (
+      q.effdat == row &&
+      q.prospect_id == pStore.prospect!.id)
   })
   if (onlyCurrent == 'Y') {
     if (!foundAny) {
