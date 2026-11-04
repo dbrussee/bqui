@@ -12,7 +12,7 @@ export default class BQAPIFetcher {
   public resp: any = {}
   public meta: any = {}
   public issue: any = {}
-  private logAPICalls: boolean = true
+  private logAPICalls: boolean = false
 
   private static readonly no_user_ok_endpoints:string[] = [
     "/login",
