@@ -102,13 +102,20 @@ const proposalsList = computed(() => {
   if (!ppStore.proposaldata) return []
   if (!ppStore.proposaldata[eff]) return []
   const list = [... ppStore.proposaldata[eff]]
+  // console.log("Computing proposalsList", "containing", list.length)
+  // let count = 0
   list.forEach((proposal:any) => {
     proposal.hasQuote = false
     const hasQuote = proposal.quotes.find((q:Iquote) => {
+      // console.log("Test Local ID", localQuote.value.id, "In Proposal", q.id, "Match", (localQuote.value.id == q.id))
       return q.id == localQuote.value.id
     })
-    if (hasQuote) proposal.hasQuote = hasQuote
+    if (hasQuote) {
+      // count++
+      proposal.hasQuote = true
+    }
   });
+  // console.log("Computed Proposals List", count, list)
   return list
 })
 
@@ -117,6 +124,14 @@ const handleSave = () => {
 }
 const handleForce = () => {
   emit('force', localQuote!.value)
+}
+
+const getHasQuoteIcon = (row:any):string => {
+  if (row.hasQuote) {
+    return '#green solid square-check'
+  } else {
+    return 'square'
+  }
 }
 
 </script>
@@ -167,7 +182,7 @@ const handleForce = () => {
       <BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon>
     </template>
     <template #column_hasQuote="{row}">
-      <BIcon :icon="row.hasQuote ? '#green solid square-check' : 'square'"/>
+      <BIcon :icon="getHasQuoteIcon(row)"/>
     </template>
     <template #footer>
       <BPrompt pos="T2R"
@@ -196,43 +211,6 @@ const handleForce = () => {
       :disabled="qStore.working != null || localQuote.descr == ''">Save Changes</BButton>&nbsp;
   </div>
 
-  <Teleport to="body">
-  <dialog :id="proposalsHandler.popid" style="width: 700px;">
-    <div class="titlebar">{{ B.format.effdat(localQuote?.effdat) }} Proposals Containing Quote #{{ localQuote?.id }}</div>
-    <BTable v-if="proposalsList.length > 0" :config="cfgProposals" :rows="proposalsList">
-      <template #column_status="{row, setStyle}">
-        <BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon>
-      </template>
-      <template #column_hasQuote="{row}">
-        <BIcon :icon="row.hasQuote ? '#green solid square-check' : 'square'"/>
-      </template>
-
-    </BTable>
-    <table class="centerme" v-if="proposalsList.length == 0">
-      <thead>
-        <tr><td>There are no proposals for this Effective Date.</td></tr>
-        <!-- <tr><td>&nbsp;</td></tr>
-        <tr><td style="text-align: center;">
-          <BPrompt
-            @change="proposalsHandler.createProposal($event)"
-            prompt="Proposal Name"
-            :placeholder="B.format.effdat(localQuote?.effdat) + ' Proposal'"
-            >Create New Proposal</BPrompt></td></tr> -->
-        <!-- <tr><td style="text-align: center;"><BButton  @click="proposalsHandler.createProposal" class="action">Create {{ B.format.effdat(localQuote?.effdat) }} Proposal</BButton></td></tr> -->
-        <tr><td>&nbsp;</td></tr>
-      </thead>
-    </table>
-    <div class="buttonbar">
-      <BPrompt class="action"
-        pos="T2L"
-        @change="proposalsHandler.createProposal($event)"
-        prompt="Proposal Name"
-        :placeholder="B.format.effdat(localQuote?.effdat) + ' Proposal'"
-        >Create New Proposal</BPrompt>
-      <BButton gapleft class="anchor" @click="proposalsHandler.close()" icon="#red solid x_">Close</BButton>
-    </div>
-  </dialog>
-  </Teleport>
 </template>
 <style lang="css" scoped>
 </style>

@@ -244,10 +244,14 @@ const isPicked = (rowval:any):boolean => {
 
 
 <template>
-  <div style="width: fit-content">
-  <div v-if="props.config.heading && props.config.heading != ''" class="b-table-heading">
+  <fieldset>
+  <legend v-if="props.config.heading && props.config.heading != ''" class="b-table-heading">
     {{ props.config.heading }}
-  </div>
+  </legend>
+  <div style="width: fit-content">
+  <!-- <div v-if="props.config.heading && props.config.heading != ''" class="b-table-heading">
+    {{ props.config.heading }}
+  </div> -->
   <div class="b-table-container"
     ref="tableRef"
     tabindex="0"
@@ -304,10 +308,24 @@ const isPicked = (rowval:any):boolean => {
   </div>
   <div v-if="$slots.footer" class="b-table-footer" @click.self="doPick(false,null,-1)"><slot name="footer"/>&nbsp;</div>
   </div>
+  </fieldset>
 </template>
 
 
 <style scoped lang="css">
+fieldset {
+  border-radius: .4em;
+  width: fit-content;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  background-clip: padding-box;
+  overflow: hidden;
+  legend {
+    margin-left: .7em;
+    padding-left: .3em;
+    padding-right: .3em;
+  }
+}
 tr.no_rows_text {
   cursor: default;
   &:hover {
@@ -325,11 +343,11 @@ tr.no_rows_text {
 }
 div.b-table-container {
   outline: none;
-  border-left: 1px solid black;
+  /* border-left: 1px solid black; */
   width: fit-content;
   overscroll-behavior: none;
 }
-div.b-table-heading {
+.b-table-heading {
   padding-left: .3rem;
   padding-bottom: .3rem;
   font-style: italic;
@@ -353,7 +371,7 @@ div.b-table-footer {
   width: 100%;
   /* font-size: .9em; */
   padding: .2em .3em;
-  border: 1px solid black;
+  /* border: 1px solid black; */
   border-top: 1px solid var(--separator-color);
   background-color: var(--table-footer-bg);
   color: var(--table-footer-text);

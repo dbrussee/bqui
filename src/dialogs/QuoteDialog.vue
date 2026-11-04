@@ -100,15 +100,12 @@ const handleContinue = (q:Iquote) => {
 <template>
   <dialog :id="props.popid">
     <div v-if="localQuote">
-      <div v-if="localQuote.id < 0"
+      <div v-if="localQuote.status == 'NEW'"
           class="titlebar"
         >New {{ B.codeToText.qtype(localQuote.qtype) }} Quote</div>
-      <div v-else-if="localQuote.status == 'INPROG'"
-          class="titlebar"
-        >Edit {{ B.codeToText.qtype(localQuote.qtype)}} Quote #{{ localQuote.id }}&nbsp;&nbsp;&nbsp; Effective: {{ B.format.effdat(localQuote.effdat) }}</div>
       <div v-else
           class="titlebar"
-        >Viewing {{ B.codeToText.qtype(localQuote.qtype)}} Quote #{{ localQuote.id }}&nbsp;&nbsp;&nbsp; Effective: {{ B.format.effdat(localQuote.effdat) }}</div>
+        >{{ B.codeToText.qtype(localQuote.qtype)}} Quote #{{ localQuote.id }} for {{ B.format.effdat(localQuote.effdat) }}</div>
       <div style="position: absolute; top: .5em; right: .5em;" class="info">
         Status: <BIcon :icon="B.statusIcon(localQuote.status)"/>{{ B.codeToText.quoteStatus(localQuote.status) }}
       </div>

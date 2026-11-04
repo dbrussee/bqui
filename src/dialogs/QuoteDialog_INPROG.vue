@@ -45,8 +45,8 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
     return p.plncod == plncod
   })
   if (!plan) return {}
-  console.dir(plan.attributes)
-  return plan.attributes
+  // console.dir(plan.attributes)
+  return plan
 }
 
 </script>

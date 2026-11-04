@@ -17,19 +17,19 @@ import { useToast } from '@/composables/useToast'
 import QuoteDialog from '@/dialogs/QuoteDialog.vue'
 import { type Iquote } from '@/types'
 
-const salutation = ():string => {
-  const msg = timeOfDay()
-  const user = uStore.user
-  if (!user) return msg
-  return `${msg}, ${user.fstnam} ${user.lstnam}`
-}
+// const salutation = ():string => {
+//   const msg = timeOfDay()
+//   const user = uStore.user
+//   if (!user) return msg
+//   return `${msg}, ${user.fstnam} ${user.lstnam}`
+// }
 
-const timeOfDay = ():string => {
-  const hours = new Date().getHours()
-  if (hours < 12) return "Good Morning"
-  if (hours < 18) return "Good Afternoon"
-  return "Good Evening"
-}
+// const timeOfDay = ():string => {
+//   const hours = new Date().getHours()
+//   if (hours < 12) return "Good Morning"
+//   if (hours < 18) return "Good Afternoon"
+//   return "Good Evening"
+// }
 
 const doSearch = (row:any, col:any):void => {
   if (!row) return // No row picked
@@ -96,6 +96,7 @@ const dashConfig = ref({
     // dashConfig.value.pickedRow = row
     doSearch(row, col)
   },
+  heading: `Dashboard for ${uStore.user?.fstnam} ${uStore.user?.lstnam} (${uStore.user?.id})` ,
   // onDblpick: () => { doSearch() },
   // pickedRow: null as any,
   columns: [
@@ -265,9 +266,6 @@ const headingText = ():string => {
 
 </script>
 <template>
-  <p>
-    {{ salutation() }}
-  </p>
   <BTable class="centerme" :config="dashConfig" :rows="monthsRange">
     <template #column_eff="{row, setStyle, setHtml}">{{ setEff(row, setStyle, setHtml) }}</template>
     <template #column_total="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.total) }}</template>
