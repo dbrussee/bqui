@@ -133,7 +133,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     issue.value = fetcher.issue
   }
 
-  function getProspect(pid: number, registerRecent: boolean = false) {
+  async function getProspect(pid: number, registerRecent: boolean = false) {
     proposalStore().proposaldata = {}
     prospect.value = null;
     quotes.value.length = 0;
@@ -141,41 +141,39 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     const fetcher = new BQAPIFetcher()
     B.working.set(prospWorking, "Loading...")
     B.working.set(censusWorking, "Loading Prospect...")
-    fetcher.callAPI(`/prospect/${pid}`, "GET").then(() => {
-      // Dont wait for recents to be updated
-      // Release the Prospect screen to show data
-      B.working.clear(prospWorking)
-      B.working.clear(censusWorking)
-      meta.value = fetcher.meta
-      issue.value = fetcher.issue
-      // resp is null if not found
-      if (fetcher.resp == null) {
-        return
-      }
-      prospect.value = fetcher.resp.prosp
-      if (prospect.value == null) return
+    await fetcher.callAPI(`/prospect/${pid}`, "GET")
+    // Dont wait for recents to be updated
+    // Release the Prospect screen to show data
+    B.working.clear(prospWorking)
+    B.working.clear(censusWorking)
+    meta.value = fetcher.meta
+    issue.value = fetcher.issue
+    // resp is null if not found
+    if (fetcher.resp == null) {
+      return
+    }
+    prospect.value = fetcher.resp.prosp
+    if (prospect.value == null) return
+    appUserStore().getDashboard()
+    proposalStore().getProposals()
 
-      proposalStore().getProposals()
-
-      // console.log(JSON.stringify(prospect.value, null, 2))
-      prospect.value.census = sortCensus(fetcher.resp.prosp.census)
-      B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
-        censusHash.value = hash
-        censusDirty.value = false
-      })
-      quotes.value = sortQuotes(fetcher.resp.quotes)
-      // console.log(JSON.stringify(prospect.value, null, 2))
-      if (registerRecent) {
-        fetcher.callAPI('/recents', "GET").then(() => {
-          if (fetcher.resp) {
-            const userStore = appUserStore()
-            if (!userStore.user) return
-            userStore.user.recents = fetcher.resp
-          }
-        })
-      }
-      // appPageStore().page = "PROSPECTS"
+    // console.log(JSON.stringify(prospect.value, null, 2))
+    prospect.value.census = sortCensus(fetcher.resp.prosp.census)
+    B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
+      censusHash.value = hash
+      censusDirty.value = false
     })
+    quotes.value = sortQuotes(fetcher.resp.quotes)
+    // console.log(JSON.stringify(prospect.value, null, 2))
+    if (registerRecent) {
+      fetcher.callAPI('/recents', "GET").then(() => {
+        if (fetcher.resp) {
+          const userStore = appUserStore()
+          if (!userStore.user) return
+          userStore.user.recents = fetcher.resp
+        }
+      })
+    }
   }
   const sortCensus = (original:any[]):any[] => {
     for (const sub of original) {

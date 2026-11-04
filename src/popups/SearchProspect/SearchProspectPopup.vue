@@ -72,46 +72,47 @@ const headingText = ():string => {
         <tbody>
           <tr>
             <th><BIcon icon="solid magnifying-glass"/>Search Text:</th>
-            <td><input autofocus ref="queryTextRef" style="width: 30em;" v-model="pStore.searchParameters.query"><BButton>Search</BButton></td>
+            <td><input autofocus ref="queryTextRef" style="width: 30em;" v-model="pStore.searchParameters.query">
+              <BButton type="submit">Search</BButton></td>
           </tr>
-          </tbody>
-        </table>
-        <table class="form-table centerme">
-          <tbody>
-            <tr>
-              <th v-if="uStore.user?.rights.SEARCH_SCOPE.value == 'AGENCY'">Agent:</th>
-              <td v-if="uStore.user?.rights.SEARCH_SCOPE.value == 'AGENCY'">
-                <select v-model="pStore.searchParameters.agent" style="width: 12em;">
-                  <option value="">any</option>
-                  <option :value="uStore.user?.id">{{ uStore.user?.lstnam }}, {{ uStore.user?.fstnam }} (me)</option>
-                  <option v-for="u of uStore.user?.agency_users" :key="u.id" :value="u.id">{{ u.lstnam }}, {{ u.fstnam }}</option>
-                </select>
-              </td>
-              <th>&nbsp;Min:</th><td><input v-model="pStore.searchParameters.min" placeholder="1" style="width:4em;"/></td>
-              <th>&nbsp;Max:</th><td><input v-model="pStore.searchParameters.max" placeholder="999999" style="width:4em;"/></td>
-              <th>&nbsp;Eff:</th><td><input v-model="pStore.searchParameters.eff" placeholder="any" style="width:6em;"/></td>
-              <th>&nbsp;Status:</th><td style="width: 10em;">
-                <BPopup ref="statusPicker" class="anchor" :icon="B.statusIcon(pStore.searchParameters.status)" pos="L2B" heading="Status Filter">{{B.codeToText.quoteStatus(pStore.searchParameters.status)}}
-                  <template #body>
-                    <p><BButton prevent @click="setSearchStatus('ANY')" class="anchor" :icon="B.statusIcon('ANY')">{{B.codeToText.quoteStatus("ANY")}}</BButton></p>
-                    <hr style="margin-top: .2em; margin-bottom: .2em;"/>
-                    <p><BButton prevent @click="setSearchStatus('INPROG')" class="anchor" :icon="B.statusIcon('INPROG')">{{B.codeToText.quoteStatus("INPROG")}}</BButton></p>
-                    <p><BButton prevent @click="setSearchStatus('PENDING')" class="anchor" :icon="B.statusIcon('PENDING')">{{B.codeToText.quoteStatus("PENDING")}}</BButton></p>
-                    <p><BButton prevent @click="setSearchStatus('RATEREQ')" class="anchor" :icon="B.statusIcon('RATEREQ')">{{B.codeToText.quoteStatus("RATEREQ")}}</BButton></p>
-                    <p><BButton prevent @click="setSearchStatus('READY')" class="anchor" :icon="B.statusIcon('READY')">{{B.codeToText.quoteStatus("READY")}}</BButton></p>
-                    <p><BButton prevent @click="setSearchStatus('ENROLLED')" class="anchor" :icon="B.statusIcon('ENROLLED')">{{B.codeToText.quoteStatus("ENROLLED")}}</BButton></p>
-                    <p><BButton prevent @click="setSearchStatus('EXPIRED')" class="anchor" :icon="B.statusIcon('EXPIRED')">{{B.codeToText.quoteStatus("EXPIRED")}}</BButton></p>
-                  </template>
-                </BPopup>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </form>
+        </tbody>
+      </table>
+      <table class="form-table centerme">
+        <tbody>
+          <tr>
+            <th v-if="uStore.user?.rights.SEARCH_SCOPE.value == 'AGENCY'">Agent:</th>
+            <td v-if="uStore.user?.rights.SEARCH_SCOPE.value == 'AGENCY'">
+              <select v-model="pStore.searchParameters.agent" style="width: 12em;">
+                <option value="">any</option>
+                <option :value="uStore.user?.id">{{ uStore.user?.lstnam }}, {{ uStore.user?.fstnam }} (me)</option>
+                <option v-for="u of uStore.user?.agency_users" :key="u.id" :value="u.id">{{ u.lstnam }}, {{ u.fstnam }}</option>
+              </select>
+            </td>
+            <th>&nbsp;Min:</th><td><input v-model="pStore.searchParameters.min" placeholder="1" style="width:4em;"/></td>
+            <th>&nbsp;Max:</th><td><input v-model="pStore.searchParameters.max" placeholder="999999" style="width:4em;"/></td>
+            <th>&nbsp;Eff:</th><td><input v-model="pStore.searchParameters.eff" placeholder="any" style="width:6em;"/></td>
+            <th>&nbsp;Status:</th><td style="width: 10em;">
+              <BPopup ref="statusPicker" class="anchor" :icon="B.statusIcon(pStore.searchParameters.status)" pos="L2B" heading="Status Filter">{{B.codeToText.quoteStatus(pStore.searchParameters.status)}}
+                <template #body>
+                  <p><BButton type="button" @click="setSearchStatus('ANY')" class="anchor" :icon="B.statusIcon('ANY')">{{B.codeToText.quoteStatus("ANY")}}</BButton></p>
+                  <hr style="margin-top: .2em; margin-bottom: .2em;"/>
+                  <p><BButton type="button" @click="setSearchStatus('INPROG')" class="anchor" :icon="B.statusIcon('INPROG')">{{B.codeToText.quoteStatus("INPROG")}}</BButton></p>
+                  <p><BButton type="button" @click="setSearchStatus('PENDING')" class="anchor" :icon="B.statusIcon('PENDING')">{{B.codeToText.quoteStatus("PENDING")}}</BButton></p>
+                  <p><BButton type="button" @click="setSearchStatus('RATEREQ')" class="anchor" :icon="B.statusIcon('RATEREQ')">{{B.codeToText.quoteStatus("RATEREQ")}}</BButton></p>
+                  <p><BButton type="button" @click="setSearchStatus('READY')" class="anchor" :icon="B.statusIcon('READY')">{{B.codeToText.quoteStatus("READY")}}</BButton></p>
+                  <p><BButton type="button" @click="setSearchStatus('ENROLLED')" class="anchor" :icon="B.statusIcon('ENROLLED')">{{B.codeToText.quoteStatus("ENROLLED")}}</BButton></p>
+                  <p><BButton type="button" @click="setSearchStatus('EXPIRED')" class="anchor" :icon="B.statusIcon('EXPIRED')">{{B.codeToText.quoteStatus("EXPIRED")}}</BButton></p>
+                </template>
+              </BPopup>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
     <BTable :config="cfgSearchResults" :rows="pStore.searchResults" />
     <div class="buttonbar">
       <span v-if="pStore.censusDirty" style="float:left; color:red">You will lose unsaved census changes!</span>
-      <BButton class="anchor" gapright icon="#red solid x" @click="closeSearch()">Cancel</BButton>
+      <BButton type="button" class="anchor" gapright icon="#red solid x" @click="closeSearch()">Cancel</BButton>
       <BButton type="button" @click="loadProspect(cfgSearchResults.pickedRow.id)" :disabled="!cfgSearchResults.pickedRow" class="modern" icon="solid check">Load</BButton>
     </div>
   </dialog>

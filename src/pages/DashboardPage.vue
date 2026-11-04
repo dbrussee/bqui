@@ -17,20 +17,6 @@ import { useToast } from '@/composables/useToast'
 import QuoteDialog from '@/dialogs/QuoteDialog.vue'
 import { type Iquote } from '@/types'
 
-// const salutation = ():string => {
-//   const msg = timeOfDay()
-//   const user = uStore.user
-//   if (!user) return msg
-//   return `${msg}, ${user.fstnam} ${user.lstnam}`
-// }
-
-// const timeOfDay = ():string => {
-//   const hours = new Date().getHours()
-//   if (hours < 12) return "Good Morning"
-//   if (hours < 18) return "Good Afternoon"
-//   return "Good Evening"
-// }
-
 const doSearch = (row:any, col:any):void => {
   if (!row) return // No row picked
   if (!uStore.dashdata[row]) return // No data for that row (eff date)
@@ -49,12 +35,66 @@ const doSearch = (row:any, col:any):void => {
   })
 }
 
-const setCount = (setStyle:any, setHtml:any, count:number) => {
-  // if (!count) return
-  setStyle((td:HTMLTableCellElement) => {
-    td.classList.add("anchor")
+const toggleFilter = async () => {
+  if (!pStore.prospect) return
+  const setting = uStore.getUserSetting('dashboard_filter', 'N')
+  if (setting.toUpperCase() == 'Y') {
+    // Y is a setting. Removing it will make it N
+    await uStore.removeUserSetting('dashboard_filter', false)
+    uStore.getDashboard(-1) // Force to all
+  } else {
+    // Turn the filter on
+    await uStore.saveUserSetting('dashboard_filter', 'Y', false)
+    uStore.getDashboard(pStore.prospect.id)
+  }
+}
+const setTotalCount = (row:any, setStyle:any, setHtml:any) => {
+  if (!uStore.dashdata || !uStore.dashdata[row]) {
+    setHtml("")
+    return
+  }
+  const onlyCurrent = uStore.getUserSetting('dashboard_filter', 'N')
+  const foundAny = pStore.quotes.some((q:Iquote) => {
+    return (q.prospect_id == pStore.prospect!.id)
   })
-  setHtml(count ? count.toString() : '')
+  if (onlyCurrent == 'Y') {
+    if (!foundAny) {
+      setStyle((td:HTMLTableCellElement) => {
+        const tr = td.closest("tr")
+        if (tr) tr.style.display = "none"
+      })
+      return
+    }
+  }
+  // console.log(row, "total", foundAny)
+  const count = uStore.dashdata[row].total
+  let countString = count ? count.toString() : ''
+  if (count > 0) {
+    if (foundAny && onlyCurrent == 'N') countString = "*" + countString + "&nbsp;"
+    setStyle((td:HTMLTableCellElement) => {
+      td.classList.add("anchor")
+    })
+  }
+  setHtml(countString)
+}
+const setCount = (row:any, status:string, setStyle:any, setHtml:any) => {
+  const foundAny = pStore.quotes.some((q:Iquote) => {
+    return (
+      q.effdat == row &&
+      q.prospect_id == pStore.prospect?.id
+      && q.status == status)
+  })
+  const onlyCurrent = uStore.getUserSetting('dashboard_filter', 'N')
+  // console.log(row, status, foundAny)
+  const count = uStore.dashdata[row]?.breakout[status]
+  let countString = count ? count.toString() : ''
+  if (count > 0) {
+    if (foundAny && onlyCurrent == 'N') countString = "*" + countString + "&nbsp;"
+    setStyle((td:HTMLTableCellElement) => {
+      td.classList.add("anchor")
+    })
+  }
+  setHtml(countString)
 }
 const setEff = (row:any, setStyle:any, setHtml:any) => {
   setStyle((td:HTMLTableCellElement) => {
@@ -266,15 +306,19 @@ const headingText = ():string => {
 
 </script>
 <template>
+  <div style="width: fit-content; margin-bottom: .3em;" class="centerme">
+    <BIcon :icon="uStore.getUserSetting('dashboard_filter','N').toUpperCase() == 'Y' ? '#green solid square-check' : 'square'" @click="toggleFilter()">
+      Show Only Current Prospect</BIcon>
+  </div>
   <BTable class="centerme" :config="dashConfig" :rows="monthsRange">
     <template #column_eff="{row, setStyle, setHtml}">{{ setEff(row, setStyle, setHtml) }}</template>
-    <template #column_total="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.total) }}</template>
-    <template #column_INPROG="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.INPROG) }}</template>
-    <template #column_PENDING="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.PENDING) }}</template>
-    <template #column_RATEREQ="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.RATEREQ) }}</template>
-    <template #column_READY="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.READY) }}</template>
-    <template #column_ENROLLED="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.ENROLLED) }}</template>
-    <template #column_EXPIRED="{row, setStyle, setHtml}">{{ setCount(setStyle, setHtml, uStore.dashdata[row]?.breakout.EXPIRED) }}</template>
+    <template #column_total="{row, setStyle, setHtml}">{{ setTotalCount(row, setStyle, setHtml) }}</template>
+    <template #column_INPROG="{row, setStyle, setHtml}">{{ setCount(row, 'INPROG', setStyle, setHtml) }}</template>
+    <template #column_PENDING="{row, setStyle, setHtml}">{{ setCount(row, 'PENDING', setStyle, setHtml) }}</template>
+    <template #column_RATEREQ="{row, setStyle, setHtml}">{{ setCount(row, 'RATEREQ', setStyle, setHtml) }}</template>
+    <template #column_READY="{row, setStyle, setHtml}">{{ setCount(row, 'READY', setStyle, setHtml) }}</template>
+    <template #column_ENROLLED="{row, setStyle, setHtml}">{{ setCount(row, 'ENROLLED', setStyle, setHtml) }}</template>
+    <template #column_EXPIRED="{row, setStyle, setHtml}">{{ setCount(row, 'EXPIRED', setStyle, setHtml) }}</template>
   </BTable>
 
   <dialog :id="quoteListHandler.popId">

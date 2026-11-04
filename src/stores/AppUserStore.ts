@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import BQAPIFetcher from "@/components/BQAPI";
 import { appMessageStore } from "./MessagesStore";
 import { appProspectStore } from "./ProspectStore";
-import { proposalStore } from "./ProposalStore";
+// import { proposalStore } from "./ProposalStore";
 import { ref } from "vue";
 import { useToast } from "@/composables/useToast";
 import { B } from "@/composables/BUtils";
@@ -24,6 +24,21 @@ export const appUserStore = defineStore("appUserStore", () => {
     relogin();
   }
 
+  const getUserSetting = (thing:string, ifNotFound:string):string => {
+    let rslt = ifNotFound
+    if (!user.value) return rslt
+    const config = user.value.config
+    if ("settings" in config) {
+      if (thing in config.settings) {
+        rslt = config.settings[thing].trim()
+      }
+    }
+    // console.log("User Setting", thing, rslt)
+    return rslt
+
+  }
+
+
   function clearSearch() {
     const pStore = appProspectStore()
     pStore.clearSearchParameters()
@@ -36,19 +51,18 @@ export const appUserStore = defineStore("appUserStore", () => {
     logout();
     const fetcher = new BQAPIFetcher()
     B.working.set(working, "Login...")
-    fetcher.callAPI(`/login/${uid}`, "POST").then(() => {
-      B.working.clear(working)
-      user.value = fetcher.resp;
-      applyTheme()
-      // console.log(JSON.stringify(user.value, null, 2))
-      meta.value = fetcher.meta;
-      issue.value = fetcher.issue;
-      const msgStore = appMessageStore()
-      msgStore.getMessages()
-      getMostRecentProspect()
-      getDashboard()
-      proposalStore().getProposals()
-    })
+    await fetcher.callAPI(`/login/${uid}`, "POST")
+    B.working.clear(working)
+    user.value = fetcher.resp;
+    applyTheme()
+    // console.log(JSON.stringify(user.value, null, 2))
+    meta.value = fetcher.meta;
+    issue.value = fetcher.issue;
+    const msgStore = appMessageStore()
+    msgStore.getMessages()
+    await getMostRecentProspect()
+    // getDashboard()
+    // proposalStore().getProposals()
   }
   async function relogin() {
     B.working.set(working, "Reload...")
@@ -62,58 +76,102 @@ export const appUserStore = defineStore("appUserStore", () => {
 
     const msgStore = appMessageStore()
     msgStore.getMessages()
-    getMostRecentProspect()
-    getDashboard()
-    proposalStore().getProposals()
+    await getMostRecentProspect()
+    // getDashboard()
+    // proposalStore().getProposals()
     return user.value;
   }
 
-  function getDashboard():void {
+  async function getDashboard(pid:number=-1) {
     dashdata.value = {}
     if (!user.value) return
     B.working.set(dashworking, "Loading...")
-    const fetcher = new BQAPIFetcher()
-    fetcher.callAPI(`/dashboard`, "GET").then(() => {
-      B.working.clear(dashworking)
-      if (fetcher.resp.result == null) {
-        dashdata.value = {}
-      } else {
-        dashdata.value = fetcher.resp.result
+    if (pid < 0) {
+      const test = getUserSetting("dashboard_filter", "N")
+      if (test == "Y") { // User wants to filter
+        const pStore = appProspectStore()
+        if (pStore.prospect) {
+          const lookedUpPID = pStore.prospect.id
+          pid = lookedUpPID
+        }
       }
-      // console.dir(dashdata.value)
-    })
+    }
+    const fetcher = new BQAPIFetcher()
+    if (pid < 0) {
+      await fetcher.callAPI(`/dashboard`, "GET")
+    } else {
+      await fetcher.callAPI(`/dashboard?onlyProspectId=${pid}`, "GET")
+    }
+    B.working.clear(dashworking)
+    if (fetcher.resp.result == null) {
+      dashdata.value = {}
+    } else {
+      dashdata.value = fetcher.resp.result
+    }
+    // console.dir(dashdata.value)
   }
   async function getDashboardQuotes(eff:string, status:string) {
     if (!user.value) return []
+    let pidParam = ""
+    const filter = getUserSetting('dashboard_filter','N')
+    if (filter == 'Y') {
+      const pStore = appProspectStore()
+      if (pStore.prospect) {
+        pidParam = `&pid=${pStore.prospect.id}`
+      }
+    }
     B.working.set(dashworking, "Loading Quotes...")
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/dashboard/quotes?eff=${eff}&status=${status}`, "GET")
+    await fetcher.callAPI(`/dashboard/quotes?eff=${eff}&status=${status}${pidParam}`, "GET")
     B.working.clear(dashworking)
     // dashdata.value = fetcher.resp.result
     return fetcher.resp as any[]
   }
 
-  function applyTheme(value:string | null = null) {
-    const rootElement = document.documentElement
-    if (value) {
-      rootElement.setAttribute('data-theme', value.toLowerCase())
-      return
+  function setTheme(themeString:string | null) {
+    // No user... no change
+    if (user.value == null || user.value.config == null) return
+    if (themeString == null) {
+      removeUserSetting('theme', false).then(() => {
+        applyTheme(null)
+      })
+      localStorage.removeItem('bq-ui-theme')
+      // console.log("--- Theme set to auto")
+    } else {
+      const code = themeString.toLowerCase()
+      saveUserSetting('theme', code, false).then(() => {
+        applyTheme(code)
+      })
+      localStorage.setItem('bq_ui_theme', code)
+      // console.log("--- Theme set to", code)
     }
-    if (user.value == null || user.value.config == null) {
-      // rootElement.removeAttribute('data-theme')
-    } else if (user.value.config.settings?.theme) {
-      const code = user.value.config.settings.theme.toLowerCase()
-      rootElement.setAttribute('data-theme', code)
-      localStorage.setItem('bq-ui-theme', code)
+  }
+  function applyTheme(themeString:string | null = null) {
+    // No user... no change
+    if (user.value == null || user.value.config == null) return
+    // Get root of web page
+    const rootElement = document.documentElement
+    if (themeString == null) { // Not told. Look it up
+      if (user.value.config.settings?.theme) { // theme provided (light or dark)
+        const code = user.value.config.settings.theme.toLowerCase()
+        // console.log("--- Found theme", code)
+        rootElement.setAttribute('data-theme', code)
+      } else { // theme not set (auto)
+        // console.log("--- No theme defined... auto!")
+        rootElement.removeAttribute('data-theme')
+      }
+    } else { // I was told what to set the theme to
+      // console.log("--- Theme set to parameter value", themeString)
+      rootElement.setAttribute('data-theme', themeString.toLowerCase())
     }
   }
 
-  function getMostRecentProspect ():void {
+  async function getMostRecentProspect () {
     if (!user.value) return
     if (!user.value.recents) return
     if (user.value.recents.length == 0) return
     const prospStore = appProspectStore()
-    prospStore.getProspect(user.value.recents[0].pid)
+    await prospStore.getProspect(user.value.recents[0].pid)
   }
 
 
@@ -170,31 +228,39 @@ export const appUserStore = defineStore("appUserStore", () => {
     }
   }
 
-  const saveUserSetting = async (thing:string, code:string) => {
-    B.working.set(working, "...")
-    const fetcher = await new BQAPIFetcher().callAPI(`/user/config/${thing}/${code}`, "PUT")
-    B.working.clear(working)
-    if (fetcher.resp != null) {
-      user.value = fetcher.resp;
-      getDashboard()
-      clearSearch()
-      if (thing == "theme") localStorage.setItem('bq-ui-theme', code)
-    }
+  const removeUserSetting = async(thing:string, reloadNeeded:boolean) => {
+    await saveUserSetting(thing, null, reloadNeeded)
   }
+  const saveUserSetting = async (thing:string, code:string | null, reloadNeeded:boolean) => {
+    if (!user.value) return
+    B.working.set(working, "...")
+    const fetcher = new BQAPIFetcher()
+    if (!code) {
+      await new BQAPIFetcher().callAPI(`/user/config/${thing}`, "DELETE")
+    } else {
+      await new BQAPIFetcher().callAPI(`/user/config/${thing}/${code}`, "PUT")
+    }
 
-  const getUserSetting = (thing:string, ifNotFound:string):string => {
-    let rslt = ifNotFound
-    if (!user.value) return rslt
-    const config = user.value.config
-    if ("settings" in config) {
-      if (thing in config.settings) {
-        rslt = config.settings[thing].toLowerCase()
+    B.working.clear(working)
+    if (reloadNeeded) {
+      if (fetcher.resp != null) {
+        user.value = fetcher.resp;
+        getDashboard()
+        clearSearch()
       }
     }
-    // console.log("User Setting", thing, rslt)
-    return rslt
-
+    if (user.value) {
+      if (!code) {
+        if (user.value.config.settings) {
+          delete user.value.config.settings[thing]
+        }
+      } else {
+        if (!user.value.config.settings) user.value.config.settings = {}
+        if (code != null) user.value.config.settings[thing] = code
+      }
+    }
   }
+
 
   const isUserReadOnly = ():boolean => {
     if (!user.value) return true
@@ -245,9 +311,8 @@ export const appUserStore = defineStore("appUserStore", () => {
     const fetcher = new BQAPIFetcher()
     fetcher.callAPI(`/recents`, "DELETE").then(() => {
       B.working.clear(working)
-      const userStore = appUserStore()
-      if (userStore.user) {
-        userStore.user.recents = [...fetcher.resp]
+      if (user.value) {
+        user.value.recents = [...fetcher.resp]
         useToast().addToast("Cleared Recents List", "info")
       }
     })
@@ -257,7 +322,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   return { isLoading: working,
     relogin, login, logout, working,
     dashworking, getDashboard, getDashboardQuotes, dashdata,
-    saveSetting: saveUserSetting, applyTheme, getUserSetting,
+    saveUserSetting, applyTheme, setTheme, getUserSetting, removeUserSetting,
     addRole, deleteRole,
     user, getUserRightValue, setUserRightValue, deleteUserRight, isUserReadOnly,
     clearRecents,

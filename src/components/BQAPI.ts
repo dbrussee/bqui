@@ -12,6 +12,7 @@ export default class BQAPIFetcher {
   public resp: any = {}
   public meta: any = {}
   public issue: any = {}
+  private logAPICalls: boolean = true
 
   private static readonly no_user_ok_endpoints:string[] = [
     "/login",
@@ -44,7 +45,7 @@ export default class BQAPIFetcher {
     }
     appStore().apiHistory.unshift(historyEntry)
 
-    console.log(method, endpoint)
+    if (this.logAPICalls) console.log(method, endpoint)
 
     counters.apiCalls.total++
     counters.apiCalls.active++

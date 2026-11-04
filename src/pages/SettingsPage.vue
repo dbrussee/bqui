@@ -201,9 +201,9 @@ const getRightLongDescription = ():string => {
             </td></tr>
             <tr><td colspan="2"><div class="buttonbar"/></td></tr>
             <tr><th>Theme:</th><td>
-              <label><input @click="uStore.saveSetting('theme','auto').then(() => { uStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'auto'" value=''> Auto ({{ isDark ? 'Dark' : 'Light' }})</label>&nbsp;&nbsp;
-              <label><input @click="uStore.saveSetting('theme','light').then(() => { uStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'light'" value='light'> Light</label>&nbsp;&nbsp;
-              <label><input @click="uStore.saveSetting('theme','dark').then(() => { uStore.applyTheme()})" type='radio' name='user_theme' :checked="getUserTheme == 'dark'" value='dark'> Dark</label>
+              <label><input @click="uStore.setTheme(null)" type='radio' name='user_theme' :checked="getUserTheme == 'auto'" value=''> Auto ({{ isDark ? 'Dark' : 'Light' }})</label>&nbsp;&nbsp;
+              <label><input @click="uStore.setTheme('light')" type='radio' name='user_theme' :checked="getUserTheme == 'light'" value='light'> Light</label>&nbsp;&nbsp;
+              <label><input @click="uStore.setTheme('dark')" type='radio' name='user_theme' :checked="getUserTheme == 'dark'" value='dark'> Dark</label>
             </td></tr>
             <tr><td colspan="2">
               <br/>
