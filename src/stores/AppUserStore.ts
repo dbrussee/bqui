@@ -28,9 +28,11 @@ export const appUserStore = defineStore("appUserStore", () => {
     let rslt = ifNotFound
     if (!user.value) return rslt
     const config = user.value.config
-    if ("settings" in config) {
-      if (thing in config.settings) {
-        rslt = config.settings[thing].trim()
+    if (config) {
+      if ("settings" in config) {
+        if (thing in config.settings) {
+          rslt = config.settings[thing].trim()
+        }
       }
     }
     // console.log("User Setting", thing, rslt)
@@ -83,19 +85,24 @@ export const appUserStore = defineStore("appUserStore", () => {
   }
 
   async function getDashboard(pid:number=-1) {
-    dashdata.value = {}
+    // dashdata.value = {}
     if (!user.value) return
     B.working.set(dashworking, "Loading...")
-    if (pid < 0) {
-      const test = getUserSetting("dashboard_filter", "N")
-      if (test == "Y") { // User wants to filter
-        const pStore = appProspectStore()
-        if (pStore.prospect) {
-          const lookedUpPID = pStore.prospect.id
-          pid = lookedUpPID
+    if (user.value.rights.SEARCH_SCOPE.value == 'GLOBAL') {
+      pid = -1 // Force no filter
+    } else {
+      if (pid < 0) {
+        const test = getUserSetting("dashboard_filter", "N")
+        if (test == "Y") { // User wants to filter
+          const pStore = appProspectStore()
+          if (pStore.prospect) {
+            const lookedUpPID = pStore.prospect.id
+            pid = lookedUpPID
+          }
         }
       }
     }
+
     const fetcher = new BQAPIFetcher()
     if (pid < 0) {
       await fetcher.callAPI(`/dashboard`, "GET")
@@ -228,7 +235,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     }
   }
 
-  const removeUserSetting = async(thing:string, reloadNeeded:boolean) => {
+  const removeUserSetting = async (thing:string, reloadNeeded:boolean) => {
     await saveUserSetting(thing, null, reloadNeeded)
   }
   const saveUserSetting = async (thing:string, code:string | null, reloadNeeded:boolean) => {
@@ -256,7 +263,7 @@ export const appUserStore = defineStore("appUserStore", () => {
         }
       } else {
         if (!user.value.config.settings) user.value.config.settings = {}
-        if (code != null) user.value.config.settings[thing] = code
+        user.value.config.settings[thing] = code
       }
     }
   }

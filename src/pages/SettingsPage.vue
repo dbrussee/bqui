@@ -56,16 +56,23 @@ const rightHandler = {
       uStore.setUserRightValue(rightCode, value)
       rightsConfig.value.pickedRow = null
     }
+    if (rightCode == 'SEARCH_SCOPE') {
+      uStore.getDashboard()
+    }
     this.close()
   },
   save() {
     const sel = document.querySelector(".SETTINGS_PAGE_SAVE_USER_RIGHT") as HTMLSelectElement
+    const rightCode = rightsConfig.value.pickedRow.code
     if (sel.value == '') {
-      uStore.deleteUserRight(rightsConfig.value.pickedRow.code)
+      uStore.deleteUserRight(rightCode)
       rightsConfig.value.pickedRow = null
     } else {
-      uStore.setUserRightValue(rightsConfig.value.pickedRow.code, sel.value)
+      uStore.setUserRightValue(rightCode, sel.value)
       rightsConfig.value.pickedRow = null
+    }
+    if (rightCode == 'SEARCH_SCOPE') {
+      uStore.getDashboard()
     }
     this.close()
   },

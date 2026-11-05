@@ -35,17 +35,14 @@ const doSearch = (row:any, col:any):void => {
   })
 }
 
-const toggleFilter = async () => {
-  if (!pStore.prospect) return
-  const setting = uStore.getUserSetting('dashboard_filter', 'N')
-  if (setting.toUpperCase() == 'Y') {
-    // Y is a setting. Removing it will make it N
+const setFilter = async (newFilter:string) => {
+  // if (!pStore.prospect) return
+  if (newFilter == 'Y') {
+    await uStore.saveUserSetting('dashboard_filter', 'Y', false)
+    uStore.getDashboard(pStore.prospect?.id)
+  } else if (newFilter == 'N') {
     await uStore.removeUserSetting('dashboard_filter', false)
     uStore.getDashboard(-1) // Force to all
-  } else {
-    // Turn the filter on
-    await uStore.saveUserSetting('dashboard_filter', 'Y', false)
-    uStore.getDashboard(pStore.prospect.id)
   }
 }
 const setTotalCount = (row:any, setStyle:any, setHtml:any) => {
@@ -54,11 +51,14 @@ const setTotalCount = (row:any, setStyle:any, setHtml:any) => {
     return
   }
   const onlyCurrent = uStore.getUserSetting('dashboard_filter', 'N')
-  const foundAny = pStore.quotes.some((q:Iquote) => {
-    return (
-      q.effdat == row &&
-      q.prospect_id == pStore.prospect!.id)
-  })
+  let foundAny = false
+  if (pStore.prospect) {
+    foundAny = pStore.quotes.some((q:Iquote) => {
+      return (
+        q.effdat == row &&
+        q.prospect_id == pStore.prospect!.id)
+    })
+  }
   if (onlyCurrent == 'Y') {
     if (!foundAny) {
       setStyle((td:HTMLTableCellElement) => {
@@ -73,28 +73,35 @@ const setTotalCount = (row:any, setStyle:any, setHtml:any) => {
   let countString = count ? count.toString() : ''
   if (count > 0) {
     if (foundAny && onlyCurrent == 'N') countString = "*" + countString + "&nbsp;"
-    setStyle((td:HTMLTableCellElement) => {
-      td.classList.add("anchor")
-    })
+    if (uStore.user?.rights.SEARCH_SCOPE.value != 'GLOBAL') {
+      setStyle((td:HTMLTableCellElement) => {
+        td.classList.add("anchor")
+      })
+    }
   }
   setHtml(countString)
 }
 const setCount = (row:any, status:string, setStyle:any, setHtml:any) => {
-  const foundAny = pStore.quotes.some((q:Iquote) => {
-    return (
-      q.effdat == row &&
-      q.prospect_id == pStore.prospect?.id
-      && q.status == status)
-  })
+  let foundAny = false
+  if (pStore.prospect) {
+    foundAny = pStore.quotes.some((q:Iquote) => {
+      return (
+        q.effdat == row &&
+        q.prospect_id == pStore.prospect?.id
+        && q.status == status)
+    })
+  }
   const onlyCurrent = uStore.getUserSetting('dashboard_filter', 'N')
   // console.log(row, status, foundAny)
   const count = uStore.dashdata[row]?.breakout[status]
   let countString = count ? count.toString() : ''
   if (count > 0) {
     if (foundAny && onlyCurrent == 'N') countString = "*" + countString + "&nbsp;"
-    setStyle((td:HTMLTableCellElement) => {
-      td.classList.add("anchor")
-    })
+    if (uStore.user?.rights.SEARCH_SCOPE.value != 'GLOBAL') {
+      setStyle((td:HTMLTableCellElement) => {
+        td.classList.add("anchor")
+      })
+    }
   }
   setHtml(countString)
 }
@@ -133,8 +140,10 @@ const monthsRange = computed(() => {
 })
 
 const dashConfig = ref({
+  height: "calc(100vh - 9.5em)",
   hover: false,
   onPick: (row:any, ri:number, col:any) => {
+    if (uStore.user?.rights.SEARCH_SCOPE.value == 'GLOBAL') return
     // dashConfig.value.pickedRow = row
     doSearch(row, col)
   },
@@ -308,10 +317,6 @@ const headingText = ():string => {
 
 </script>
 <template>
-  <div style="width: fit-content; margin-bottom: .3em;" class="centerme">
-    <BIcon :icon="uStore.getUserSetting('dashboard_filter','N').toUpperCase() == 'Y' ? '#green solid square-check' : 'square'" @click="toggleFilter()">
-      Show Only Current Prospect</BIcon>
-  </div>
   <BTable class="centerme" :config="dashConfig" :rows="monthsRange">
     <template #column_eff="{row, setStyle, setHtml}">{{ setEff(row, setStyle, setHtml) }}</template>
     <template #column_total="{row, setStyle, setHtml}">{{ setTotalCount(row, setStyle, setHtml) }}</template>
@@ -321,6 +326,17 @@ const headingText = ():string => {
     <template #column_READY="{row, setStyle, setHtml}">{{ setCount(row, 'READY', setStyle, setHtml) }}</template>
     <template #column_ENROLLED="{row, setStyle, setHtml}">{{ setCount(row, 'ENROLLED', setStyle, setHtml) }}</template>
     <template #column_EXPIRED="{row, setStyle, setHtml}">{{ setCount(row, 'EXPIRED', setStyle, setHtml) }}</template>
+    <template #footer>
+      <template v-if="uStore.user?.rights.SEARCH_SCOPE.value != 'GLOBAL'">
+        Filter:
+        <BIcon :icon="uStore.getUserSetting('dashboard_filter','').toUpperCase() == '' ? '#green circle-dot' : 'circle'" @click="setFilter('N')">
+          All Prospects</BIcon>
+        &nbsp;
+        <BIcon :icon="uStore.getUserSetting('dashboard_filter','').toUpperCase() == 'Y' ? '#green circle-dot' : 'circle'" @click="setFilter('Y')">
+          Current Prospect</BIcon>
+        </template>
+
+    </template>
   </BTable>
 
   <dialog :id="quoteListHandler.popId">
