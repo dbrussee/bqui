@@ -12,7 +12,6 @@ import MessagesPage from './MessagesPage.vue'
 import CensusPage from './CensusPage.vue';
 import DashboardPage from './DashboardPage.vue';
 
-
 </script>
 
 <template>

@@ -136,6 +136,19 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       }
     }
   }
+  const getQuote = async (qid:number) => {
+    B.working.set(working, "Getting quote...")
+    const fetcher = await new BQAPIFetcher().callAPI(`/quote/${qid}`, 'GET')
+    B.working.clear(working)
+    if (fetcher.resp != null) {
+      if (fetcher.issue) {
+        useToast().addToast(`Error: ${fetcher.issue.error}`, "error")
+        return null
+      } else {
+        return fetcher.resp.quote as Iquote
+      }
+    }
+  }
 
   function sortQuotes(original:any[]):any[] {
     const sorted = original.sort((a, b) => {
@@ -312,8 +325,8 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     quote, working,
     rlobList, getRLOBList,
     planList, drugPlanList, getPlanList,
-    initializeFromQuote, makeBlankQuote, //initializeNewQuoteOptions,
+    initializeFromQuote, makeBlankQuote,
     initial_effdate_offset: INITIAL_EFFDATE_OFFSET, number_of_effdates: NUMBER_OF_EFFDATES,
-    createQuote, deleteQuote, updateQuote, getPlansForQuote
+    createQuote, deleteQuote, updateQuote, getPlansForQuote, getQuote
   }
 })

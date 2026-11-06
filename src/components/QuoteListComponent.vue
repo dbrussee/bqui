@@ -60,7 +60,7 @@ const formatStatusCell = (row:any, setStyle:any, setHtml:any) => {
     td.classList.add(classname)
   })
   let txt = B.codeToText.quoteStatus(row.status)
-  if ("INPROG,ENROLLED".indexOf(row.status) < 0) {
+  if ("INPROG,ENROLLED,EXPIRED".indexOf(row.status) < 0) {
     let cnt = 0
     if (!row.proposals) {
       cnt = 0
@@ -99,9 +99,14 @@ const qHandler = {
     this.quote.value = {...q}
     B.popup.showModal(this.popid)
   },
-  edit(quote:Iquote) {
-    this.quote.value = {...quote}
-    B.popup.showModal(this.popid)
+  async edit(quote:Iquote) {
+    const temp = await qStore.getQuote(quote.id)
+    // console.dir(temp)
+    // qStore.quote = this.quote.value
+    if (temp) {
+      this.quote.value = temp
+      B.popup.showModal(this.popid)
+    }
   },
   async save(quote:Iquote) {
     if (quote.id < 0) {
@@ -198,13 +203,19 @@ const qHandler = {
         </template>
       </BPopup>
       <BButton class="anchor anchor-in-table-footer"
-        gapleft
+        gapleft gapright
         style="color: white"
         :disabled="!cfgQuotesList.pickedRow"
         :icon="uStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'"
         @click="qHandler.edit(cfgQuotesList.pickedRow)"
         @xclick="qHandler.edit(cfgQuotesList.pickedRow)"
       >{{ uStore.isUserReadOnly() ? 'View Quote...' : 'Edit Quote...' }}</BButton>
+      |
+      <BButton class="anchor anchor-in-table-footer"
+        gapleft
+        style="color: white"
+        icon="solid rotate-left_"
+        @click="pStore.reloadProspect()">Refresh</BButton>
     </template>
   </BTable>
 

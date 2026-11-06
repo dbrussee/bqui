@@ -179,7 +179,7 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
       :disabled="qStore.working != null"
       @confirm="emit('submit', localQuote)">Submit?
       <template #message>
-        After submitting this quote, you will no longer be able to edit anything other than the name.
+        After submitting this quote, you will be asked to select Proposals to link the quote to.
       </template>
     </BConfirm>
     <BConfirm v-if="localQuote.nonstd == 'Y' && !uStore.isUserReadOnly()"
@@ -190,7 +190,7 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
       :disabled="qStore.working != null"
       @confirm="emit('submit', localQuote)">Request Rates?
       <template #message>
-        After requesting rates for this quote, you will no longer be able to edit anything other than the name.
+        <p>After requesting rates for this quote, you will be asked to select Proposals to link the quote to.</p>
         <p>Once rates are available, the quote will move to Ready status.</p>
       </template>
     </BConfirm>
@@ -202,7 +202,7 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
       :disabled="qStore.working != null"
       @confirm="emit('submit', localQuote)">Request Approval?
       <template #message>
-        After submitting this quote for approval, you will no longer be able to edit anything other than the name.
+        <p>After submitting this quote for approval, you will be asked to select Proposals to link the quote to.</p>
         <p>When the quote is approved and rates are available, the quote will move to Ready status.</p>
       </template>
     </BConfirm>

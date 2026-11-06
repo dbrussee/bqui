@@ -152,13 +152,13 @@ const dashConfig = ref({
   // pickedRow: null as any,
   columns: [
     { id: "eff", heading: "Effective", width: "5em", flags: "R" },
-    { id: "total", heading: "Total", width: "4em", flags: "C" },
-    { id: "INPROG", heading: B.codeToText.quoteStatus('INPROG'), width: "5em", flags: "C" },
-    { id: "PENDING", heading: B.codeToText.quoteStatus('PENDING'), width: "5em", flags: "C" },
-    { id: "RATEREQ", heading: B.codeToText.quoteStatus('RATEREQ'), width: "5em", flags: "C" },
-    { id: "READY", heading: B.codeToText.quoteStatus('READY'), width: "5em", flags: "C" },
-    { id: "ENROLLED", heading: B.codeToText.quoteStatus('ENROLLED'), width: "5em", flags: "C" },
-    { id: "EXPIRED", heading: B.codeToText.quoteStatus('EXPIRED'), width: "5em", flags: "C" },
+    { id: "total", heading: "Total", width: "5em", flags: "C" },
+    { id: "INPROG", heading: B.codeToText.quoteStatus('INPROG'), width: "6em", flags: "C" },
+    { id: "PENDING", heading: B.codeToText.quoteStatus('PENDING'), width: "6em", flags: "C" },
+    { id: "RATEREQ", heading: B.codeToText.quoteStatus('RATEREQ'), width: "6em", flags: "C" },
+    { id: "READY", heading: B.codeToText.quoteStatus('READY'), width: "6em", flags: "C" },
+    { id: "ENROLLED", heading: B.codeToText.quoteStatus('ENROLLED'), width: "6em", flags: "C" },
+    // { id: "EXPIRED", heading: B.codeToText.quoteStatus('EXPIRED'), width: "5em", flags: "C" },
   ]
 })
 

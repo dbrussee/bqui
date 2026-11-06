@@ -133,6 +133,11 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     issue.value = fetcher.issue
   }
 
+  async function reloadProspect() {
+    if (prospect.value == null) return
+    return getProspect(prospect.value.id, false)
+  }
+
   async function getProspect(pid: number, registerRecent: boolean = false) {
     proposalStore().proposaldata = {}
     prospect.value = null;
@@ -509,7 +514,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     prospWorking, censusWorking, meta, issue,
     censusDirty, getCensus, updateCensus, importCensus, exportCensus,
     quotes,
-    prospect, createProspect, updateProspect, getProspect,
+    prospect, createProspect, updateProspect, getProspect, reloadProspect,
     searchProspects, searchResults, searchParameters, clearSearchParameters,
     deleteProspect,
     refreshQuote,

@@ -36,6 +36,7 @@ const updateQuoteName = (newName:string) => {
 const cfgProposals = ref({
   onPick: async (row:any) => {
     if (!localQuote) return
+    if (localQuote.value.status == 'EXPIRED') return
     // const eff = B.format.dateMMDDYYYY(localQuote.value.effdat);
     if (row.hasQuote) {
       await ppStore.removeQuote(row.id, localQuote.value.id)
@@ -57,9 +58,9 @@ const cfgProposals = ref({
   no_rows_text: 'No Proposals for this Effective Date',
   columns: [
     { id: "id", heading: "ID", width: "4em", flags: "R" },
-    { id: "hasQuote", heading: "", width: "2em", flags: "C" },
-    { id: "status", heading: "Proposal Status", width: "11em" },
+    { id: "hasQuote", heading: "", width: "3em", flags: "R" },
     { id: "descr", heading: "Proposal Name", width: "30em" },
+    { id: "status", heading: "Proposal Status", width: "11em" },
   ]
 })
 const proposalsHandler = {
@@ -89,13 +90,6 @@ const proposalsHandler = {
   }
 }
 
-const formatStatusCell = (row:any, setStyle:any) => {
-  setStyle((td:HTMLTableCellElement) => {
-    const classname = "status" + row.status
-    td.classList.add(classname)
-  })
-  return B.codeToText.quoteStatus(row.status)
-}
 const proposalsList = computed(() => {
   if (!localQuote) return []
   const eff = localQuote.value.effdat
@@ -126,7 +120,23 @@ const handleForce = () => {
   emit('force', localQuote!.value)
 }
 
-const getHasQuoteIcon = (row:any):string => {
+const formatStatusCell = (row:any, setStyle:any) => {
+  setStyle((td:HTMLTableCellElement) => {
+    const classname = "status" + row.status
+    td.classList.add(classname)
+  })
+  return B.codeToText.quoteStatus(row.status)
+}
+const getHasQuoteIcon = (row:any, setStyle:any):string => {
+  if (!localQuote) return "square"
+  setStyle((td:HTMLTableCellElement) => {
+    if ('EXPIRED,ENROLLED'.indexOf(localQuote.value.status) >= 0) {
+      if (!row.hasQuote) {
+        const tr = td.closest('tr')
+        if (tr) tr.style.display = 'none'
+      }
+    }
+  })
   if (row.hasQuote) {
     return '#green solid square-check'
   } else {
@@ -181,11 +191,13 @@ const getHasQuoteIcon = (row:any):string => {
     <template #column_status="{row, setStyle}">
       <BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon>
     </template>
-    <template #column_hasQuote="{row}">
-      <BIcon :icon="getHasQuoteIcon(row)"/>
+    <template #column_hasQuote="{row, setStyle}">
+      <BIcon :icon="getHasQuoteIcon(row, setStyle)"/>
     </template>
     <template #footer>
-      <BPrompt pos="T2R"
+      <span v-if="'EXPIRED,ENROLLED'.indexOf(localQuote.status) >= 0" class="info">
+        Proposals cannot be modified with quote in {{B.codeToText.quoteStatus(localQuote.status)}} status</span>
+      <BPrompt pos="T2R" v-else
         :disabled="localQuote?.prospect_id != pStore.prospect?.id"
         @change="proposalsHandler.createProposal($event)"
         prompt="Proposal Name"

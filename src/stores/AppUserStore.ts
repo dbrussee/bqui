@@ -3,7 +3,6 @@ import { defineStore } from "pinia";
 import BQAPIFetcher from "@/components/BQAPI";
 import { appMessageStore } from "./MessagesStore";
 import { appProspectStore } from "./ProspectStore";
-// import { proposalStore } from "./ProposalStore";
 import { ref } from "vue";
 import { useToast } from "@/composables/useToast";
 import { B } from "@/composables/BUtils";
@@ -71,6 +70,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     const fetcher = await new BQAPIFetcher().callAPI(`/relogin`, "POST");
     B.working.clear(working)
     user.value = fetcher.resp;
+
     applyTheme()
     // console.log(JSON.stringify(user.value, null, 2))
     meta.value = fetcher.meta;
