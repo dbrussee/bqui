@@ -32,25 +32,24 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     const fetcher = await new BQAPIFetcher().callAPI(`/quote`, 'POST', clone)
     B.working.clear(working)
     if (fetcher.resp != null) {
-      const q:Iquote = fetcher.resp.quote
-      if (q.med_plan == null) q.med_plan = ''
-      if (q.dru_plan == null) q.dru_plan = ''
-      if (q.vis_plan == null) q.vis_plan = ''
-      if (q.den_plan == null) q.den_plan = ''
+      const newQuote:Iquote = fetcher.resp.quote
+      if (newQuote.med_plan == null) newQuote.med_plan = ''
+      if (newQuote.dru_plan == null) newQuote.dru_plan = ''
+      if (newQuote.vis_plan == null) newQuote.vis_plan = ''
+      if (newQuote.den_plan == null) newQuote.den_plan = ''
       const prospStore = appProspectStore()
-      prospStore.quotes.unshift(q)
+      prospStore.quotes.unshift(newQuote)
       prospStore.quotes = sortQuotes(appProspectStore().quotes)
       if (!prospStore.prospect) return null
-      prospStore.prospect.last_quote = {...q}
-      prospStore.prospect.last_quote_id = q.id
+      prospStore.prospect.last_quote = {...newQuote}
+      prospStore.prospect.last_quote_id = newQuote.id
       if (fetcher.issue) {
         useToast().addToast(`Error creating quote: ${fetcher.issue.error}`, "error")
       } else {
-        useToast().addToast(`Quote ${q.id} created`, "success")
         appUserStore().getDashboard()
       }
-      quote.value = {...q}
-      return q
+      quote.value = {...newQuote}
+      return newQuote
     } else {
       return null
     }
@@ -72,7 +71,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       med_plan: 'M_NOPLN', dru_plan: 'R_NOPLN', vis_plan: 'V_NOPLN', den_plan: 'D_NOPLN',
       crtusr: '', crttms: new Date(), updusr: '', updtms: new Date()
     }
-    console.dir(q)
+    // console.dir(q)
     getRLOBList(q)
     return q
   }
@@ -131,11 +130,36 @@ export const QuoteStore = defineStore('QuoteStore', () => {
         useToast().addToast(`Error: ${fetcher.issue.error}`, "error")
         return null
       } else {
+        const updatedQuote = fetcher.resp.quote
+        if (!updatedQuote) return null
+        const pStore = appProspectStore()
+        pStore.quotes.forEach((q:Iquote, i:number) => {
+          if (q.id == updatedQuote.id) {
+            pStore.quotes.splice(i, 1, updatedQuote)
+          }
+        })
         appUserStore().getDashboard()
-        return fetcher.resp.quote
+        quote.value = {...updatedQuote}
+        return updatedQuote
       }
     }
   }
+
+  const saveQuoteName = async (qid:number, qname:string) => {
+    B.working.set(working, "Updating Quote...")
+    const fetcher = await new BQAPIFetcher().callAPI(`/quotename/${qid}`, 'PUT', {name:qname})
+    B.working.clear(working)
+    if (fetcher.resp != null) {
+      if (fetcher.issue) {
+        useToast().addToast(`Error: ${fetcher.issue.error}`, "error")
+        return null
+      } else {
+        return fetcher.resp.quote
+      }
+    }
+
+  }
+
   const getQuote = async (qid:number) => {
     B.working.set(working, "Getting quote...")
     const fetcher = await new BQAPIFetcher().callAPI(`/quote/${qid}`, 'GET')
@@ -327,6 +351,6 @@ export const QuoteStore = defineStore('QuoteStore', () => {
     planList, drugPlanList, getPlanList,
     initializeFromQuote, makeBlankQuote,
     initial_effdate_offset: INITIAL_EFFDATE_OFFSET, number_of_effdates: NUMBER_OF_EFFDATES,
-    createQuote, deleteQuote, updateQuote, getPlansForQuote, getQuote
+    createQuote, deleteQuote, updateQuote, saveQuoteName, getPlansForQuote, getQuote
   }
 })

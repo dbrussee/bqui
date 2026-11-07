@@ -18,6 +18,7 @@ export function useToast() {
     const newToast: Toast = { id, message, type, duration }
 
     toasts.value.push(newToast)
+    // console.log("Toast:", message)
 
     // Automatically remove the toast after the specified duration
     if (duration > 0) {

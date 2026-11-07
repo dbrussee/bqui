@@ -20,21 +20,34 @@ const allPlans = inject('sharedAllPlans') as any
 
 
 const emit = defineEmits<{
-  (e: 'save', payload: Iquote): void
-  (e: 'delete'): void
-  (e: 'submit', payload: Iquote): void
   (e: 'close'): void
+  (e: 'save', payload: Iquote): void
+  (e: 'name', payload: Iquote): void
+  (e: 'submit', payload: Iquote): void
+  (e: 'delete'): void
 }>()
 
-
-const updateQuoteName = (newName:string) => {
-  if (!localQuote) return
-  localQuote.value.descr = newName
+const handler = {
+  close: () => {
+    emit('close')
+  },
+  save: () => {
+    emit('save', localQuote!.value)
+  },
+  submit: () => {
+    if (localQuote) emit('submit', localQuote.value)
+  },
+  name: (newName:string) => {
+    if (!localQuote) return
+    localQuote.value.descr = newName
+    emit('name', localQuote.value)
+  },
+  delete: () => {
+    emit('delete')
+  }
 }
 
-const handleSave = () => {
-  emit('save', localQuote!.value)
-}
+
 
 const getPlancodeDetails = (qtype:string, plncod:string):any => {
   if (!localQuote) return {}
@@ -71,7 +84,7 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
       <tr>
         <th :style="{color:localQuote.descr == '' ? 'red' : ''}">Name:</th>
         <td colspan="3">{{ localQuote.descr }}
-          <BPrompt required @change="updateQuoteName" :text="localQuote.descr" prompt="Quote Name"/>
+          <BPrompt required @change="handler.name" :text="localQuote.descr" prompt="Quote Name"/>
         </td>
       </tr>
       <tr><td colspan="4"><hr style="margin-top:.3em; margin-bottom:.3em;"/></td></tr>
@@ -151,7 +164,7 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
   </table>
 
   <div class="buttonbar">
-    <BConfirm v-if="uStore.getUserRightValue('QUOTE_DELETE') == 'Y'" style="float: left;" class="anchor" gapright @confirm="emit('delete')"
+    <BConfirm v-if="uStore.getUserRightValue('QUOTE_DELETE') == 'Y'" style="float: left;" class="anchor" gapright @confirm="handler.delete"
       pos="T2R"
       :disabled="uStore.isUserReadOnly()"
       tabindex="-1"
@@ -165,11 +178,11 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
       </template>
     </BConfirm>
 
-    <BButton class="anchor" icon="#red solid x_" @click="emit('close')">Close</BButton>&nbsp;
+    <BButton class="anchor" icon="#red solid x_" @click="handler.close">Close</BButton>&nbsp;
     <BButton v-if="!uStore.isUserReadOnly()"
       :class="localQuote.status == 'INPROG' ? 'anchor' : 'modern'"
       icon="floppy-disk_"
-      @click="handleSave"
+      @click="handler.save"
       :disabled="qStore.working != null || localQuote.descr == ''">Save Changes</BButton>&nbsp;
     <BConfirm v-if="localQuote.nonstd == 'N' && !uStore.isUserReadOnly()"
       class="modern"
@@ -177,7 +190,7 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
       heading="Submit Standard Quote"
       pos="T"
       :disabled="qStore.working != null"
-      @confirm="emit('submit', localQuote)">Submit?
+      @confirm="handler.submit">Submit?
       <template #message>
         After submitting this quote, you will be asked to select Proposals to link the quote to.
       </template>
@@ -188,7 +201,7 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
       heading="Non-Standard Quote Submission"
       pos="T"
       :disabled="qStore.working != null"
-      @confirm="emit('submit', localQuote)">Request Rates?
+      @confirm="handler.submit">Request Rates?
       <template #message>
         <p>After requesting rates for this quote, you will be asked to select Proposals to link the quote to.</p>
         <p>Once rates are available, the quote will move to Ready status.</p>
@@ -200,7 +213,7 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
       heading="Custom Quote Submission"
       pos="T"
       :disabled="qStore.working != null"
-      @confirm="emit('submit', localQuote)">Request Approval?
+      @confirm="handler.submit">Request Approval?
       <template #message>
         <p>After submitting this quote for approval, you will be asked to select Proposals to link the quote to.</p>
         <p>When the quote is approved and rates are available, the quote will move to Ready status.</p>

@@ -5,6 +5,10 @@ import type { Iquote } from '@/types';
 import { ref, watch, type PropType, provide } from 'vue';
 import { QuoteStore } from '@/stores/QuoteStore';
 const qStore = QuoteStore()
+import { appProspectStore } from '@/stores/ProspectStore.ts';
+const pStore = appProspectStore()
+import { appUserStore } from '@/stores/AppUserStore.ts';
+const uStore = appUserStore()
 import BIcon from '@/components/B/BIcon.vue';
 import QuoteDialog_CREATE from './QuoteDialog_CREATE.vue';
 import QuoteDialog_INPROG from './QuoteDialog_INPROG.vue';
@@ -12,7 +16,7 @@ import QuoteDialog_VIEW from './QuoteDialog_VIEW.vue';
 
 const emit = defineEmits<{
   (e: 'save', payload: Iquote): void
-  (e: 'continue', payload: Iquote): void
+  (e: 'name', payload: Iquote): void
   (e: 'delete'): void
   (e: 'submit', payload: Iquote): void
   (e: 'force', payload: Iquote): void
@@ -76,23 +80,83 @@ watch(() => props.quote, (newValue) => {
 
 }, { deep: true })
 
+const internalHandler = {
+  close: () => {
+    emit('close')
+  },
+  save: async (q:Iquote) => {
+    localQuote.value = JSON.parse(JSON.stringify(q))
+    if (localQuote.value.id < 0) {
+      qStore.quote = {...localQuote.value}
+      const newQuote = await qStore.createQuote() as Iquote
+      // useToast().addToast(`Quote ${q.id} created`, "success")
+      emit('save', newQuote)
+    } else {
+      const updatedQuote = await qStore.updateQuote(localQuote.value) as Iquote
+      if (updatedQuote) {
+        qStore.quote = {...localQuote.value}
+        pStore.refreshQuote(updatedQuote as Iquote)
+        // useToast().addToast(`Quote ${q.id} saved`, "success")
+        emit('save', updatedQuote)
+      }
+    }
+  },
+  continue: (q:Iquote) => {
+    localQuote.value = JSON.parse(JSON.stringify(q))
+    if (!uStore.user) return
+    localQuote.value.status = 'INPROG'
+    localQuote.value.crtusr = uStore.user.id
+    localQuote.value.updusr = uStore.user.id
+    getPlansAndAttributes()
+  },
+  force: async (q:Iquote) => {
+    localQuote.value = JSON.parse(JSON.stringify(q))
+    localQuote.value.status = 'INPROG'
+    const updatedQuote = await qStore.updateQuote(localQuote.value)
+    if (updatedQuote) {
+      qStore.quote = {...localQuote.value}
+      pStore.refreshQuote(updatedQuote as Iquote)
+      emit('force', updatedQuote)
+    }
+  },
+  submit: async (q:Iquote) => {
+    localQuote.value = JSON.parse(JSON.stringify(q))
+        switch(localQuote.value.nonstd) {
+      case 'N':
+        localQuote.value.status = 'READY'
+        break
+      case 'Y':
+        localQuote.value.status = 'RATEREQ'
+        break
+      case 'C':
+        localQuote.value.status = 'PENDING'
+        break
+    }
+    if (localQuote.value.id < 0) {
+      qStore.quote = {...localQuote.value}
+      const newQuote = await qStore.createQuote()
+      emit('submit', newQuote)
+    } else {
+      const updatedQuote = await qStore.updateQuote(localQuote.value)
+      if (updatedQuote) {
+        pStore.refreshQuote(updatedQuote)
+        emit('submit', updatedQuote)
+      }
+    }
+  },
+  name: async (q:Iquote) => {
+    const updatedQuote = await qStore.saveQuoteName(q.id, q.descr) as Iquote
+    if (updatedQuote) {
+      pStore.refreshQuote(updatedQuote as Iquote)
+      emit('name', updatedQuote)
+    }
+  },
+  delete: () => {
+    if (!localQuote.value) return
+    qStore.deleteQuote(localQuote.value)
 
-
-const handleSave = (q:Iquote) => {
-  localQuote.value = JSON.parse(JSON.stringify(q))
-  emit('save', localQuote.value)
-}
-const handleSubmit = (q:Iquote) => {
-  localQuote.value = JSON.parse(JSON.stringify(q))
-  emit('submit', localQuote.value)
-}
-const handleForce = (q:Iquote) => {
-  localQuote.value = JSON.parse(JSON.stringify(q))
-  emit('force', localQuote.value)
-}
-const handleContinue = (q:Iquote) => {
-  localQuote.value = JSON.parse(JSON.stringify(q))
-  emit('continue', localQuote.value)
+    emit('delete')
+  }
 }
 
 </script>
@@ -103,30 +167,30 @@ const handleContinue = (q:Iquote) => {
       <div v-if="localQuote.status == 'NEW'"
           class="titlebar"
         >New {{ B.codeToText.qtype(localQuote.qtype) }} Quote</div>
+      <div v-else-if="localQuote.id < 0"
+          class="titlebar"
+        >New {{ B.codeToText.qtype(localQuote.qtype)}} Quote for {{ B.format.effdat(localQuote.effdat) }}</div>
       <div v-else
           class="titlebar"
         >{{ B.codeToText.qtype(localQuote.qtype)}} Quote #{{ localQuote.id }} for {{ B.format.effdat(localQuote.effdat) }}</div>
       <div style="position: absolute; top: .5em; right: .5em;" class="info">
         Status: <BIcon :icon="B.statusIcon(localQuote.status)"/>{{ B.codeToText.quoteStatus(localQuote.status) }}
       </div>
-      <!-- <form @submit.prevent="handleSave"> -->
-        <QuoteDialog_CREATE v-if="localQuote.status == 'NEW'"
-          @close="emit('close')"
-          @continue="handleContinue" />
-        <QuoteDialog_INPROG v-else-if="localQuote.status == 'INPROG'"
-          @close="emit('close')"
-          @delete="emit('delete')"
-          @submit="handleSubmit"
-          @save="handleSave" />
-        <QuoteDialog_VIEW v-else
-          @close="emit('close')"
-          @force="handleForce"
-          @save="handleSave" />
-      <!-- </form> -->
-
-  </div>
-</dialog>
-
+      <QuoteDialog_CREATE v-if="localQuote.status == 'NEW'"
+        @close="internalHandler.close"
+        @continue="internalHandler.continue" />
+      <QuoteDialog_INPROG v-else-if="localQuote.status == 'INPROG'"
+        @close="internalHandler.close"
+        @delete="internalHandler.delete"
+        @submit="internalHandler.submit"
+        @name="internalHandler.name"
+        @save="internalHandler.save" />
+      <QuoteDialog_VIEW v-else
+        @close="internalHandler.close"
+        @force="internalHandler.force"
+        @name="internalHandler.name" />
+    </div>
+  </dialog>
 </template>
 
 <style lang="css" scoped>

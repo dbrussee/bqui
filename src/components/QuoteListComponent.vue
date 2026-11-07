@@ -31,7 +31,7 @@ const cfgQuotesList = ref({
     cfgQuotesList.value.pickedRow = row
     // cfgQuotesList.value.pickedRowNumber = rn
   },
-  onDblpick: () => { qHandler.edit(cfgQuotesList.value.pickedRow) },
+  onDblpick: () => { quoteEventHandler.edit(cfgQuotesList.value.pickedRow) },
   height: "calc(100vh - 11.7em)",
   width: "calc(100vw - 200px - .9em)",
   pickedRow: null as any,
@@ -73,7 +73,14 @@ const formatStatusCell = (row:any, setStyle:any, setHtml:any) => {
   }
   setHtml(txt)
 }
-const qHandler = {
+
+const findAndPickQuote = ((qid:number) => {
+  const found = pStore.quotes.find((q:Iquote) => {
+    return q.id == qid
+  })
+  cfgQuotesList.value.pickedRow = found
+})
+const quoteEventHandler = {
   quote: ref<Iquote | undefined>(undefined),
   popid: useId(),
 
@@ -109,32 +116,14 @@ const qHandler = {
     }
   },
   async save(quote:Iquote) {
-    if (quote.id < 0) {
-      qStore.quote = {...quote}
-      const newQuote = await qStore.createQuote()
-      cfgQuotesList.value.pickedRow = newQuote as Iquote
-      this.close()
-    } else {
-      const updatedQuote = await qStore.updateQuote(quote)
-      // updatedQuote = toRaw(updatedQuote)
-      if (updatedQuote) {
-        pStore.refreshQuote(updatedQuote as Iquote)
-        cfgQuotesList.value.pickedRow = null
-        useToast().addToast(`Quote ${updatedQuote.id} saved`, "success")
-      }
-      this.close()
-    }
+    findAndPickQuote(quote.id)
+    useToast().addToast(`Quote ${quote.id} saved`, "success")
+    this.close()
   },
-  continue(quote:Iquote) { // Change from NEW to INPROG (still not saved)
-    if (!uStore.user) return
-    this.quote.value = {...quote}
-    this.quote.value.status = 'INPROG'
-    this.quote.value.crtusr = uStore.user.id
-    this.quote.value.updusr = uStore.user.id
+  name(quote:Iquote) { // Quote has already been saved with new name... just get it into the list
+    findAndPickQuote(quote.id)
   },
   delete() {
-    if (!this.quote.value) return
-    qStore.deleteQuote(this.quote.value)
     cfgQuotesList.value.pickedRow = null
     this.close()
   },
@@ -142,39 +131,21 @@ const qHandler = {
     let toastMessage = 'unchanged'
     switch(quote.nonstd) {
       case 'N':
-        quote.status = 'READY'
         toastMessage = 'is ready to enroll'
         break
       case 'Y':
-        quote.status = 'RATEREQ'
         toastMessage = 'rates have been requested'
         break
       case 'C':
-        quote.status = 'PENDING'
         toastMessage = 'is pending approval'
         break
     }
-    if (quote.id < 0) {
-      qStore.quote = {...quote}
-      const newQuote = await qStore.createQuote()
-      cfgQuotesList.value.pickedRow = newQuote
-    } else {
-      const updatedQuote = await qStore.updateQuote(quote)
-      if (updatedQuote) {
-        pStore.refreshQuote(updatedQuote)
-        // pStore.quotes[cfgQuotesList.value.pickedRowNumber] = {...updatedQuote}
-        cfgQuotesList.value.pickedRow = null
-        useToast().addToast(`Quote ${updatedQuote.id} ${toastMessage}`, "success")
-      }
-    }
+    findAndPickQuote(quote.id)
+    useToast().addToast(`Quote ${quote.id} ${toastMessage}`, "success")
   },
   async force(quote:Iquote) {
-    quote.status = 'INPROG'
-    const updatedQuote = await qStore.updateQuote(quote)
-    if (updatedQuote) {
-      cfgQuotesList.value.pickedRow.status = 'INPROG'
-      useToast().addToast(`Quote ${updatedQuote.id} set back to In Progress`, "success")
-    }
+    findAndPickQuote(quote.id)
+    useToast().addToast(`Quote ${quote.id} set back to In Progress`, "success")
   }
 }
 </script>
@@ -194,12 +165,12 @@ const qHandler = {
     <template #footer>
       <BPopup v-if="!uStore.isUserReadOnly()" class="action" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
         <template #body>
-          <p><BButton @click="qHandler.start('MED')" class="anchor" :icon="B.codeToText.qtypeIcon('MED')">Medical &amp; Drug</BButton></p>
-          <p><BButton @click="qHandler.start('DEN')" class="anchor" :icon="B.codeToText.qtypeIcon('DEN')">Dental</BButton></p>
-          <p><BButton @click="qHandler.start('VIS')" class="anchor" :icon="B.codeToText.qtypeIcon('VIS')">Vision</BButton></p>
-          <p><BButton disabled @click="qHandler.start('WEL')" class="anchor" :icon="B.codeToText.qtypeIcon('WEL')">Wellness</BButton></p>
+          <p><BButton @click="quoteEventHandler.start('MED')" class="anchor" :icon="B.codeToText.qtypeIcon('MED')">Medical &amp; Drug</BButton></p>
+          <p><BButton @click="quoteEventHandler.start('DEN')" class="anchor" :icon="B.codeToText.qtypeIcon('DEN')">Dental</BButton></p>
+          <p><BButton @click="quoteEventHandler.start('VIS')" class="anchor" :icon="B.codeToText.qtypeIcon('VIS')">Vision</BButton></p>
+          <p><BButton disabled @click="quoteEventHandler.start('WEL')" class="anchor" :icon="B.codeToText.qtypeIcon('WEL')">Wellness</BButton></p>
           <hr style="margin-top: .2em; margin-bottom: .2em;"/>
-          <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="qHandler.startFromQuote(cfgQuotesList.pickedRow)" class="anchor" icon="clone_">Copy Selected</BButton></p>
+          <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="quoteEventHandler.startFromQuote(cfgQuotesList.pickedRow)" class="anchor" icon="clone_">Copy Selected</BButton></p>
         </template>
       </BPopup>
       <BButton class="anchor anchor-in-table-footer"
@@ -207,8 +178,8 @@ const qHandler = {
         style="color: white"
         :disabled="!cfgQuotesList.pickedRow"
         :icon="uStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'"
-        @click="qHandler.edit(cfgQuotesList.pickedRow)"
-        @xclick="qHandler.edit(cfgQuotesList.pickedRow)"
+        @click="quoteEventHandler.edit(cfgQuotesList.pickedRow)"
+        @xclick="quoteEventHandler.edit(cfgQuotesList.pickedRow)"
       >{{ uStore.isUserReadOnly() ? 'View Quote...' : 'Edit Quote...' }}</BButton>
       |
       <BButton class="anchor anchor-in-table-footer"
@@ -219,14 +190,14 @@ const qHandler = {
     </template>
   </BTable>
 
-  <QuoteDialog :popid="qHandler.popid"
-    @save="(q) => qHandler.save(q)"
-    @close="qHandler.close()"
-    @continue="(q) => qHandler.continue(q)"
-    @delete="qHandler.delete()"
-    @submit="(q) => qHandler.submit(q)"
-    @force="(q) => qHandler.force(q)"
-    :quote="qHandler.quote.value"/>
+  <QuoteDialog :popid="quoteEventHandler.popid"
+    @save="(q) => quoteEventHandler.save(q)"
+    @name="(q) => quoteEventHandler.name(q)"
+    @close="quoteEventHandler.close()"
+    @delete="quoteEventHandler.delete()"
+    @submit="(q) => quoteEventHandler.submit(q)"
+    @force="(q) => quoteEventHandler.force(q)"
+    :quote="quoteEventHandler.quote.value"/>
 
 </template>
 

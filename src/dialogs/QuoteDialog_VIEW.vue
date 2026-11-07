@@ -1,6 +1,6 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { inject, useId, computed, ref } from 'vue'
+import { inject, useId, ref } from 'vue'
 import type { Ref } from 'vue'
 import { B } from '@/composables/BUtils';
 import BButton from '@/components/B/BButton.vue';
@@ -11,10 +11,9 @@ import { appProspectStore } from '@/stores/ProspectStore';
 const pStore = appProspectStore()
 import { proposalStore } from '@/stores/ProposalStore.ts';
 const ppStore = proposalStore()
+if (!ppStore.proposaldata) ppStore.proposaldata = {}
 import { appUserStore } from '@/stores/AppUserStore';
 const uStore = appUserStore()
-import { QuoteStore } from '@/stores/QuoteStore';
-const qStore = QuoteStore()
 import BTable from '@/components/B/BTable.vue';
 import BPrompt from '@/components/B/BPrompt.vue';
 
@@ -22,7 +21,7 @@ import BPrompt from '@/components/B/BPrompt.vue';
 const localQuote = inject<Ref<Iquote> | null>('sharedLocalQuote', null)
 
 const emit = defineEmits<{
-  (e: 'save', payload: Iquote): void
+  (e: 'name', payload: Iquote): void
   (e: 'force', payload: Iquote): void
   (e: 'close'): void
 }>()
@@ -31,6 +30,7 @@ const emit = defineEmits<{
 const updateQuoteName = (newName:string) => {
   if (!localQuote) return
   localQuote.value.descr = newName
+  emit('name', localQuote.value)
 }
 
 const cfgProposals = ref({
@@ -38,18 +38,15 @@ const cfgProposals = ref({
     if (!localQuote) return
     if (localQuote.value.status == 'EXPIRED') return
     // const eff = B.format.dateMMDDYYYY(localQuote.value.effdat);
-    if (row.hasQuote) {
+    const hasQuote = row.quotes.some((q:Iquote) => {
+      return q.id == localQuote?.value.id
+    })
+    // console.log(hasQuote)
+    if (hasQuote) {
       await ppStore.removeQuote(row.id, localQuote.value.id)
-      localQuote.value.proposals = localQuote.value.proposals.filter((p:any) => {
-        return p.id != row.id
-      })
     } else {
       await ppStore.addQuote(row.id, localQuote.value.id)
-      if (!localQuote.value.proposals) localQuote.value.proposals = []
-      localQuote.value.proposals.push(row)
     }
-
-    // cfgQuotesList.value.pickedRowNumber = rn
   },
   heading: "Proposals Containing This Quote",
   height: "10em",
@@ -57,9 +54,9 @@ const cfgProposals = ref({
   // pickedRowNumber: -1,
   no_rows_text: 'No Proposals for this Effective Date',
   columns: [
-    { id: "id", heading: "ID", width: "4em", flags: "R" },
+    // { id: "id", heading: "ID", width: "4em", flags: "R" },
     { id: "hasQuote", heading: "", width: "3em", flags: "R" },
-    { id: "descr", heading: "Proposal Name", width: "30em" },
+    { id: "descr", heading: "Proposal Name", width: "35em" },
     { id: "status", heading: "Proposal Status", width: "11em" },
   ]
 })
@@ -90,32 +87,19 @@ const proposalsHandler = {
   }
 }
 
-const proposalsList = computed(() => {
-  if (!localQuote) return []
-  const eff = localQuote.value.effdat
-  if (!ppStore.proposaldata) return []
-  if (!ppStore.proposaldata[eff]) return []
-  const list = [... ppStore.proposaldata[eff]]
-  // console.log("Computing proposalsList", "containing", list.length)
-  // let count = 0
-  list.forEach((proposal:any) => {
-    proposal.hasQuote = false
-    const hasQuote = proposal.quotes.find((q:Iquote) => {
-      // console.log("Test Local ID", localQuote.value.id, "In Proposal", q.id, "Match", (localQuote.value.id == q.id))
-      return q.id == localQuote.value.id
-    })
-    if (hasQuote) {
-      // count++
-      proposal.hasQuote = true
-    }
-  });
-  // console.log("Computed Proposals List", count, list)
-  return list
-})
+// const proposalsList = computed(() => {
+//   if (!localQuote) return []
+//   const eff = localQuote.value.effdat
+//   if (!ppStore.proposaldata) return []
+//   if (!ppStore.proposaldata[eff]) return []
+//   const list = [... ppStore.proposaldata[eff]]
 
-const handleSave = () => {
-  emit('save', localQuote!.value)
-}
+//   return list
+// })
+
+// const handleSave = () => {
+//   emit('save', localQuote!.value)
+// }
 const handleForce = () => {
   emit('force', localQuote!.value)
 }
@@ -127,17 +111,12 @@ const formatStatusCell = (row:any, setStyle:any) => {
   })
   return B.codeToText.quoteStatus(row.status)
 }
-const getHasQuoteIcon = (row:any, setStyle:any):string => {
-  if (!localQuote) return "square"
-  setStyle((td:HTMLTableCellElement) => {
-    if ('EXPIRED,ENROLLED'.indexOf(localQuote.value.status) >= 0) {
-      if (!row.hasQuote) {
-        const tr = td.closest('tr')
-        if (tr) tr.style.display = 'none'
-      }
-    }
+const getHasQuoteIcon = (row:any):string => {
+  const hasQuote = row.quotes.some((q:Iquote) => {
+    return q.id == localQuote?.value.id
   })
-  if (row.hasQuote) {
+  // console.log(row.id, row.descr, hasQuote)
+  if (hasQuote) {
     return '#green solid square-check'
   } else {
     return 'square'
@@ -187,12 +166,12 @@ const getHasQuoteIcon = (row:any, setStyle:any):string => {
   </table>
 
   <!-- <div class="titlebar">{{ B.format.effdat(localQuote?.effdat) }} Proposals Containing Quote #{{ localQuote?.id }}</div> -->
-  <BTable :config="cfgProposals" :rows="proposalsList">
+  <BTable :config="cfgProposals" :rows="ppStore.proposaldata[localQuote.effdat]">
     <template #column_status="{row, setStyle}">
       <BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon>
     </template>
-    <template #column_hasQuote="{row, setStyle}">
-      <BIcon :icon="getHasQuoteIcon(row, setStyle)"/>
+    <template #column_hasQuote="{row}">
+      <BIcon :icon="getHasQuoteIcon(row)"/>
     </template>
     <template #footer>
       <span v-if="'EXPIRED,ENROLLED'.indexOf(localQuote.status) >= 0" class="info">
@@ -216,11 +195,11 @@ const getHasQuoteIcon = (row:any, setStyle:any):string => {
       </template>
     </BConfirm>
     <BButton class="anchor" icon="#red solid x_" @click="emit('close')">Close</BButton>&nbsp;
-    <BButton v-if="!uStore.isUserReadOnly()"
+    <!-- <BButton v-if="!uStore.isUserReadOnly()"
       class="modern"
       icon="floppy-disk_"
       @click="handleSave"
-      :disabled="qStore.working != null || localQuote.descr == ''">Save Changes</BButton>&nbsp;
+      :disabled="qStore.working != null || localQuote.descr == ''">Save Changes</BButton>&nbsp; -->
   </div>
 
 </template>

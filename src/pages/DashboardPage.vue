@@ -5,10 +5,8 @@ import { B } from '@/composables/BUtils'
 // import BIcon from '@/components/B/BIcon.vue'
 import { appUserStore } from '@/stores/AppUserStore'
 const uStore = appUserStore()
-import { QuoteStore } from '@/stores/QuoteStore'
 import { appProspectStore } from '@/stores/ProspectStore'
 const pStore = appProspectStore()
-const qStore = QuoteStore()
 // import { useSearchProspectPopup } from '@/popups/SearchProspect/useSearchProspectPopup';
 import BTable from '@/components/B/BTable.vue'
 import BIcon from '@/components/B/BIcon.vue'
@@ -219,71 +217,30 @@ const qHandler = {
     B.popup.showModal(this.popid)
   },
   save(quote:Iquote) {
-    if (quote.id < 0) {
-      qStore.quote = {...quote}
-      qStore.createQuote().then(() => {
-        pStore.refreshQuote(quote)
-        uStore.getDashboard()
-        this.close()
-      })
-    } else {
-      qStore.updateQuote(quote).then((updatedQuote:any) => {
-        if (updatedQuote) {
-          pStore.refreshQuote(quote)
-          useToast().addToast(`Quote ${updatedQuote.id} saved`, "success")
-        }
-        this.close()
-      })
-    }
+    useToast().addToast(`Quote ${quote.id} saved`, "success")
+    this.close()
   },
   delete() {
-    if (!this.quote.value) return
-    qStore.deleteQuote(this.quote.value)
-    pStore.refreshQuote(this.quote.value)
     this.close()
   },
   submit(quote:Iquote) {
     let toastMessage = 'unchanged'
     switch(quote.nonstd) {
       case 'N':
-        quote.status = 'READY'
         toastMessage = 'is ready to enroll'
         break
       case 'Y':
-        quote.status = 'RATEREQ'
         toastMessage = 'rates have been requested'
         break
       case 'C':
-        quote.status = 'PENDING'
         toastMessage = 'is pending approval'
         break
     }
-    if (quote.id < 0) {
-      qStore.quote = {...quote}
-      qStore.createQuote().then(() => {
-        pStore.refreshQuote(quote)
-        uStore.getDashboard()
-        this.close()
-      })
-    } else {
-      qStore.updateQuote(quote).then((updatedQuote:any) => {
-        if (updatedQuote) {
-          pStore.refreshQuote(updatedQuote)
-          useToast().addToast(`Quote ${updatedQuote.id} ${toastMessage}`, "success")
-        }
-        this.close()
-      })
-    }
+    useToast().addToast(`Quote ${quote.id} ${toastMessage}`, "success")
+    this.close()
   },
   force(quote:Iquote) {
-    quote.status = 'INPROG'
-    qStore.updateQuote(quote).then((updatedQuote:any) => {
-      if (updatedQuote) {
-        pStore.refreshQuote(updatedQuote)
-        uStore.getDashboard()
-        useToast().addToast(`Quote ${updatedQuote.id} set back to In Progress`, "success")
-      }
-    })
+    useToast().addToast(`Quote ${quote.id} set back to In Progress`, "success")
   }
 }
 

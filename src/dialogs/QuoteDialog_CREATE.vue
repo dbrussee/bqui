@@ -13,10 +13,19 @@ const pStore = appProspectStore()
 import BIcon from '@/components/B/BIcon.vue';
 const localQuote = inject<Ref<Iquote> | null>('sharedLocalQuote', null)
 
-  const emit = defineEmits<{
+const emit = defineEmits<{
   (e: 'continue', payload: Iquote): void
   (e: 'close'): void
 }>()
+
+const handler = {
+  close: () => {
+    emit('close')
+  },
+  continue: () => {
+    emit('continue', localQuote!.value)
+  }
+}
 
 const getRlobList = async () => {
   if (!pStore.prospect) return
@@ -34,10 +43,6 @@ const getRlobList = async () => {
       localQuote.value.rlob = ''
     }
   // }
-}
-
-const handleContinue = () => {
-  emit('continue', localQuote!.value)
 }
 
 </script>
@@ -94,12 +99,12 @@ const handleContinue = () => {
     </tbody>
   </table>
   <div class="buttonbar">
-    <BButton class="anchor" icon="#red solid x_" @click="emit('close')">Close</BButton>&nbsp;
+    <BButton class="anchor" icon="#red solid x_" @click="handler.close">Close</BButton>&nbsp;
     <BButton
       :disabled="localQuote.effdat == null
         || qStore.working != null
         || localQuote.descr == ''
-        || localQuote.rlob == ''" class="modern" @click="handleContinue">Select Plans...</BButton>
+        || localQuote.rlob == ''" class="modern" @click="handler.continue">Select Plans...</BButton>
   </div>
 
 </template><style lang="css" scoped>

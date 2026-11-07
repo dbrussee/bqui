@@ -78,23 +78,20 @@ export const proposalStore = defineStore("proposalStore", () => {
     })
   }
 
-  async function addQuote(pid:number, qid:string|number) {
+  async function addQuote(proposal_id:number, qid:string|number) {
     if (typeof qid == 'string') qid = parseInt(qid)
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/proposal/quote/${pid}/${qid}`, 'PUT')
+    await fetcher.callAPI(`/proposal/quote/${proposal_id}/${qid}`, 'PUT')
     if (fetcher.issue) {
       useToast().addToast(fetcher.issue.message, "warning")
     } else {
       proposaldata.value = fetcher.resp.eff_dates
-      currentProposal.value = findProposal(pid)
+      currentProposal.value = findProposal(proposal_id)
       const pStore = appProspectStore()
       if (pStore.prospect) {
         const quote = pStore.quotes.find((q:Iquote) => q.id == qid)
         if (!quote.proposals) quote.proposals = []
-        const qeff = B.format.dateMMDDYYYY(quote.effdat)
-        const proposal = proposaldata.value[qeff].find((p:any) => p.id=pid)
-        quote.proposals.push({id:proposal.id, descr:proposal.descr})
-        // proposal.quotes.push(quote)
+        quote.proposals.push({id:proposal_id})
       }
     }
     return qid
