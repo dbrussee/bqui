@@ -6,7 +6,8 @@ import { B } from "@/composables/BUtils";
 import { appUserStore } from "./AppUserStore";
 import { proposalStore } from "./ProposalStore";
 import { useToast } from '../composables/useToast'
-import * as XLSX from "xlsx";
+// import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import type { Iprospect } from "@/types/prospect";
 import type { Iquote } from "@/types";
 
@@ -330,27 +331,53 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   const exportCensus = async () => {
     if (!prospect.value) return
     const census = flattenCensus()
-    const worksheet = XLSX.utils.json_to_sheet(census)
-    worksheet['!cols'] = [
-      { wch: 4 },  // Sub number
-      { wch: 7 },  // Relation
-      { wch: 19 }, // Last
-      { wch: 19 }, // First
-      { wch: 4 },  // MI
-      { wch: 5 },  // Suffix
-      { wch: 11 }, // DOB
-      { wch: 4 },  // Sex
-      { wch: 4 },  // MED
-      { wch: 4 },  // DEN
-      { wch: 4 },  // VIS
-      { wch: 7 },  // Sub COBRA
-      { wch: 9 }   // Dep Disabled
-    ];
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Census")
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Census");
+    worksheet.columns = [
+      { header: 'Sub',       key: 'Sub',       width: 4 },
+      { header: 'Relation',  key: 'Relation',  width: 7 },
+      { header: 'Last Name', key: 'Last Name',  width: 19 },
+      { header: 'First Name',key: 'First Name', width: 19 },
+      { header: 'MI',        key: 'MI',        width: 4 },
+      { header: 'Suffix',    key: 'Suffix',    width: 5 },
+      { header: 'DOB',       key: 'DOB',       width: 11 },
+      { header: 'Sex',       key: 'Sex',       width: 4 },
+      { header: 'MED',       key: 'MED',       width: 4 },
+      { header: 'DEN',       key: 'DEN',       width: 4 },
+      { header: 'VIS',       key: 'VIS',       width: 4 },
+      { header: 'COBRA',     key: 'COBRA',     width: 7 },
+      { header: 'Disabled',  key: 'Disabled',  width: 9 }
+    ]
+    console.dir(census)
+    worksheet.addRows(census)
+
+    worksheet.eachRow({includeEmpty: true}, (row, rowNumber) => {
+      if (rowNumber == 1) {
+        row.eachCell((cell) => {
+          // Set Font Family, Size, and Weight
+          cell.font = {
+            name: 'Arial',
+            color: { argb: 'FFFFFFFF' } // White text
+          }
+          // Set Background Fill (Professional Corporate Slate Blue)
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF2F5597' }
+          }
+        })
+      } else {
+        row.eachCell((cell) => {
+          // Set Font Family, Size, and Weight
+          cell.font = {
+            name: 'Arial',
+          };
+        })
+      }
+    })
+
 
     try {
-      // 1. Prompt the user with the native blocking save dialog
       const handle = await (window as any).showSaveFilePicker({
         suggestedName: `BQ Census for Prospect ${prospect.value.id}.xlsx`,
         types: [{
@@ -360,17 +387,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
           }
         }]
       });
-
-      // --- The code cleanly pauses here until the user clicks "Save" ---
-
-      // 2. Generate the raw Excel file bytes using SheetJS
-      const rawData = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-
-      // 3. Write the data directly to the chosen file handle
+      const rawData = await workbook.xlsx.writeBuffer();
       const writable = await handle.createWritable();
       await writable.write(rawData);
       await writable.close();
-
       // 4. Runs strictly AFTER the file is successfully saved
       useToast().addToast("Census exported successfully", "success");
 
@@ -431,8 +451,6 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
 
   const importCensus = (event:Event) => {
-    // console.log("Before Import")
-    // console.log(prospect.value.census)
     const target = event.currentTarget as HTMLInputElement
     if (target.files && target.files.length > 0) {
       const file = target.files[0] as File
@@ -440,24 +458,43 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       const reader = new FileReader();
 
       // Define what happens once the file is completely read into memory
-      reader.onload = function(e) {
+      reader.onload = async function(e) {
         if (!e.target) {
           useToast().addToast("No data in census reader", "error")
           return
         }
-        const data = e.target.result; // This is the ArrayBuffer containing file data
+        const data = e.target.result as ArrayBuffer // This is the ArrayBuffer containing file data
 
-        /* Parse file data and generate a SheetJS workbook object */
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = new ExcelJS.Workbook()
+        await workbook.xlsx.load(data)
+        const worksheet = workbook.worksheets[0];
+        if (!worksheet) {
+          useToast().addToast("No worksheets found in file", "error")
+          return
+        }
 
-        /* Get the name of the first worksheet */
-        const firstSheetName:string = workbook.SheetNames[0] as string
+        const jsonData: any[] = []
+        const headers: string[] = []
 
-        /* Get the actual worksheet object */
-        const worksheet:XLSX.WorkSheet = workbook.Sheets[firstSheetName] as XLSX.WorkSheet;
-
-        /* Convert the worksheet rows into a readable array of JSON objects */
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        worksheet.eachRow({includeEmpty: false}, (row, rowNumber) => {
+          if (rowNumber == 1) {
+            // This is the header row, extract headers
+            row.eachCell({includeEmpty: false}, (cell) => {
+              headers.push(cell.text.trim())
+            })
+          } else {
+            // Subsequent rows are data rows
+            const rowObject: any = {};
+            row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+              const headerKey = headers[colNumber - 1];
+              if (headerKey) {
+                // cell.value handles text, numbers, dates, or formula outcomes cleanly
+                rowObject[headerKey] = cell.value;
+              }
+            });
+            jsonData.push(rowObject);
+          }
+        })
 
         // Display the formatted JSON on the page
         mapImportJSONToCensus(jsonData)
