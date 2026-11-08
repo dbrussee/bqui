@@ -23,18 +23,7 @@ watch(
     if (newProspect && newProspect.name) {
       prospText = ` - ${newProspect.name}`
     }
-
-    let pageText = ""
-    switch(newPage) {
-      case 'DASHBOARD': pageText = " 🗓️"; break
-      case 'PROSPECTS': pageText = " ⌂"; break
-      case 'CENSUS': pageText = " 🧑‍🧑‍🧒‍🧒"; break
-      case 'MSGS': pageText = " ✉"; break
-      case 'SETTINGS': pageText = " ⚙️"; break
-      case 'PROPOSALS': pageText = " 🤝"; break
-    }
-    pageText = "" // Ignore for now, just show the prospect name in the title
-    document.title = `BlueQuote${pageText}${prospText}`
+    document.title = `BlueQuote${prospText}`
   },
   { immediate: true, deep: true }
 )
