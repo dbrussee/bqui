@@ -44,7 +44,7 @@ const deduceJustification = (style: Record<string, string>, col:any) => {
 const cfgCensus = ref({
   height: "calc(100vh - 9em)",
   columns: [
-    { id: "relation", heading: "", width: "3.5em" },
+    { id: "relation", heading: "Rel", width: "3.5em" },
     { id: "lstnam", heading: " Last Name" },
     { id: "fstnam", heading: " First Name" },
     { id: "midnam", heading: "Mid", width: "2em", flags: "C" },

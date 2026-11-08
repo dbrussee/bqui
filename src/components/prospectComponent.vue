@@ -157,7 +157,7 @@ const prospectCSZ = (prosp:any) => {
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton type="button" class="anchor" style="margin-right: .6em;" @click="handler.close()" icon="#red solid x">Cancel</BButton>
-            <BButton v-if="!uStore.isUserReadOnly()" type="submit" class="action" icon="floppy-disk_"> Save Changes</BButton>
+            <BButton v-if="!uStore.isUserReadOnly()" type="submit" class="modern" icon="floppy-disk_"> Save Changes</BButton>
           </div>
         </td></tr>
       </tbody>

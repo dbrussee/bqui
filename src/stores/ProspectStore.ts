@@ -481,14 +481,14 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     let sub:any = null
     for(let rn = 0; rn < json.length; rn++) {
       const mem = json[rn]
-      const relation = mem["Relation"]
+      const relation = mem["Relation"] || ''
       if (relation == '') {
         sub = {
-          relation: mem["Relation"],
-          lstnam: mem["Last Name"], fstnam: mem["First Name"], midnam: mem["MI"],
-          dob: mem["DOB"], sex: mem["Sex"],
+          relation: mem["Relation"] || '',
+          lstnam: mem["Last Name"] || '', fstnam: mem["First Name"] || '', midnam: mem["MI"] || '',
+          dob: mem["DOB"] || '', sex: mem["Sex"] || 'M',
           med: mem["MED"] != "", den: mem["DEN"] != "", vis: mem["VIS"] != "",
-          cobra: mem["COBRA"] != "", dis: false,
+          cobra: mem["COBRA"] || '' != "", dis: false,
           deps: []
         }
         addNodeIfNotNull(sub, "suffnam", mem["Suffix"])
@@ -496,11 +496,11 @@ export const appProspectStore = defineStore("appProspectStore", () => {
       } else {
         if (sub != null) {
           const dep = {
-            relation: mem["Relation"],
-            lstnam: mem["Last Name"], fstnam: mem["First Name"], midnam: mem["MI"],
-            dob: mem["DOB"], sex: mem["Sex"],
+            relation: mem["Relation"] || 'CHD',
+            lstnam: mem["Last Name"] || '', fstnam: mem["First Name"] || '', midnam: mem["MI"] || '',
+            dob: mem["DOB"] || '', sex: mem["Sex"] || 'M',
             med: mem["MED"] != "", den: mem["DEN"] != "", vis: mem["VIS"] != "",
-            cobra: false, dis: relation == 'SPS' ? false : mem["Disabled"] != ""
+            cobra: false, dis: relation == 'SPS' ? false : mem["Disabled"] || '' != ""
           }
           addNodeIfNotNull(dep, "suffnam", mem["Suffix"])
           sub.deps.push(dep)

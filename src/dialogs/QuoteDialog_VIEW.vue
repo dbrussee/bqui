@@ -171,7 +171,7 @@ const getHasQuoteIcon = (row:any):string => {
       <BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon>
     </template>
     <template #column_hasQuote="{row}">
-      <BIcon :icon="getHasQuoteIcon(row)"/>
+      <BIcon :disabled="'EXPIRED,ENROLLED'.indexOf(localQuote.status) >= 0" :icon="getHasQuoteIcon(row)"/>
     </template>
     <template #footer>
       <span v-if="'EXPIRED,ENROLLED'.indexOf(localQuote.status) >= 0" class="info">
