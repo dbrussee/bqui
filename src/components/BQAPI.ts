@@ -8,19 +8,41 @@ export default class BQAPIFetcher {
   // private static readonly BASE_URL = 'http://localhost:8080/bqapi/v2.1'
   private static readonly BASE_URL =
     window.location.hostname == 'localhost' ? 'http://localhost:8080/bqapi/v2.1' : 'https://hkb16htf-8080.use2.devtunnels.ms/bqapi/v2.1'
+  private static readonly HONO_URL = 'http://localhost:3000'
   private status: 'FETCHED' | 'FETCHING' | 'UNUSED' | 'ERROR' = 'UNUSED'
   public resp: any = {}
   public meta: any = {}
   public issue: any = {}
-  private logAPICalls: boolean = false
+  private logAPICalls: boolean = true
 
   private static readonly no_user_ok_endpoints:string[] = [
     "/login",
-    "/logout"
+    "/logout",
+    "/relogin",
+    "/app/init"
   ]
 
   public getStatus(): 'FETCHED' | 'FETCHING' | 'UNUSED' | 'ERROR' {
     return this.status
+  }
+
+  public async callAPI(
+    endpoint: string,
+    method: string = 'GET',
+    body: any = {},
+  ): Promise<BQAPIFetcher> {
+    return this.callBaseAPI(
+      endpoint, method, body, BQAPIFetcher.BASE_URL
+    )
+  }
+  public async callHonoAPI(
+    endpoint: string,
+    method: string = 'GET',
+    body: any = {},
+  ): Promise<BQAPIFetcher> {
+    return this.callBaseAPI(
+      endpoint, method, body, BQAPIFetcher.HONO_URL
+    )
   }
 
   /**
@@ -30,10 +52,11 @@ export default class BQAPIFetcher {
    * @param body (optional = {}) - JSON object for body
    * @returns The status of the fetch operation ('FETCHED', 'FETCHING', 'UNUSED', or 'ERROR').
    */
-  public async callAPI(
+  public async callBaseAPI(
     endpoint: string,
     method: string = 'GET',
     body: any = {},
+    BASE_URL: string
   ): Promise<BQAPIFetcher> {
     const counters = countersStore()
     const historyEntry = {
@@ -53,7 +76,7 @@ export default class BQAPIFetcher {
     try {
       this.status = 'FETCHING'
       // Append the endpoint parameter to the static base URL
-      const targetUrl = `${BQAPIFetcher.BASE_URL}${endpoint}`
+      const targetUrl = `${BASE_URL}${endpoint}`
 
       const response = await fetch(targetUrl, {
         method: method,

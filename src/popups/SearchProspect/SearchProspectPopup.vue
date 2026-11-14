@@ -63,7 +63,7 @@ const headingText = ():string => {
 
 </script>
 <template>
-  <dialog ref="popRef">
+  <dialog ref="popRef" v-if="uStore.user?.id">
     <div class="titlebar"><BIcon icon="solid filter_"/>{{  headingText() }}
       <span style="font-size: 1rem;"><BButton class="anchor" @click="pStore.clearSearchParameters()" icon="solid rotate-left"/></span>
     </div>

@@ -79,6 +79,7 @@ const rightHandler = {
 }
 
 const computedRightsList = computed(() => {
+  if (!app.config.rights) return []
   const list = Object.entries(app.config.rights).map(([key, innerObj]) => {
     const obj = innerObj as any
     return {

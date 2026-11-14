@@ -6,6 +6,7 @@ const pStore = appProspectStore()
 import BButton from '@/components/B/BButton.vue';
 import BConfirm from '@/components/B/BConfirm.vue';
 import BIcon from '@/components/B/BIcon.vue';
+import type { ICensusMember } from '@/types';
 
 const handler = {
   popId: useId(),
@@ -90,35 +91,40 @@ const setFocus = (subnum:number, depnum:number):void => {
 }
 
 const newSub = ():void => {
-  const sub = {relation:"SUB", fstnam:'', lstnam:'', midnam:'', sufnam:'',
+  if (!pStore.prospect || !pStore.prospect.census) return
+  const sub: ICensusMember = {relation:'SUB', fstnam:'', lstnam:'', midnam:'', suffix:'',
     sex:'M', dob:'', med:false, den:false, vis:false, cobra: false, deps:[]
-  } as any
-  pStore.prospect?.census.unshift(sub)
+  }
+  pStore.prospect.census.unshift(sub)
   pStore.setCensusDirty()
   setFocus(0, -1)
 }
 const delSub = (subnum:number):void => {
-  pStore.prospect?.census.splice(subnum, 1)
+  if (!pStore.prospect || !pStore.prospect.census) return
+  pStore.prospect.census.splice(subnum, 1)
   pStore.setCensusDirty()
 }
 const newDep = (subnum:number):void => {
-  const sub = pStore.prospect?.census[subnum] as any
-  let relation = 'SPS'
-  let sex = 'M'
-  if (sub.deps.length > 0) {
+  if (!pStore.prospect || !pStore.prospect.census) return
+  const sub = pStore.prospect.census[subnum] as ICensusMember
+  let relation: ICensusMember['relation'] = 'SPS'
+  let sex: ICensusMember['sex'] = 'M'
+  if (sub.deps?.length > 0) {
     relation = 'CHD'
   } else {
     sex = sub.sex == 'M' ? 'F' : 'M'
   }
-  const data = {relation:relation, fstnam:'', lstnam:sub.lstnam, midnam:'', sufnam:'',
-    sex:sex, dob:'', med:sub.med, den:sub.den, vis:sub.vis, cobra: false
-  } as any
-  sub.deps.push(data)
+  const dep: ICensusMember = {relation:relation, fstnam:'', lstnam:sub.lstnam, midnam:'', suffix:'',
+    sex:sex, dob:'', med:sub.med, den:sub.den, vis:sub.vis, dis:false, cobra:false, deps:[]
+  }
+  sub.deps.push(dep)
   pStore.setCensusDirty()
   setFocus(subnum, sub.deps.length - 1)
 }
 const delDep = (subnum:number, depnum:number):void => {
-  pStore.prospect?.census[subnum]?.deps.splice(depnum, 1)
+  if (!pStore.prospect || !pStore.prospect.census) return
+  if (!pStore.prospect.census[subnum]) return
+  pStore.prospect.census[subnum].deps.splice(depnum, 1)
   pStore.setCensusDirty()
 }
 
@@ -128,6 +134,7 @@ const delDep = (subnum:number, depnum:number):void => {
 //   btn?.focus()
 // }
 const setSubBoolean = (subnum:number, opt:string):void => {
+  if (!pStore.prospect || !pStore.prospect.census) return
   const sub = pStore.prospect?.census[subnum] as any
   if (sub) {
     sub[opt] = !sub[opt]
@@ -140,7 +147,8 @@ const setSubBoolean = (subnum:number, opt:string):void => {
   pStore.setCensusDirty()
 }
 const setDepBoolean = (subnum:number, depnum:number, opt:string):void => {
-  const sub = pStore.prospect?.census[subnum] as any
+  if (!pStore.prospect || !pStore.prospect.census) return
+  const sub = pStore.prospect.census[subnum] as any
   if (sub) {
     const dep = sub.deps[depnum] as any
     if (dep) dep[opt] = !dep[opt]
@@ -148,49 +156,55 @@ const setDepBoolean = (subnum:number, depnum:number, opt:string):void => {
   pStore.setCensusDirty()
 }
 const setRelation = (subnum:number, depnum:number, e:Event) => {
+  if (!pStore.prospect || !pStore.prospect.census) return
   const sel = e.target as HTMLSelectElement
   const relation = sel.value
-  const sub = pStore.prospect?.census[subnum] as any
+  const sub = pStore.prospect.census[subnum] as ICensusMember
   if (sub) {
     if (depnum < 0) {
       // Trying to set relation on Sub... should never really get here
-      sub.relation = relation
+      sub.relation = relation as ICensusMember['relation']
     } else {
-      const dep = sub.deps[depnum] as any
+      const dep = sub.deps[depnum] as ICensusMember
       if (relation == "CHD") {
         // Changing from DOM or SPS to Child
-        dep.relation = relation
+        dep.relation = relation as ICensusMember['relation']
         dep.dis = false
       } else if (relation == 'SUB') {
         const oldSub = JSON.stringify(sub)
         const oldDeps = JSON.stringify(sub.deps)
-        const newSub = JSON.parse(JSON.stringify(sub.deps[depnum]))
+        const newSub: ICensusMember = JSON.parse(JSON.stringify(sub.deps[depnum]))
         newSub.deps = JSON.parse(oldDeps)
         newSub.relation = 'SUB'
         newSub.dis = false // Subscriber cannot be disabled
         newSub.cobra = false // Default just in case
 
         newSub.deps[depnum] = JSON.parse(oldSub)
-        delete newSub.deps[depnum].deps
-        newSub.deps[depnum].relation = dep.relation
+        if (newSub.deps[depnum]) {
+          const newDep:ICensusMember = newSub.deps[depnum]
+          newDep.deps = []
+          newDep.relation = dep.relation
+        }
 
-        pStore.prospect?.census.splice(subnum, 1, newSub)
+        pStore.prospect.census.splice(subnum, 1, newSub)
         // deps cannot have what some does not take
-        pStore.prospect?.census[subnum].deps.forEach((dep:any) => {
-          dep.cobra = false // Fixes the one that was SUB before
-          if (!sub.med) dep.med = false
-          if (!sub.den) dep.den = false
-          if (!sub.vis) dep.vis = false
-        });
+        if (pStore.prospect.census[subnum]) {
+          pStore.prospect.census[subnum].deps.forEach((dep:ICensusMember) => {
+            dep.cobra = false // Fixes the one that was SUB before
+            if (!sub.med) dep.med = false
+            if (!sub.den) dep.den = false
+            if (!sub.vis) dep.vis = false
+          });
+        }
       } else { // SPS or DOM ... set all others to CHD and then set new value
-        sub.deps.forEach((curdep:any)=> {
+        sub.deps.forEach((curdep:ICensusMember)=> {
           if (curdep.relation != 'CHD') {
             curdep.cobra = false
             curdep.dis = false
             curdep.relation = 'CHD'
           }
         })
-        dep.relation = relation // SPS or DOM
+        dep.relation = relation as ICensusMember['relation'] // SPS or DOM
         dep.dis = false
         dep.cobra = false
       }
@@ -199,8 +213,8 @@ const setRelation = (subnum:number, depnum:number, e:Event) => {
   pStore.setCensusDirty()
 }
 const setSex = (subnum:number, depnum:number):void => {
-  // setButtonFocus(e)
-  const sub = pStore.prospect?.census[subnum] as any
+  if (!pStore.prospect || !pStore.prospect.census) return
+  const sub = pStore.prospect.census[subnum] as any
   if (sub) {
     if (depnum < 0) {
       sub.sex = sub.sex == 'M' ? 'F' : 'M'
@@ -259,13 +273,13 @@ const hardSpace = (txt:string):string => {
         </tr>
       </thead>
       <tbody v-if="pStore.prospect">
-        <template v-for="(sub, rn) in pStore.prospect.census" :key="sub">
+        <template v-for="(sub, rn) in pStore.prospect.census" :key="rn">
           <tr :class="{seperator: Number(rn) > 0}">
             <td>&nbsp;</td>
             <td><input v-model="sub.lstnam" class="lstnam" placeholder="Last name"/></td>
             <td><input v-model="sub.fstnam" class="fstnam" placeholder="First name"/></td>
             <td><input maxlength="1" v-model="sub.midnam" class="midnam"/></td>
-            <td><input maxlength="3" v-model="sub.suffnam" class="sufnam"/></td>
+            <td><input maxlength="3" v-model="sub.suffix" class="sufnam"/></td>
             <td><input v-model="sub.dob" class="dob" placeholder="m/d/yyyy"/></td>
             <td style="text-align: center;"><button @click="(e:Event) => setSex(Number(rn), -1)" class="clear sex mono">{{ sub.sex }}</button></td>
             <td style="text-align: center;">
@@ -280,7 +294,7 @@ const hardSpace = (txt:string):string => {
               <BButton class="clear" @click="newDep(Number(rn))" icon="solid user-plus" />
             </td>
           </tr>
-          <tr v-for="(dep, dn) in sub.deps" :key="dep">
+          <tr v-for="(dep, dn) in sub.deps" :key="dn">
             <td><select class="mono" style="background-color: transparent; width: 3.3em;" @change="setRelation(rn as number, dn as number, $event)">
                 <option class="mono" :selected="dep.relation == 'SUB'" value="SUB">SUB - Subscriber</option>
                 <option class="mono" :selected="dep.relation == 'SPS'" value="SPS">SPS - Spouse</option>
@@ -290,7 +304,7 @@ const hardSpace = (txt:string):string => {
             <td><input v-model="dep.lstnam" class="lstnam dep" placeholder="Last name"/></td>
             <td><input v-model="dep.fstnam" class="fstnam dep" placeholder="First name"/></td>
             <td><input maxlength="1" v-model="dep.midnam" class="midnam"/></td>
-            <td><input maxlength="3" v-model="dep.suffnam" class="sufnam"/></td>
+            <td><input maxlength="3" v-model="dep.suffix" class="sufnam"/></td>
             <td><input v-model="dep.dob" class="dob" placeholder="m/d/yyyy"/></td>
             <td style="text-align: center;"><BButton class="clear sex" @click="(e:Event) => setSex(Number(rn), Number(dn))">{{ dep.sex }}</BButton></td>
             <td style="text-align: center;">

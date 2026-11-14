@@ -189,7 +189,7 @@ const openHistory = () => {
                 @click="fave(pStore.prospect.id, !pStore.isCurrentlyFavorite())" />
               {{ getProspectName() }}
             </td>
-            <td v-if="uStore.user" style="text-align: right;">
+            <td v-if="uStore.user?.id" style="text-align: right;">
               <BPopup class="anchor anchor-in-header" pos="B" icon="solid list-ul_" ref="recentPopover">Recent
                 <template #body>
                   <BTable :config="cfgRecents" :rows="uStore.user.recents"/>

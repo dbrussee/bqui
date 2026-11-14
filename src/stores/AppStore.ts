@@ -32,7 +32,7 @@ export const appStore = defineStore('qppStore', () => {
 
   const initialize = () => {
     const fetcher = new BQAPIFetcher()
-    fetcher.callAPI("/app/init").then(() => {
+    fetcher.callHonoAPI("/app/init").then(() => {
       // console.log("AppStore.initialize() resp: " + JSON.stringify(fetcher.resp, null, 2))
       config.value = fetcher.resp
     })

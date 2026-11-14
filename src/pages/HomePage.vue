@@ -32,7 +32,7 @@ watch(
 </script>
 
 <template>
-  <div v-if="userStore.user">
+  <div v-if="userStore.user?.id">
     <DashboardPage v-if="pageStore.page == 'DASHBOARD'" />
     <ProspectsPage v-if="pageStore.page == 'PROSPECTS'" />
     <CensusPage v-if="pageStore.page == 'CENSUS'" />

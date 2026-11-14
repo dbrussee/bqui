@@ -12,7 +12,7 @@ import { B } from '@/composables/BUtils.ts';
 import BPopup from './B/BPopup.vue';
 import BButton from './B/BButton.vue';
 import BIcon from './B/BIcon.vue';
-import type { Iquote } from '@/types/quote.ts';
+import type { Iquote } from '@/types';
 import QuoteDialog from '@/dialogs/QuoteDialog.vue';
 import { useToast } from '@/composables/useToast'
 

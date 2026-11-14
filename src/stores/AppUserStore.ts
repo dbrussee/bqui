@@ -6,7 +6,7 @@ import { appProspectStore } from "./ProspectStore";
 import { ref } from "vue";
 import { useToast } from "@/composables/useToast";
 import { B } from "@/composables/BUtils";
-import type { Iuser } from "@/types/user";
+import type { Iuser } from "@/types";
 
 export const appUserStore = defineStore("appUserStore", () => {
   const user = ref<Iuser | null>(null);
@@ -52,7 +52,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     logout();
     const fetcher = new BQAPIFetcher()
     B.working.set(working, "Login...")
-    await fetcher.callAPI(`/login/${uid}`, "POST")
+    await fetcher.callHonoAPI(`/login/${uid}`, "POST")
     B.working.clear(working)
     user.value = fetcher.resp;
     applyTheme()
@@ -67,7 +67,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   }
   async function relogin() {
     B.working.set(working, "Reload...")
-    const fetcher = await new BQAPIFetcher().callAPI(`/relogin`, "POST");
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/relogin`, "POST");
     B.working.clear(working)
     user.value = fetcher.resp;
 
@@ -105,9 +105,9 @@ export const appUserStore = defineStore("appUserStore", () => {
 
     const fetcher = new BQAPIFetcher()
     if (pid < 0) {
-      await fetcher.callAPI(`/dashboard`, "GET")
+      await fetcher.callHonoAPI(`/dashboard`, "GET")
     } else {
-      await fetcher.callAPI(`/dashboard?onlyProspectId=${pid}`, "GET")
+      await fetcher.callHonoAPI(`/dashboard?pid=${pid}`, "GET")
     }
     B.working.clear(dashworking)
     if (fetcher.resp.result == null) {
@@ -129,7 +129,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     }
     B.working.set(dashworking, "Loading Quotes...")
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/dashboard/quotes?eff=${eff}&status=${status}${pidParam}`, "GET")
+    await fetcher.callHonoAPI(`/dashboard/quotes?eff=${eff}&status=${status}${pidParam}`, "GET")
     B.working.clear(dashworking)
     // dashdata.value = fetcher.resp.result
     return fetcher.resp as any[]
@@ -182,16 +182,16 @@ export const appUserStore = defineStore("appUserStore", () => {
   }
 
 
-  function logout() {
+  async function logout() {
     if (!user.value) return;
     B.working.set(working, "Logout...")
     user.value = null;
     const prospStore = appProspectStore()
-    B.working.clear(working)
     prospStore.prospect = null
-    window.setTimeout(() => {
-      new BQAPIFetcher().callAPI(`/logout`, "POST");
-    },100)
+    // window.setTimeout(() => {
+      await new BQAPIFetcher().callHonoAPI(`/logout`, "POST");
+      // },100)
+    B.working.clear(working)
   }
 
   // Remember last filter option. If no filter is passed to the
@@ -200,7 +200,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   async function getAPIHistory(filter?:'ALL' | 'ERROR') {
     if (filter == undefined) filter = lastAPIFilter.value
     apiHistory.value.length = 0
-    const fetcher = await new BQAPIFetcher().callAPI(`/apihistory/${filter}`, 'GET')
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/apihistory/${filter}`, 'GET')
     if (fetcher.resp != null) {
       lastAPIFilter.value = filter
       apiHistory.value.push(...(fetcher.resp as any[]))
@@ -210,7 +210,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   async function addRole(code:string) {
     B.working.set(working, "...")
 
-    const fetcher = await new BQAPIFetcher().callAPI(`/user/role/${code}`, "POST")
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/user/role/${code}`, "POST")
     B.working.clear(working)
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
@@ -223,7 +223,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   }
   async function deleteRole(code:string) {
     B.working.set(working, "...")
-    const fetcher = await new BQAPIFetcher().callAPI(`/user/role/${code}`, "DELETE")
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/user/role/${code}`, "DELETE")
     B.working.clear(working)
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
@@ -243,9 +243,9 @@ export const appUserStore = defineStore("appUserStore", () => {
     B.working.set(working, "...")
     const fetcher = new BQAPIFetcher()
     if (!code) {
-      await new BQAPIFetcher().callAPI(`/user/config/${thing}`, "DELETE")
+      await new BQAPIFetcher().callHonoAPI(`/user/config/${thing}`, "DELETE")
     } else {
-      await new BQAPIFetcher().callAPI(`/user/config/${thing}/${code}`, "PUT")
+      await new BQAPIFetcher().callHonoAPI(`/user/config/${thing}/${code}`, "PUT")
     }
 
     B.working.clear(working)
@@ -287,7 +287,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   async function setUserRightValue(code:string, value:string) {
     B.working.set(working, "...")
 
-    const fetcher = await new BQAPIFetcher().callAPI(`/user/right/${code}/${value}`, "PUT")
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/user/right/${code}/${value}`, "PUT")
     B.working.clear(working)
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
@@ -301,7 +301,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   async function deleteUserRight(code:string) {
     B.working.set(working, "...")
 
-    const fetcher = await new BQAPIFetcher().callAPI(`/user/right/${code}`, "DELETE")
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/user/right/${code}`, "DELETE")
     B.working.clear(working)
     if (fetcher.resp != null) {
       user.value = fetcher.resp;
@@ -316,7 +316,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   async function clearRecents() {
     B.working.set(working, "...")
     const fetcher = new BQAPIFetcher()
-    fetcher.callAPI(`/recents`, "DELETE").then(() => {
+    fetcher.callHonoAPI(`/recents`, "DELETE").then(() => {
       B.working.clear(working)
       if (user.value) {
         user.value.recents = [...fetcher.resp]

@@ -24,7 +24,7 @@ const cfgAddQuoteList = ref({
   // pickedRowNumber: -1,
   columns: [
     { id: "id", heading: "Quote", width: "4em", flags: "R" },
-    { id: "custom", heading: "", width: ".1em" },
+    { id: "extra", heading: "", width: ".1em" },
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
@@ -110,13 +110,13 @@ const formatStatusCell = (row:any, setStyle:any) => {
     const classname = "status" + row.status
     td.classList.add(classname)
     // const tr = td.closest("tr") as HTMLTableRowElement
-    // if (tr) tr.style.textDecoration = (row.custom == 'Y' ? "line-through" : "none")
+    // if (tr) tr.style.textDecoration = (row.extra == 'Y' ? "line-through" : "none")
   })
   return B.codeToText.quoteStatus(row.status)
 }
 
 const isInProposalIcon = (row:Iquote) => {
-  if (row.custom == "Y") {
+  if (row.extra == "Y") {
     return "#green solid square-check"
   } else {
     return "square"
@@ -161,7 +161,7 @@ const proposalHandler = {
       const alreadyInList = ppStore.currentProposal.quotes.find((pq:any) => {
         return q.id == pq.id
       })
-      q.custom = alreadyInList ? "Y" : "N"
+      q.extra = alreadyInList ? "Y" : "N"
       // console.log("Compare quote", qeff, "with", peff, " status:", q.status)
       return qeff == peff
         && 'INPROG,EXPIRED,ENROLLED'.indexOf(q.status) < 0
@@ -172,8 +172,8 @@ const proposalHandler = {
   },
   async toggleQuote(quote_row:any) {
     if (!quote_row.id || quote_row.id == '') return
-    if (quote_row.custom == 'Y') { // It's on the list
-      quote_row.custom = "N"
+    if (quote_row.extra == 'Y') { // It's on the list
+      quote_row.extra = "N"
       await ppStore.removeQuote(ppStore.currentProposal.id, quote_row.id)
       // if (cfgQuotesList.value.pickedRow) {
       //   if (cfgQuotesList.value.pickedRow.id == quote_row.id) {
@@ -181,7 +181,7 @@ const proposalHandler = {
       //   }
       // }
     } else {
-      quote_row.custom = "Y"
+      quote_row.extra = "Y"
       await ppStore.addQuote(ppStore.currentProposal.id, quote_row.id)
     }
     // this.pickQuote()
@@ -290,7 +290,7 @@ const setCurrent = (effmonth:string, index:number) => {
       and are not In Progress or Expired are available.
     </div>
     <BTable :config="cfgAddQuoteList" :rows="proposalHandler.availableQuotes.value || []">
-      <template #column_custom="{row}"><BIcon :icon="isInProposalIcon(row)"></BIcon></template>
+      <template #column_extra="{row}"><BIcon :icon="isInProposalIcon(row)"></BIcon></template>
       <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
       <template #column_status="{row, setStyle}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon></template>
       <template #column_nonstd="{row}">

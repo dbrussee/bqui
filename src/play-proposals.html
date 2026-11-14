@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Interactive Proposal & Quote Diagram</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 24px;
+      user-select: none; /* Prevents accidental text selection while dragging */
+    }
+    svg {
+      border: 1px solid #ccc;
+      max-width: 520px;
+      display: block;
+    }
+    .node {
+      cursor: grab;
+    }
+    .node:hover circle,
+    .node:hover rect {
+      stroke: #2563eb;
+      stroke-width: 2.5;
+    }
+    .link-hit {
+      cursor: pointer;
+    }
+    .link-group:hover .link-visible {
+      stroke: #dc2626;
+      stroke-width: 3;
+    }
+  </style>
+</head>
+<body>
+  <p><small>Drag between a Proposal circle and a Quote box to link. Double-click a line to remove.</small></p>
+  <div id="diagram"></div>
+
+  <script>
+    const state = {
+      proposals: [{ id: 1 }, { id: 2 }],
+      quotes: [{ id: 101 }, { id: 102 }, { id: 103 }],
+      links: [
+        { proposal_id: 1, quote_id: 101 },
+        { proposal_id: 1, quote_id: 102 },
+        { proposal_id: 2, quote_id: 102 },
+      ],
+    }
+
+    const rowHeight = 70
+    const startY = 60
+    const propX = 100
+    const quoteX = 380
+    const r = 22
+    const boxW = 64
+    const boxH = 36
+
+    let dragStart = null // { type: 'proposal' | 'quote', id: number, x: number, y: number }
+
+    function getSvgPoint(svg, clientX, clientY) {
+      const pt = svg.createSVGPoint()
+      pt.x = clientX
+      pt.y = clientY
+      return pt.matrixTransform(svg.getScreenCTM().inverse())
+    }
+
+    async function addLink(proposal_id, quote_id) {
+      const exists = state.links.some(
+        (l) => l.proposal_id === proposal_id && l.quote_id === quote_id
+      )
+      if (exists) return
+
+      state.links.push({ proposal_id, quote_id })
+      render()
+
+      // Persist to your Hono API:
+      // await fetch('/proposals/links', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ proposal_id, quote_id }),
+      // })
+    }
+
+    async function removeLink(proposal_id, quote_id) {
+      state.links = state.links.filter(
+        (l) => !(l.proposal_id === proposal_id && l.quote_id === quote_id)
+      )
+      render()
+
+      // Persist to your Hono API:
+      // await fetch('/proposals/links', {
+      //   method: 'DELETE',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ proposal_id, quote_id }),
+      // })
+    }
+
+    function render() {
+      const height = Math.max(state.proposals.length, state.quotes.length) * rowHeight + 60
+      const pMap = new Map(state.proposals.map((p, i) => [p.id, { x: propX, y: startY + i * rowHeight }]))
+      const qMap = new Map(state.quotes.map((q, i) => [q.id, { x: quoteX, y: startY + i * rowHeight }]))
+
+      // 1. Existing lines (includes an invisible 14px wide stroke so double-clicking is easy)
+      const lines = state.links.map(({ proposal_id, quote_id }) => {
+        const p = pMap.get(proposal_id)
+        const q = qMap.get(quote_id)
+        if (!p || !q) return ''
+        const x1 = p.x + r
+        const y1 = p.y
+        const x2 = q.x - boxW / 2
+        const y2 = q.y
+
+        return `
+          <g class="link-group" data-proposal="${proposal_id}" data-quote="${quote_id}">
+            <line class="link-visible" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#333" stroke-width="1.5" />
+            <line class="link-hit" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="transparent" stroke-width="14" />
+          </g>
+        `
+      }).join('')
+
+      // 2. Proposal circles
+      const circles = state.proposals.map((p) => {
+        const { x, y } = pMap.get(p.id)
+        return `
+          <g class="node" data-type="proposal" data-id="${p.id}">
+            <circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="#000" stroke-width="1.5" />
+            <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="13">${p.id}</text>
+          </g>
+        `
+      }).join('')
+
+      // 3. Quote boxes
+      const boxes = state.quotes.map((q) => {
+        const { x, y } = qMap.get(q.id)
+        return `
+          <g class="node" data-type="quote" data-id="${q.id}">
+            <rect x="${x - boxW / 2}" y="${y - boxH / 2}" width="${boxW}" height="${boxH}" fill="#fff" stroke="#000" stroke-width="1.5" />
+            <text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="13">${q.id}</text>
+          </g>
+        `
+      }).join('')
+
+      const container = document.getElementById('diagram')
+      container.innerHTML = `
+        <svg id="svg-canvas" viewBox="0 0 480 ${height}">
+          <text x="${propX}" y="24" text-anchor="middle" font-size="11" font-weight="bold">PROPOSALS</text>
+          <text x="${quoteX}" y="24" text-anchor="middle" font-size="11" font-weight="bold">QUOTES</text>
+          ${lines}
+          <line id="drag-preview" x1="0" y1="0" x2="0" y2="0" stroke="#2563eb" stroke-width="2" stroke-dasharray="5,5" visibility="hidden" pointer-events="none" />
+          ${circles}
+          ${boxes}
+        </svg>
+      `
+
+      const svg = document.getElementById('svg-canvas')
+      const preview = document.getElementById('drag-preview')
+
+      // Start dragging from either a Proposal circle or a Quote box
+      svg.querySelectorAll('.node').forEach((node) => {
+        node.addEventListener('pointerdown', (e) => {
+          const type = node.dataset.type
+          const id = Number(node.dataset.id)
+          const pos = type === 'proposal' ? pMap.get(id) : qMap.get(id)
+          const startX = type === 'proposal' ? pos.x + r : pos.x - boxW / 2
+
+          dragStart = { type, id, x: startX, y: pos.y }
+          preview.setAttribute('x1', startX)
+          preview.setAttribute('y1', pos.y)
+          preview.setAttribute('x2', startX)
+          preview.setAttribute('y2', pos.y)
+          preview.setAttribute('visibility', 'visible')
+        })
+      })
+
+      // Update dashed preview line as mouse moves
+      svg.addEventListener('pointermove', (e) => {
+        if (!dragStart) return
+        const pt = getSvgPoint(svg, e.clientX, e.clientY)
+        preview.setAttribute('x2', pt.x)
+        preview.setAttribute('y2', pt.y)
+      })
+
+      // Complete connection if dropped on the opposite node type
+      window.addEventListener('pointerup', (e) => {
+        if (!dragStart) return
+        const targetNode = e.target.closest?.('.node')
+
+        if (targetNode) {
+          const endType = targetNode.dataset.type
+          const endId = Number(targetNode.dataset.id)
+
+          if (dragStart.type === 'proposal' && endType === 'quote') {
+            addLink(dragStart.id, endId)
+          } else if (dragStart.type === 'quote' && endType === 'proposal') {
+            addLink(endId, dragStart.id)
+          }
+        }
+
+        dragStart = null
+        preview.setAttribute('visibility', 'hidden')
+      }, { once: true })
+
+      // Double-click any line to delete the link
+      svg.querySelectorAll('.link-group').forEach((group) => {
+        group.addEventListener('dblclick', () => {
+          const proposalId = Number(group.dataset.proposal)
+          const quoteId = Number(group.dataset.quote)
+          removeLink(proposalId, quoteId)
+        })
+      })
+    }
+
+    render()
+  </script>
+</body>
+</html>

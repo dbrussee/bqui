@@ -8,7 +8,7 @@ import { proposalStore } from "./ProposalStore";
 import { useToast } from '../composables/useToast'
 // import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
-import type { Iprospect } from "@/types/prospect";
+import type { Iprospect } from "@/types";
 import type { Iquote } from "@/types";
 
 export const appProspectStore = defineStore("appProspectStore", () => {
@@ -63,7 +63,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     const fetcher = new BQAPIFetcher()
     if (!prospect.value) return
     const pid = prospect.value.id
-    fetcher.callAPI(`/recents/${pid}`, "DELETE").then(() => {
+    fetcher.callHonoAPI(`/recents/${pid}`, "DELETE").then(() => {
       if (fetcher.issue) {
         useToast().addToast(`Error removing prospect ${pid} from Recents`, "error")
       } else {
@@ -172,7 +172,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     quotes.value = sortQuotes(fetcher.resp.quotes)
     // console.log(JSON.stringify(prospect.value, null, 2))
     if (registerRecent) {
-      fetcher.callAPI('/recents', "GET").then(() => {
+      fetcher.callHonoAPI('/recents', "GET").then(() => {
         if (fetcher.resp) {
           const userStore = appUserStore()
           if (!userStore.user) return
@@ -217,7 +217,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
 
   async function setFavorite(pid: number, isFavorite: boolean = true) {
     B.working.set(prospWorking, isFavorite ? "Set Bookmark..." : "Remove Bookmark...")
-    const fetcher = await new BQAPIFetcher().callAPI(
+    const fetcher = await new BQAPIFetcher().callHonoAPI(
       `/favorite/${pid}`,
       isFavorite ? "POST" : "DELETE",
     );
@@ -296,9 +296,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   async function getCensus() {
     if (!prospect.value) return
     B.working.set(censusWorking, "Loading...")
-    const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'GET')
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/census/${prospect.value.id}`, 'GET')
     B.working.clear(censusWorking)
     if (fetcher.resp != null) {
+      if (!prospect.value.census) prospect.value.census = []
       prospect.value.census.length = 0
       prospect.value.census = sortCensus([...fetcher.resp[0].census])
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
@@ -313,9 +314,10 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     if (!prospect.value) return
     B.working.set(censusWorking, "Saving...")
     cleanCensus()
-    const fetcher = await new BQAPIFetcher().callAPI(`/census/${prospect.value.id}`, 'PUT', data)
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/census/${prospect.value.id}`, 'PUT', data)
     B.working.clear(censusWorking)
     if (fetcher.resp != null) {
+      if (!prospect.value.census) prospect.value.census = []
       prospect.value.census.length = 0
       prospect.value.census = [...fetcher.resp[0].census]
       B.getHash(JSON.stringify(prospect.value.census)).then(hash => {
@@ -403,6 +405,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
   const cleanCensus = ():void => {
     if (!prospect.value) return
+    if (!prospect.value.census) prospect.value.census = []
     prospect.value.census.forEach((sub: any) => {
       sub.dob = cleanDOB(sub.dob)
       if (sub.deps && Array.isArray(sub.deps)) {
@@ -426,6 +429,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
     // console.dir(prospect.value.census)
     cleanCensus()
     const flat = [] as any[]
+    if (!prospect.value.census) prospect.value.census = []
     prospect.value.census.forEach((sub: any, rn:number) => {
       flat.push({
         'Sub':rn+1, 'Relation':'',
@@ -514,6 +518,7 @@ export const appProspectStore = defineStore("appProspectStore", () => {
   }
   const mapImportJSONToCensus = (json:any) => {
     if (!prospect.value) return
+    if (!prospect.value.census) prospect.value.census = []
     prospect.value.census.length = 0
     let sub:any = null
     for(let rn = 0; rn < json.length; rn++) {

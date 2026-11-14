@@ -5,9 +5,8 @@ import { appProspectStore } from './ProspectStore'
 import { useToast } from '@/composables/useToast'
 import { appUserStore } from './AppUserStore'
 import BQAPIFetcher from '@/components/BQAPI'
-import type { Iquote } from '@/types/quote'
+import type { Iquote, Iprospect } from '@/types'
 import { ref } from 'vue'
-import type { Iprospect } from '@/types'
 
 export const QuoteStore = defineStore('QuoteStore', () => {
   const NUMBER_OF_EFFDATES = 10
@@ -114,7 +113,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
       }
       useToast().addToast(`Quote ${quote.id} deleted`, "success")
       appUserStore().getDashboard()
-      appProspectStore().quotes = appProspectStore().quotes.filter((q) => {
+      appProspectStore().quotes = appProspectStore().quotes.filter((q:Iquote) => {
         return q.id != quote.id
       })
 
@@ -162,7 +161,7 @@ export const QuoteStore = defineStore('QuoteStore', () => {
 
   const getQuote = async (qid:number) => {
     B.working.set(working, "Getting quote...")
-    const fetcher = await new BQAPIFetcher().callAPI(`/quote/${qid}`, 'GET')
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/quote/${qid}`, 'GET')
     B.working.clear(working)
     if (fetcher.resp != null) {
       if (fetcher.issue) {

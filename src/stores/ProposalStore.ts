@@ -18,7 +18,9 @@ export const proposalStore = defineStore("proposalStore", () => {
   function findProposal(id:number):any {
     for (const key of Object.keys(proposaldata.value)) {
       const array = proposaldata.value[key]
-      const match = array.find((proposal:any) => proposal.id == id)
+      const match = array.find((proposal:any) => {
+        return proposal.id == id
+      })
       if (match) return match
     }
     return null
@@ -33,7 +35,7 @@ export const proposalStore = defineStore("proposalStore", () => {
     if (!uStore.user) return
     B.working.set(working, "Loading...")
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/proposals/${pStore.prospect.id}`, "GET")
+    await fetcher.callHonoAPI(`/proposals/${pStore.prospect.id}`, "GET")
     B.working.clear(working)
     proposaldata.value = fetcher.resp.eff_dates
     // console.log(JSON.stringify(proposaldata.value, null, 2))
@@ -48,15 +50,17 @@ export const proposalStore = defineStore("proposalStore", () => {
   }
   async function createProposal(formData:any) {
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/proposal`, 'POST', formData)
+    await fetcher.callHonoAPI(`/proposal`, 'POST', formData)
     proposaldata.value = fetcher.resp.eff_dates
-    const found = findProposal(fetcher.resp.newid)
+    let newid = fetcher.resp.newId
+    if (typeof newid == 'string') newid = parseInt(newid, 10)
+    const found = findProposal(newid)
     useToast().addToast(`Proposal successfully created`)
     return found
   }
   function deleteProposal(id:number):void {
     const fetcher = new BQAPIFetcher()
-    fetcher.callAPI(`/proposal/${id}`, 'DELETE').then(() => {
+    fetcher.callHonoAPI(`/proposal/${id}`, 'DELETE').then(() => {
       proposaldata.value = fetcher.resp.eff_dates
       currentProposal.value = null
       useToast().addToast(`Proposal successfully deleted`)
@@ -70,7 +74,7 @@ export const proposalStore = defineStore("proposalStore", () => {
       descr: newName
     }
     const fetcher = new BQAPIFetcher()
-    fetcher.callAPI(`/proposal`, 'PUT', body).then(() => {
+    fetcher.callHonoAPI(`/proposal`, 'PUT', body).then(() => {
       proposaldata.value = fetcher.resp.eff_dates
       const found = findProposal(proposal_id)
       currentProposal.value = found
@@ -81,7 +85,7 @@ export const proposalStore = defineStore("proposalStore", () => {
   async function addQuote(proposal_id:number, qid:string|number) {
     if (typeof qid == 'string') qid = parseInt(qid)
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/proposal/quote/${proposal_id}/${qid}`, 'PUT')
+    await fetcher.callHonoAPI(`/proposal/quote/${proposal_id}/${qid}`, 'PUT')
     if (fetcher.issue) {
       useToast().addToast(fetcher.issue.message, "warning")
     } else {
@@ -99,7 +103,7 @@ export const proposalStore = defineStore("proposalStore", () => {
   async function removeQuote(pid:number, qid:string|number) {
     if (typeof qid == 'string') qid = parseInt(qid)
     const fetcher = new BQAPIFetcher()
-    await fetcher.callAPI(`/proposal/quote/${pid}/${qid}`, 'DELETE')
+    await fetcher.callHonoAPI(`/proposal/quote/${pid}/${qid}`, 'DELETE')
     if (fetcher.issue) {
       useToast().addToast(fetcher.issue.message, "warning")
     } else {

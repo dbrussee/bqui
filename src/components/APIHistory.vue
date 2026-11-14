@@ -20,7 +20,7 @@ const cfgHistory = ref({
     { id: "category", heading: "", width: "2em", flags: "C", cellclass:'mono mini' },
     // { id: "body", heading: "Body", width: "2em", flags: "C" },
     // { id: "issue", heading: "Err", width: "2em", flags: "C" },
-    { id: "response.meta.request.httpMethod", heading: "", width: "4em", flags: "R", cellclass:'mono mini'},
+    // { id: "method", heading: "", width: "4em", flags: "R", cellclass:'mono mini'},
     { id: "endpoint", heading: "Endpoint", width: "35em", cellclass:'mono mini' },
   ]
 })
@@ -44,11 +44,11 @@ defineExpose({
 const showBodyPopup = () => {
   const row = cfgHistory.value.pickedRow
   if (!row) return
-  if (!row.body && !row.response) return
+  // if (!row.body && !row.response) return
   B.popup.showModal(bodyPopid)
 }
 const getPickedRowBody = ():string => {
-  const row = cfgHistory.value.pickedRow
+  const row = cfgHistory.value.pickedRow.response
   if (row && row.body) {
     const body = row.body as string
     if (body.startsWith("{") || body.startsWith("[")) {
@@ -63,10 +63,10 @@ const getPickedRowBody = ():string => {
 }
 
 const getPickedRowError = ():string => {
-  const row = cfgHistory.value.pickedRow
+  const row = cfgHistory.value.pickedRow.response
   if (row) {
     // delete issue.host.ip
-    return JSON.stringify(row.response, null, 2)
+    return JSON.stringify(row, null, 2)
   }
   return ""
 }
@@ -88,6 +88,15 @@ const getResultIcon = (row:any):string => {
     return "#red solid bug"
   }
   return "" // "#green solid check"
+}
+const getHttpMethod = (row:any): string => {
+  const meta = row.meta
+  if (!meta) return ""
+  if (meta.request) {
+    return meta.request.httpMethod
+  } else {
+    return meta.endpoint.method
+  }
 }
 
 const simplifyEndpoint = (row:any) => {
@@ -118,7 +127,8 @@ const reQueryAPI = () => {
 <template>
   <dialog :id="popid">
     <BTable :config="cfgHistory" :rows="uStore.apiHistory">
-      <template #column_endpoint="{row}">{{ simplifyEndpoint(row) }}</template>
+      <!-- <template #column_endpoint="{row}">{{ simplifyEndpoint(row) }}</template> -->
+      <template #column_method="{row}">{{ getHttpMethod(row) }}</template>
       <template #column_ts="{row, setStyle, setHtml}">{{ setTimestamp(row, setStyle, setHtml) }}</template>
       <template #column_body="{row}"><BIcon v-if="row.body && row.body.length > 0" icon="solid code"/></template>
       <template #column_category="{row}"><BIcon :icon="getResultIcon(row)"/></template>
@@ -141,7 +151,7 @@ const reQueryAPI = () => {
         <div class="titlebar">Request Body</div>
         <pre>{{ getPickedRowBody() }}</pre>
       </div>
-      <div v-if="cfgHistory.pickedRow?.response" :style="{'margin-top': cfgHistory.pickedRow?.body ? '.5em' : ''}">
+      <div v-if="cfgHistory.pickedRow" :style="{'margin-top': cfgHistory.pickedRow?.body ? '.5em' : ''}">
         <div class="titlebar">API Fetch Details</div>
         <pre>{{ getPickedRowError() }}</pre>
       </div>

@@ -30,7 +30,7 @@ const counters = countersStore();
         <tbody>
           <tr>
             <td style="text-align: left;">
-              <BConfirm v-if="uStore.user"
+              <BConfirm v-if="uStore.user?.id"
                   icon="solid arrow-right-from-bracket_"
                   :warning="pStore.censusDirty ? 'You will lose unsaved census changes!' : ''"
                   class="anchor"
