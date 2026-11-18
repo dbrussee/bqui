@@ -68,7 +68,7 @@ defineExpose({
 <template>
   <span style="position: relative;">
   <button type="button" formnovalidate :popovertarget="popid" :disabled="props.disabled" :style="attrs.style" :class="attrs.class"
-    ><BIcon v-if="props.icon != ''" :icon="icon"/><slot/></button>
+    ><BIcon v-if="props.icon != ''" style="font-size: 1em;" :icon="icon"/><slot/></button>
   </span>
   <div popover="auto" :id="popid" :class="props.pos" :style="{'max-width': props.width}">
     <div style="width: fit-content">

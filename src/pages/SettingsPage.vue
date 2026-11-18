@@ -190,13 +190,15 @@ const getRightLongDescription = ():string => {
 const settingStartTabOptions = [
   {value:'', text:'Dashboard', icon:'solid chart-simple_'},
   {value:'PROSPECT', text:'Prospect', icon:'solid shop_'},
+  {value:'CENSUS', text:'Census', icon:'solid people-group_'},
   {value:'PROPOSALS', text:'Proposals', icon:'file-pdf_'},
+  {value:'MSGS', text:'Messages', icon:'envelope_'},
 ]
 const settingThemeOptions = [
-  {value:'', text:'Auto (' + (isDark ? 'Dark' : 'Light') + ')', icon: 'solid toggle-on_'},
+  {value:'', text:'Auto (' + (isDark ? 'Dark' : 'Light') + ')', icon: 'window-restore_'},
   {value:'--', text:'--'},
-  {value:'dark', text:'Dark', icon:'solid moon'},
-  {value:'light', text:'Light', icon:'sun'},
+  {value:'dark', text:'Dark', icon:'solid moon_'},
+  {value:'light', text:'Light', icon:'sun_'},
 ]
 
 </script>

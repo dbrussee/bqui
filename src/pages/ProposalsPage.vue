@@ -24,10 +24,11 @@ const cfgAddQuoteList = ref({
   onPick: (row:any) => {
     proposalHandler.toggleQuote(row)
   },
-  heading: 'Available Quotes (click rows to toggle selection)',
+  heading: 'Available Quotes',
+  heading_extra: '(click rows to toggle selection)',
   height: "calc(100vh - 13.8em)",
   width: "calc(100vw - 200px - 10em - 1.8em)",
-  no_rows_text: "No available quotes for this Effective Date",
+  no_rows_text: "No available quotes",
   help: `Only quotes matching the proposal effective date and are not In Progress or Expired are available.`,
   // pickedRowNumber: -1,
   columns: [

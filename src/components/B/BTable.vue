@@ -248,6 +248,7 @@ const isPicked = (rowval:any):boolean => {
   <legend v-if="props.config.heading && props.config.heading != ''" class="b-table-heading">
     <BInfo v-if="props.config.help && props.config.help != ''" width="22em" :message="props.config.help" pos="B2R"></BInfo>
     {{ props.config.heading }}
+    <span v-if="props.config.heading_extra && props.config.heading_extra != ''" style="color:var(--body-text); font-size: .8em;">{{ props.config.heading_extra }}</span>
   </legend>
   <div style="width: fit-content">
   <!-- <div v-if="props.config.heading && props.config.heading != ''" class="b-table-heading">
