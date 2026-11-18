@@ -80,7 +80,7 @@ function getCensusCount():string {
         icon="solid chart-simple_"
         :working="uStore.dashworking"
         :shortname="'Dashboard'" />
-    <SidebarItem @click="pageStore.page = 'PROSPECTS'" :current="pageStore.page == 'PROSPECTS'"
+    <SidebarItem @click="pageStore.page = 'PROSPECT'" :current="pageStore.page == 'PROSPECT'"
         icon="solid shop_"
         :working="pStore.prospWorking"
         :shortname="`Prospect<span style='font-size: .8em;'>${ getProspectID() }</span>`"

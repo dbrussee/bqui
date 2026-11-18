@@ -2,7 +2,9 @@
 import BIcon from './BIcon.vue'
 import type { PropType,ButtonHTMLAttributes } from 'vue'
 
-const emit = defineEmits(["click"])
+const emit = defineEmits<{
+  click: [event: MouseEvent]
+}>()
 
 const props = defineProps({
   prevent: { type: Boolean, required: false, default: false },
@@ -20,7 +22,7 @@ const props = defineProps({
 })
 const handleClick = (event:MouseEvent) => {
   if (event && props.prevent) event.preventDefault()
-  emit('click')
+  emit('click', event)
 }
 </script>
 

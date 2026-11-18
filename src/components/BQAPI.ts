@@ -41,7 +41,7 @@ export default class BQAPIFetcher {
     body: any = {},
   ): Promise<BQAPIFetcher> {
     return this.callBaseAPI(
-      endpoint, method, body, BQAPIFetcher.HONO_URL
+      endpoint, method, body, BQAPIFetcher.BASE_URL // .HONO_URL
     )
   }
 

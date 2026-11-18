@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import BQAPIFetcher from "@/components/BQAPI";
 import { appMessageStore } from "./MessagesStore";
 import { appProspectStore } from "./ProspectStore";
+import { appPageStore } from "./PageStore";
 import { ref } from "vue";
 import { useToast } from "@/composables/useToast";
 import { B } from "@/composables/BUtils";
@@ -56,6 +57,8 @@ export const appUserStore = defineStore("appUserStore", () => {
     B.working.clear(working)
     user.value = fetcher.resp;
     applyTheme()
+    const page = getUserSetting('start_page', 'DASHBOARD')
+    appPageStore().page = page
     // console.log(JSON.stringify(user.value, null, 2))
     meta.value = fetcher.meta;
     issue.value = fetcher.issue;
@@ -72,6 +75,9 @@ export const appUserStore = defineStore("appUserStore", () => {
     user.value = fetcher.resp;
 
     applyTheme()
+    const page = getUserSetting('start_tab', 'DASHBOARD')
+    appPageStore().page = page
+
     // console.log(JSON.stringify(user.value, null, 2))
     meta.value = fetcher.meta;
     issue.value = fetcher.issue;
@@ -134,7 +140,6 @@ export const appUserStore = defineStore("appUserStore", () => {
     // dashdata.value = fetcher.resp.result
     return fetcher.resp as any[]
   }
-
   function setTheme(themeString:string | null) {
     // No user... no change
     if (user.value == null || user.value.config == null) return

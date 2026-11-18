@@ -9,28 +9,47 @@ import { appProspectStore } from '@/stores/ProspectStore';
 const pStore = appProspectStore()
 import { proposalStore } from '@/stores/ProposalStore';
 const ppStore = proposalStore()
-import { computed, ref, useId } from 'vue';
+import { computed, onMounted, ref, useId, watch } from 'vue';
 import BTable from '@/components/B/BTable.vue';
 import BIcon from '@/components/B/BIcon.vue';
 import BPrompt from '@/components/B/BPrompt.vue';
 import type { Iquote } from '@/types';
+import BCheckbox from '@/components/B/BCheckbox.vue';
 
+watch(() => pStore.prospect, () => {
+  proposalHandler.availableQuotes.value = []
+  }
+)
 const cfgAddQuoteList = ref({
   onPick: (row:any) => {
     proposalHandler.toggleQuote(row)
   },
-  height: "10em",
-  width: "800px",
+  heading: 'Available Quotes (click rows to toggle selection)',
+  height: "calc(100vh - 13.8em)",
+  width: "calc(100vw - 200px - 10em - 1.8em)",
+  no_rows_text: "No available quotes for this Effective Date",
+  help: `Only quotes matching the proposal effective date and are not In Progress or Expired are available.`,
   // pickedRowNumber: -1,
   columns: [
     { id: "id", heading: "Quote", width: "4em", flags: "R" },
-    { id: "extra", heading: "", width: ".1em" },
+    { id: "extra", heading: "", width: ".1em", flags: "C" },
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
     { id: "status", heading: "Status", width: "10em" },
     { id: "descr", heading: "Name" },
   ]
+})
+
+const quoteOptions = ref({
+  cover: false,
+  grpapp: true,
+  details: false,
+  rates: false,
+  legal: false,
+  tax: false,
+  comp_benes: false,
+  comp_rates: false
 })
 
 const quotesSummary = computed(() => {
@@ -109,23 +128,30 @@ const formatStatusCell = (row:any, setStyle:any) => {
   setStyle((td:HTMLTableCellElement) => {
     const classname = "status" + row.status
     td.classList.add(classname)
-    // const tr = td.closest("tr") as HTMLTableRowElement
-    // if (tr) tr.style.textDecoration = (row.extra == 'Y' ? "line-through" : "none")
   })
   return B.codeToText.quoteStatus(row.status)
 }
 
 const isInProposalIcon = (row:Iquote) => {
+  if (!ppStore.currentProposal) return ""
   if (row.extra == "Y") {
-    return "#green solid square-check"
+    if (ppStore.currentProposal.status != 'INPROG') {
+      return "#silver solid square-check"
+    } else {
+      return "#green solid square-check"
+    }
   } else {
-    return "square"
+    if (ppStore.currentProposal.status != 'INPROG') {
+      return "#silver solid ban"
+    } else {
+      return "square"
+    }
   }
 }
 
 const proposalHandler = {
   id: useId(),
-  quote_select_id: useId(),
+  quote_options_id: useId(),
   previewId: useId(),
   model: ref<any>({ effdat:"", descr:"", prospect_id:pStore.prospect?.id }),
   availableQuotes: ref<any[]>([]),
@@ -136,8 +162,7 @@ const proposalHandler = {
   async create() {
     if (this.model.value.effdat == '') return
     if (this.model.value.descr == '') {
-      let descr = B.format.effdat(this.model.value.effdat)
-      descr += ' Proposal'
+      let descr = 'Quote Proposal'
       if (ppStore.proposaldata) {
         const effnode = ppStore.proposaldata[this.model.value.effdat]
         if (effnode) descr += ' #' + (effnode.length + 1)
@@ -145,7 +170,7 @@ const proposalHandler = {
       this.model.value.descr = descr
     }
     ppStore.currentProposal = await ppStore.createProposal(this.model.value)
-    this.pickQuote()
+    this.pickProposal()
 
     this.model.value.effdat = ''
     this.model.value.descr = ''
@@ -154,7 +179,8 @@ const proposalHandler = {
   delete() {
     ppStore.deleteProposal(ppStore.currentProposal.id)
   },
-  pickQuote() {
+  pickProposal() {
+    this.availableQuotes.value = []
     this.availableQuotes.value = pStore.quotes.filter((q:Iquote) => {
       const qeff = B.format.effdat(q.effdat)
       const peff = B.format.effdat(ppStore.currentProposal.effdat)
@@ -162,15 +188,12 @@ const proposalHandler = {
         return q.id == pq.id
       })
       q.extra = alreadyInList ? "Y" : "N"
-      // console.log("Compare quote", qeff, "with", peff, " status:", q.status)
       return qeff == peff
         && 'INPROG,EXPIRED,ENROLLED'.indexOf(q.status) < 0
-        // && !alreadyInList
     })
-    // console.dir(this.availableQuotes)
-    B.popup.showModal(this.quote_select_id)
   },
   async toggleQuote(quote_row:any) {
+    if (ppStore.currentProposal.status != 'INPROG') return
     if (!quote_row.id || quote_row.id == '') return
     if (quote_row.extra == 'Y') { // It's on the list
       quote_row.extra = "N"
@@ -184,82 +207,89 @@ const proposalHandler = {
       quote_row.extra = "Y"
       await ppStore.addQuote(ppStore.currentProposal.id, quote_row.id)
     }
-    // this.pickQuote()
   },
+  showOptions() {
+    B.popup.showModal(this.quote_options_id)
+  }
 }
 
 const setCurrent = (effmonth:string, index:number) => {
   ppStore.currentProposal = ppStore.proposaldata[effmonth][index]
+  proposalHandler.pickProposal()
 }
+onMounted(() => {
+  if (ppStore.currentProposal) proposalHandler.pickProposal()
+})
 </script>
 
 <template>
-
-  <div class="drop_menu">
-    <!-- <BButton class="anchor" icon="solid rotate-left_" @click="refresh()">Refresh List</BButton>&nbsp;&nbsp; -->
-    <BButton class="action" icon="square-plus_" @click="B.popup.showModal(proposalHandler.id)" gapright>New Proposal&hellip;</BButton>
-    <BConfirm icon="thumbs-up_" class="modern">Enroll Prospect?</BConfirm>
-
-    <span style="float: right;" v-if="ppStore.currentProposal">
-      <BConfirm class="anchor" pos="B2L" icon="#red trash-can_" @confirm="proposalHandler.delete">Delete Proposal?
-        <template #message>
-          Delete this proposal?
-          <p style='color:red'>This cannot be undone</p>
-        </template>
-      </BConfirm>&nbsp;
-    </span>
+  <div class="proposal_list">
+    <BButton class="action" style="width: 150px;" icon="square-plus_" @click="B.popup.showModal(proposalHandler.id)">New Proposal&hellip;</BButton>
+    <div v-if="uStore && ppStore && ppStore.proposaldata">
+      <div v-if="ppStore && ppStore.proposaldata && Object.keys(ppStore.proposaldata).length == 0" style="width: 100%; text-align: center; color: silver">No Proposals</div>
+      <template v-for="m of monthsRange" :key="m">
+        <div class="effdat-title info" v-if="ppStore && ppStore.proposaldata && ppStore.proposaldata[m]" >- {{ B.format.effdat(m) }} -</div>
+        <div v-for="(pp, index) of ppStore.proposaldata[m]" :key="index"
+          :class="pp.id == ppStore.currentProposal?.id ? 'proposal-item picked' : 'proposal-item'"
+          @click="setCurrent(m, index as number)">
+          {{ ppStore.proposaldata[m][index].descr }}<br/>
+          <span :style="{'font-size': '.8em', 'color': ppStore.proposaldata[m][index].quotes.length == 0 ? 'red' : ''}">
+            <BIcon :icon="B.statusIcon(ppStore.proposaldata[m][index].status)"/>
+            {{ B.format.valueWithUnits(ppStore.proposaldata[m][index].quotes.length, "quote") }}</span>
+        </div>
+      </template>
+    </div>
   </div>
-  <div v-if="uStore && ppStore.proposaldata" class="proposal_list">
-    <div v-if="Object.keys(ppStore.proposaldata).length == 0" style="width: 100%; text-align: center; color: silver">No Proposals</div>
-    <template v-for="m of monthsRange" :key="m">
-      <div class="effdat-title info" v-if="ppStore?.proposaldata[m]" >- {{ B.format.effdat(m) }} -</div>
-      <div v-for="(pp, index) of ppStore.proposaldata[m]" :key="index"
-        :class="pp.id == ppStore.currentProposal?.id ? 'proposal-item picked' : 'proposal-item'"
-        @click="setCurrent(m, index as number)">
-        <BIcon :icon="B.statusIcon(ppStore.proposaldata[m][index].status)"/>
-        {{ ppStore.proposaldata[m][index].descr }}<br/>
-        <span :style="{'font-size': '.8em', 'color': ppStore.proposaldata[m][index].quotes.length == 0 ? 'red' : ''}">&hellip;{{ B.format.valueWithUnits(ppStore.proposaldata[m][index].quotes.length, "quote") }}</span>
-      </div>
-    </template>
-  </div>
-  <div v-else class="proposal_list">
+  <!-- <div v-else class="proposal_list">
     You have no proposals.
-  </div>
+  </div> -->
   <div class="proposal">
-    <table class="form-table" style="margin-bottom: .3em; width: 100%;">
+    <table class="form-table" style="margin-bottom: .5em; width: calc(100vw - 200px - 12em);">
       <tbody>
-        <tr><th style="width:8em;">Effective:</th>
-            <td colspan="2">{{ B.format.effdat(ppStore.currentProposal?.effdat) }}
-                <span v-if="ppStore.currentProposal" style="float: right">Proposal Status: <BIcon :icon="B.statusIcon(ppStore.currentProposal?.status)">{{ B.codeToText.quoteStatus(ppStore.currentProposal?.status) }}</BIcon></span>
-            </td></tr>
+        <tr><th style="width: 10em;">Effective:</th>
+          <td>{{ B.format.effdat(ppStore.currentProposal?.effdat) }}</td>
+          <th style="width: 7em;">Proposal ID:</th>
+          <td>{{ ppStore.currentProposal?.id }}</td>
+          <td style="width: 15em">
+            <span v-if="ppStore.currentProposal" style="float: right">Proposal Status: <BIcon :icon="B.statusIcon(ppStore.currentProposal?.status)">{{ B.codeToText.quoteStatus(ppStore.currentProposal?.status) }}</BIcon></span>
+          </td>
+          </tr>
         <tr><th>Proposal Name:</th>
-            <td colspan="2">{{ ppStore.currentProposal?.descr }}
-              <BPrompt required v-if="ppStore.currentProposal" @change="proposalHandler.rename" :text="ppStore.currentProposal?.descr" prompt="Proposal Name"/>
-            </td>
+          <td colspan="4">{{ ppStore.currentProposal?.descr }}
+            <BPrompt required v-if="ppStore.currentProposal" @change="proposalHandler.rename" :text="ppStore.currentProposal?.descr" prompt="Proposal Name"/>
+          </td>
         </tr>
-        <tr><th>Quotes:</th><td colspan="2">{{ quotesSummary.total }}
+        <tr><th>Quote Summary:</th>
+          <td colspan="4">{{ quotesSummary.total }}
             {{ quotesSummary.ready == '' ? '' : ' - ' }}
             <BIcon v-if="quotesSummary.icon != ''" :icon="quotesSummary.icon"/>{{ quotesSummary.ready }}
-          &nbsp;<span v-if="ppStore.currentProposal" class="anchor" @click="proposalHandler.pickQuote()">
-            <BIcon icon="solid pencil_"></BIcon>Add / Remove Quotes
-          </span>
-        </td></tr>
-        <template v-if="ppStore.currentProposal">
-        <tr><td class="breakline" colspan="3"><hr/></td></tr>
-        <tr><th>Include:</th><td colspan="2"><label><input type="checkbox"> Cover Page</label></td></tr>
-        <tr><th></th><td colspan="2"><label><input type="checkbox"> Group Application</label></td></tr>
-        <tr><th></th><td style="width: 11em;"><label><input type="checkbox"> Benefit Details</label></td>
-                    <td><label><input type="checkbox"> Benefit Comparisons</label></td></tr>
-        <tr><th></th><td><label><input type="checkbox"> Rate Sheets</label></td>
-                    <td><label><input type="checkbox"> Rate Sheet Comparisons</label></td></tr>
-        <tr><th></th><td colspan="2"><label><input type="checkbox"> Legal Agreement Form</label></td></tr>
-        <tr><th></th><td colspan="2"><label><input type="checkbox"> Tax Preparation Documents</label></td></tr>
-        </template>
+          </td>
+        </tr>
       </tbody>
     </table>
-    <div class="buttonbar" v-if="ppStore.currentProposal">
-      <BConfirm :disabled="quotesSummary.counts.total == 0" icon="file-pdf_" class="modern">Generate PDF</BConfirm>
-    </div>
+    <BTable :config="cfgAddQuoteList" :rows="proposalHandler.availableQuotes.value || []">
+      <template #column_extra="{row}"><BIcon :icon="isInProposalIcon(row)"></BIcon></template>
+      <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
+      <template #column_status="{row, setStyle}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon></template>
+      <template #column_nonstd="{row}">
+        <span :class="{
+          'nonstdY': row.nonstd == 'Y',
+          'nonstdC': row.nonstd == 'C'}"
+        >{{ B.codeToText.nonstd(row.nonstd) }}</span>
+      </template>
+      <template #footer>
+        <BButton @click="proposalHandler.showOptions()" :disabled="quotesSummary.counts.total == 0" icon="file-pdf_" class="modern" gapright>Generate PDF...</BButton>
+        <BConfirm class="modern" :disabled="quotesSummary.counts.total == 0 || quotesSummary.counts.not_ready > 0" icon="thumbs-up_" pos="T">Enroll Proposal?</BConfirm>
+        <BConfirm style="float: right" class="anchor" :disabled="ppStore.currentProposal?.quotes.length != 0" pos="T2L" icon="#red trash-can_" @confirm="proposalHandler.delete">Delete Proposal?
+          <template #message>
+            Delete this proposal?
+            <p style='color:red'>This cannot be undone</p>
+          </template>
+        </BConfirm>&nbsp;
+
+      </template>
+    </BTable>
+
   </div>
   <dialog :id="proposalHandler.id">
     <div class="titlebar">New Proposal</div>
@@ -273,7 +303,7 @@ const setCurrent = (effmonth:string, index:number) => {
               </select>
             </td>
         </tr>
-        <tr><th>Name:</th><td><input :placeholder="(B.format.effdat(proposalHandler.model.value.effdat) as string) + ' Proposal'" style="width: 30em;" v-model="proposalHandler.model.value.descr"></td></tr>
+        <tr><th>Name:</th><td><input :placeholder="'Quote Proposal'" style="width: 30em;" v-model="proposalHandler.model.value.descr"></td></tr>
         <tr><td colspan="2">
           <div class="buttonbar">
             <BButton class="anchor" @click="B.popup.close(proposalHandler.id)" icon="#red solid x">Cancel</BButton>&nbsp;
@@ -283,25 +313,28 @@ const setCurrent = (effmonth:string, index:number) => {
       </tbody>
     </table>
   </dialog>
-  <dialog :id="proposalHandler.quote_select_id">
-    <div class="titlebar">Add Quote to Proposal</div>
-    <div style="margin-bottom: .5em; text-align: center;" class="info">
-      Only quotes effective {{ B.format.effdat(ppStore.currentProposal?.effdat) }}
-      and are not In Progress or Expired are available.
+  <dialog :id="proposalHandler.quote_options_id" style="width: 35em">
+    <div class="titlebar">Generate Proposal</div>
+    <div class="infobar">
+      The proposal PDF will consist of the following pages. They will be included
+      in the order presented in the list below. You may elect to print any of the options
+      but you must select at least one option.
     </div>
-    <BTable :config="cfgAddQuoteList" :rows="proposalHandler.availableQuotes.value || []">
-      <template #column_extra="{row}"><BIcon :icon="isInProposalIcon(row)"></BIcon></template>
-      <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
-      <template #column_status="{row, setStyle}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle) }}</BIcon></template>
-      <template #column_nonstd="{row}">
-        <span :class="{
-          'nonstdY': row.nonstd == 'Y',
-          'nonstdC': row.nonstd == 'C'}"
-        >{{ B.codeToText.nonstd(row.nonstd) }}</span>
-      </template>
-    </BTable>
-    <div class="buttonbar">
-      <BButton class="anchor" @click="B.popup.close(proposalHandler.quote_select_id)" icon="#red solid x">Close</BButton>&nbsp;
+    <table class="form-table">
+      <tbody>
+        <tr><th>Include: </th><td colspan="2"><BCheckbox v-model="quoteOptions.cover">Cover Page</BCheckbox></td></tr>
+        <tr><th></th><td colspan="2"><BCheckbox v-model="quoteOptions.grpapp">Group Application</BCheckbox></td></tr>
+        <tr><th></th><td style="width: 11em;"><BCheckbox v-model="quoteOptions.details">Details</BCheckbox></td>
+                    <td><BCheckbox v-model="quoteOptions.comp_benes">Benefit Comparisons</BCheckbox></td></tr>
+        <tr><th></th><td><BCheckbox disabled v-model="quoteOptions.rates">Rate Sheets</BCheckbox></td>
+                    <td><BCheckbox v-model="quoteOptions.comp_rates">Rate Sheet Comparisons</BCheckbox></td></tr>
+        <tr><th></th><td colspan="2"><BCheckbox v-model="quoteOptions.legal">Legal Agreement Form</BCheckbox></td></tr>
+        <tr><th></th><td colspan="2"><BCheckbox v-model="quoteOptions.tax">Tax Preparation Documents</BCheckbox></td></tr>
+      </tbody>
+    </table>
+    <div class="buttonbar" v-if="ppStore.currentProposal">
+      <BButton class="anchor" gapright @click="B.popup.closeMe($event)" icon="#red solid x">Cancel</BButton>
+      <BConfirm :disabled="quotesSummary.counts.total == 0" icon="file-pdf_" class="modern">Generate PDF?</BConfirm>
     </div>
   </dialog>
 
@@ -312,18 +345,18 @@ const setCurrent = (effmonth:string, index:number) => {
 div.proposal_list {
   display: inline-block;
   /* margin-top: .3em; */
-  width: 15em;
-  height: calc(100vh - 9em);
+  width: 10em;
+  height: calc(100vh - 7em);
   overflow-y: auto;
-  border-right: 3px solid gainsboro;
+  /* border-right: 3px solid gainsboro; */
   padding-right: 3px;
 }
 div.proposal {
   display: inline-block;
   padding-left: .3em;
   /* margin-top: .3em; */
-  width: calc(100% - 15.5em);
-  height: calc(100vh - 9em);
+  width: calc(100% - 10.5em);
+  height: calc(100vh - 7em);
   overflow-y: auto;
 }
 .nonstdC {

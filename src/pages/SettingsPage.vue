@@ -16,6 +16,7 @@ import { useDark } from '@vueuse/core';
 import ClipboardIcon from "@/components/ClipboardIcon.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
 import BInfo from "@/components/B/BInfo.vue";
+import BDropdownMenu from "@/components/B/BDropdownMenu.vue";
 
 const isDark = useDark({
   storageKey: null // 🚫 Disables reading and writing to localStorage
@@ -169,7 +170,15 @@ const inspectRight = ():string => {
 }
 
 const getUserTheme = computed(():string => {
-  return uStore.getUserSetting('theme','auto')
+  return uStore.getUserSetting('theme','')
+})
+const setTheme = (theme:string) => {
+  uStore.setTheme(theme)
+}
+const getStartTab = computed(():string => {
+  const tab = uStore.getUserSetting('start_tab','')
+  console.log("Start Tab:", tab)
+  return tab
 })
 
 const getRightLongDescription = ():string => {
@@ -177,6 +186,19 @@ const getRightLongDescription = ():string => {
   const rightCode = rightsConfig.value.pickedRow.code
   return app.config.rights[rightCode].long_descr
 }
+
+const settingStartTabOptions = [
+  {value:'', text:'Dashboard', icon:'solid chart-simple_'},
+  {value:'PROSPECT', text:'Prospect', icon:'solid shop_'},
+  {value:'PROPOSALS', text:'Proposals', icon:'file-pdf_'},
+]
+const settingThemeOptions = [
+  {value:'', text:'Auto (' + (isDark ? 'Dark' : 'Light') + ')', icon: 'solid toggle-on_'},
+  {value:'--', text:'--'},
+  {value:'dark', text:'Dark', icon:'solid moon'},
+  {value:'light', text:'Light', icon:'sun'},
+]
+
 </script>
 
 <template>
@@ -209,9 +231,15 @@ const getRightLongDescription = ():string => {
             </td></tr>
             <tr><td colspan="2"><div class="buttonbar"/></td></tr>
             <tr><th>Theme:</th><td>
-              <label><input @click="uStore.setTheme(null)" type='radio' name='user_theme' :checked="getUserTheme == 'auto'" value=''> Auto ({{ isDark ? 'Dark' : 'Light' }})</label>&nbsp;&nbsp;
-              <label><input @click="uStore.setTheme('light')" type='radio' name='user_theme' :checked="getUserTheme == 'light'" value='light'> Light</label>&nbsp;&nbsp;
-              <label><input @click="uStore.setTheme('dark')" type='radio' name='user_theme' :checked="getUserTheme == 'dark'" value='dark'> Dark</label>
+              <BDropdownMenu heading="Theme" :options="settingThemeOptions" :value="getUserTheme" @change="(val) => setTheme(val)" />
+              <!-- <select @change="setTheme($event)" :value="getUserTheme">
+                <option value="">Auto ({{ isDark ? 'Dark' : 'Light' }})</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select> -->
+            </td></tr>
+            <tr><th>Starting Tab:</th><td>
+              <BDropdownMenu heading="Starting tab" :options="settingStartTabOptions" :value="getStartTab" @change="(val) => uStore.saveUserSetting('start_tab', val, false)" />
             </td></tr>
             <tr><td colspan="2">
               <br/>

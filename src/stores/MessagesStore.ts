@@ -30,7 +30,7 @@ export const appMessageStore = defineStore('appMessageStore', () => {
       subject: subject,
       message: message
     }
-    const fetcher = await new BQAPIFetcher().callAPI(`/message`, 'POST', msgBody)
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/message`, 'POST', msgBody)
     B.working.clear(working)
     if (fetcher.resp != null) {
       messages.value.unshift(fetcher.resp as any)
@@ -45,7 +45,7 @@ export const appMessageStore = defineStore('appMessageStore', () => {
   }
   async function deleteMessage(id:number) {
     B.working.set(working, "Deleting...")
-    const fetcher = await new BQAPIFetcher().callAPI(`/message/${id}`, 'DELETE')
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/message/${id}`, 'DELETE')
     B.working.clear(working)
     messages.value.length = 0
     if (fetcher.resp != null) {
@@ -58,7 +58,7 @@ export const appMessageStore = defineStore('appMessageStore', () => {
   async function getMessages() {
     B.working.set(working, "Getting...")
     messages.value.length = 0
-    const fetcher = await new BQAPIFetcher().callAPI(`/messages`, 'GET')
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/messages`, 'GET')
     B.working.clear(working)
     if (fetcher.resp != null) {
       messages.value.length = 0
@@ -81,7 +81,7 @@ export const appMessageStore = defineStore('appMessageStore', () => {
     const msg = messages.value[index]
     if (msg.readat != null) return
     B.working.set(working, "Acknowledging...")
-    const fetcher = await new BQAPIFetcher().callAPI(`/message/${msg.id}`, 'PUT')
+    const fetcher = await new BQAPIFetcher().callHonoAPI(`/message/${msg.id}`, 'PUT')
     B.working.clear(working)
     if (fetcher.resp != null) {
       msg.readat = fetcher.resp.readat

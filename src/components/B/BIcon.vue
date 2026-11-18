@@ -1,5 +1,6 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
+import type { Modifier } from 'typescript';
 import { computed, ref, useAttrs } from 'vue'
 const attrs = useAttrs()
 defineOptions({
@@ -36,7 +37,9 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(["click"])
+const emit = defineEmits<{
+  click: [event: MouseEvent]
+}>()
 const iconcolor = ref()
 
 const getClasses = computed(() => {
@@ -107,8 +110,8 @@ const getStyle_fa = () => {
   return stuff
 }
 
-const handleClick = () => {
-  if (!props.disabled) emit('click')
+const handleClick = (event:MouseEvent) => {
+  if (!props.disabled) emit('click', event)
 }
 </script>
 

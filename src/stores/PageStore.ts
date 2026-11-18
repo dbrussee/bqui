@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export const appPageStore = defineStore('appPageStore', () => {
-  type PageCode = 'PROSPECTS' | 'MSGS' | 'SETTINGS' | 'CENSUS' | 'PROPOSALS' | 'DASHBOARD'
-  const page = ref<PageCode>("DASHBOARD")
+export const VALID_PAGES = ['PROSPECT', 'MSGS', 'SETTINGS', 'CENSUS', 'PROPOSALS', 'DASHBOARD'] as const
 
-  return { page }
+export const appPageStore = defineStore('appPageStore', () => {
+  const page = ref("DASHBOARD")
+  const setPage = (code:string) => {
+    page.value = code
+  }
+  return { page, setPage }
 })

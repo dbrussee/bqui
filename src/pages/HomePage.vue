@@ -34,7 +34,7 @@ watch(
 <template>
   <div v-if="userStore.user?.id">
     <DashboardPage v-if="pageStore.page == 'DASHBOARD'" />
-    <ProspectsPage v-if="pageStore.page == 'PROSPECTS'" />
+    <ProspectsPage v-if="pageStore.page == 'PROSPECT'" />
     <CensusPage v-if="pageStore.page == 'CENSUS'" />
     <MessagesPage v-if="pageStore.page == 'MSGS'" />
     <SettingsPage v-if="pageStore.page == 'SETTINGS'" />

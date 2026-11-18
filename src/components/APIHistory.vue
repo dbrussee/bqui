@@ -103,6 +103,7 @@ const simplifyEndpoint = (row:any) => {
   // Example: GET /bqapi/v2.1/beef
   // Returns: GET /beef
   let endpoint = row.endpoint // GET /bqapi/v2.1/beef
+  // endpoint = endpoint.replace('/bqapi/v2.1', '')
   const space:number = endpoint.indexOf(" ") // 3
   const mth:string = endpoint.substr(0, space) // GET
   endpoint = row.endpoint.substr(space+1) // /bqapi/v2.1/beef
@@ -113,7 +114,7 @@ const simplifyEndpoint = (row:any) => {
       endpoint = endpoint.substring(slash) // /beef
     }
   }
-  return endpoint
+  return mth + ' ' + endpoint
 }
 
 const reQueryAPI = () => {
@@ -127,7 +128,7 @@ const reQueryAPI = () => {
 <template>
   <dialog :id="popid">
     <BTable :config="cfgHistory" :rows="uStore.apiHistory">
-      <!-- <template #column_endpoint="{row}">{{ simplifyEndpoint(row) }}</template> -->
+      <template #column_endpoint="{row}">{{ simplifyEndpoint(row) }}</template>
       <template #column_method="{row}">{{ getHttpMethod(row) }}</template>
       <template #column_ts="{row, setStyle, setHtml}">{{ setTimestamp(row, setStyle, setHtml) }}</template>
       <template #column_body="{row}"><BIcon v-if="row.body && row.body.length > 0" icon="solid code"/></template>

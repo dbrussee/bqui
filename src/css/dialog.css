@@ -7,6 +7,17 @@ div.titlebar {
   border-bottom: 1px solid var(--form-prompt-color);
   margin-bottom: 0.4em;
 }
+div.infobar {
+  color: var(--form-prompt-color);
+  font-size: 1em;
+  font-style: italic;
+  padding-bottom: 0.5em;
+  padding-left: 1.5em;
+  padding-right: 1.5em;
+  /* margin-right: .5em; */
+  border-bottom: 1px solid var(--form-prompt-color);
+  margin-bottom: 0.4em;
+}
 dialog {
   color-scheme: light;
   padding: .5em;

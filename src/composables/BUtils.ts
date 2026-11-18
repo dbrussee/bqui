@@ -463,6 +463,11 @@ export const B = {
         el.showModal()
       }
     },
+    closeMe: (event:MouseEvent) => {
+      const el = event.target as HTMLElement
+      const dlg = el.closest("dialog")
+      if (dlg) B.popup.close(dlg.id)
+    },
     close: (...idlist: string[]) => {
       idlist.forEach((popid) => {
         const el = B.findElement(popid, "dialog") // Find the elemnt in the DOM

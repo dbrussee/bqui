@@ -246,6 +246,7 @@ const isPicked = (rowval:any):boolean => {
 <template>
   <fieldset>
   <legend v-if="props.config.heading && props.config.heading != ''" class="b-table-heading">
+    <BInfo v-if="props.config.help && props.config.help != ''" width="22em" :message="props.config.help" pos="B2R"></BInfo>
     {{ props.config.heading }}
   </legend>
   <div style="width: fit-content">

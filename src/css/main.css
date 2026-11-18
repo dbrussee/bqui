@@ -200,7 +200,30 @@ a, .anchor {
     text-decoration: underline !important;
   }
 }
-button.anchor {
+button.normal.forced {
+  top: 0 !important;
+  text-decoration: none;
+  background: none !important;
+  color: var(--body-text) !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  &:disabled {
+    cursor: default !important;
+    background: none !important;
+    border: none !important;
+    color: var(--ui-disabled-text) !important;
+  }
+  & * {
+    &:disabled {
+      color: var(--ui-disabled-text) !important;
+    }
+  }
+  &:hover:not(:disabled) {
+    text-decoration: underline !important;
+  }
+}
+button.anchor,
+button.normal {
   border: none !important;
 }
 .truncate-text {

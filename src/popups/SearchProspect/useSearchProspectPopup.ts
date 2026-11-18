@@ -14,7 +14,7 @@ export function useSearchProspectPopup() {
   }
   async function loadProspect(pid:number):Promise<void> {
     appProspectStore().getProspect(pid, true)
-    appPageStore().page = "PROSPECTS"
+    appPageStore().page = "PROSPECT"
     closeSearch()
   }
 

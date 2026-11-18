@@ -25,7 +25,20 @@ watch(() => pStore.prospect, () => {
   }
 )
 
-
+const cfgEffList = ref({
+  onPick: (row:any) => {
+    // cfgQuotesList.value.pickedRow = row
+    // cfgQuotesList.value.pickedRowNumber = rn
+  },
+  // onDblpick: () => { quoteEventHandler.edit(cfgQuotesList.value.pickedRow) },
+  height: "calc(100vh - 11.7em)",
+  // width: "calc(100vw - 200px - .9em - 7em",
+  pickedRow: null as any,
+  // pickedRowNumber: -1,
+  columns: [
+    { id: "effdat", heading: "Effective", width: "6.7em", flags: "C" },
+  ]
+})
 const cfgQuotesList = ref({
   onPick: (row:any) => {
     cfgQuotesList.value.pickedRow = row
@@ -33,6 +46,7 @@ const cfgQuotesList = ref({
   },
   onDblpick: () => { quoteEventHandler.edit(cfgQuotesList.value.pickedRow) },
   height: "calc(100vh - 11.7em)",
+  // width: "calc(100vw - 200px - .9em - 7em)",
   width: "calc(100vw - 200px - .9em)",
   pickedRow: null as any,
   // pickedRowNumber: -1,
@@ -151,44 +165,55 @@ const quoteEventHandler = {
 </script>
 
 <template>
-  <BTable :config="cfgQuotesList" :rows="pStore.quotes">
-    <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
-    <!-- <template #column_proposals="{row}">{{ proposalCount(row) }}</template> -->
-    <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
-    <template #column_status="{row, setStyle, setHtml}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle, setHtml) }}</BIcon></template>
-    <template #column_nonstd="{row}">
-      <span :class="{
-        'nonstdY': row.nonstd == 'Y',
-        'nonstdC': row.nonstd == 'C'}"
-      >{{ B.codeToText.nonstd(row.nonstd) }}</span>
-    </template>
-    <template #footer>
-      <BPopup v-if="!uStore.isUserReadOnly()" class="action" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
-        <template #body>
-          <p><BButton @click="quoteEventHandler.start('MED')" class="anchor" :icon="B.codeToText.qtypeIcon('MED')">Medical &amp; Drug</BButton></p>
-          <p><BButton @click="quoteEventHandler.start('DEN')" class="anchor" :icon="B.codeToText.qtypeIcon('DEN')">Dental</BButton></p>
-          <p><BButton @click="quoteEventHandler.start('VIS')" class="anchor" :icon="B.codeToText.qtypeIcon('VIS')">Vision</BButton></p>
-          <p><BButton disabled @click="quoteEventHandler.start('WEL')" class="anchor" :icon="B.codeToText.qtypeIcon('WEL')">Wellness</BButton></p>
-          <hr style="margin-top: .2em; margin-bottom: .2em;"/>
-          <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="quoteEventHandler.startFromQuote(cfgQuotesList.pickedRow)" class="anchor" icon="clone_">Copy Selected</BButton></p>
+  <!-- <div class="eff_quote_container"> -->
+    <!-- <div class="eff_list">
+      <BTable :config="cfgEffList" :rows="[]">
+        <template #footer>
+          <BButton style="visibility:hidden;">Beef</BButton>
         </template>
-      </BPopup>
-      <BButton class="anchor anchor-in-table-footer"
-        gapleft gapright
-        style="color: white"
-        :disabled="!cfgQuotesList.pickedRow"
-        :icon="uStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'"
-        @click="quoteEventHandler.edit(cfgQuotesList.pickedRow)"
-        @xclick="quoteEventHandler.edit(cfgQuotesList.pickedRow)"
-      >{{ uStore.isUserReadOnly() ? 'View Quote...' : 'Edit Quote...' }}</BButton>
-      |
-      <BButton class="anchor anchor-in-table-footer"
-        gapleft
-        style="color: white"
-        icon="solid rotate-left_"
-        @click="pStore.reloadProspect()">Refresh</BButton>
-    </template>
-  </BTable>
+      </BTable>
+    </div> -->
+    <!-- <div class="quote_list"> -->
+      <BTable :config="cfgQuotesList" :rows="pStore.quotes">
+        <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
+        <!-- <template #column_proposals="{row}">{{ proposalCount(row) }}</template> -->
+        <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
+        <template #column_status="{row, setStyle, setHtml}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle, setHtml) }}</BIcon></template>
+        <template #column_nonstd="{row}">
+          <span :class="{
+            'nonstdY': row.nonstd == 'Y',
+            'nonstdC': row.nonstd == 'C'}"
+          >{{ B.codeToText.nonstd(row.nonstd) }}</span>
+        </template>
+        <template #footer>
+          <BPopup v-if="!uStore.isUserReadOnly()" class="action" icon="solid bars_" pos="T2R" heading="New Quote">New Quote&hellip;
+            <template #body>
+              <p><BButton @click="quoteEventHandler.start('MED')" class="anchor" :icon="B.codeToText.qtypeIcon('MED')">Medical &amp; Drug</BButton></p>
+              <p><BButton @click="quoteEventHandler.start('DEN')" class="anchor" :icon="B.codeToText.qtypeIcon('DEN')">Dental</BButton></p>
+              <p><BButton @click="quoteEventHandler.start('VIS')" class="anchor" :icon="B.codeToText.qtypeIcon('VIS')">Vision</BButton></p>
+              <p><BButton disabled @click="quoteEventHandler.start('WEL')" class="anchor" :icon="B.codeToText.qtypeIcon('WEL')">Wellness</BButton></p>
+              <hr style="margin-top: .2em; margin-bottom: .2em;"/>
+              <p><BButton :disabled="!cfgQuotesList.pickedRow" @click="quoteEventHandler.startFromQuote(cfgQuotesList.pickedRow)" class="anchor" icon="clone_">Copy Selected</BButton></p>
+            </template>
+          </BPopup>
+          <BButton class="anchor anchor-in-table-footer"
+            gapleft gapright
+            style="color: white"
+            :disabled="!cfgQuotesList.pickedRow"
+            :icon="uStore.isUserReadOnly() ? 'solid magnifying-glass-plus' : 'edit'"
+            @click="quoteEventHandler.edit(cfgQuotesList.pickedRow)"
+            @xclick="quoteEventHandler.edit(cfgQuotesList.pickedRow)"
+          >{{ uStore.isUserReadOnly() ? 'View Quote...' : 'Edit Quote...' }}</BButton>
+          |
+          <BButton class="anchor anchor-in-table-footer"
+            gapleft
+            style="color: white"
+            icon="solid rotate-left_"
+            @click="pStore.reloadProspect()">Refresh</BButton>
+        </template>
+      </BTable>
+    <!-- </div> -->
+  <!-- </div> -->
 
   <QuoteDialog :popid="quoteEventHandler.popid"
     @save="(q) => quoteEventHandler.save(q)"
@@ -202,6 +227,20 @@ const quoteEventHandler = {
 </template>
 
 <style lang="css" scoped>
+.eff_quote_container {
+    display: flex;
+    height: fit-content;
+    width: 100%;
+  }
+
+  .eff_list {
+    flex: 0 0 7em; /* Fixed 6em width (won't grow or shrink) */
+  }
+
+  .quote_list {
+    flex: 1; /* Takes all remaining horizontal space */
+    min-width: 0; /* Prevents wide content (like tables/SVGs) from breaking the layout */
+  }
 .nonstdC {
   color: goldenrod;
   font-style: italic;

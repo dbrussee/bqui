@@ -3,7 +3,7 @@ import BQAPIFetcher from "@/components/BQAPI";
 import { B } from "@/composables/BUtils";
 import { useToast } from "@/composables/useToast";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, onActivated } from "vue";
 import { appProspectStore } from "./ProspectStore";
 import { appUserStore } from "./AppUserStore";
 import type { Iquote } from "@/types";
@@ -61,8 +61,8 @@ export const proposalStore = defineStore("proposalStore", () => {
   function deleteProposal(id:number):void {
     const fetcher = new BQAPIFetcher()
     fetcher.callHonoAPI(`/proposal/${id}`, 'DELETE').then(() => {
-      proposaldata.value = fetcher.resp.eff_dates
       currentProposal.value = null
+      proposaldata.value = fetcher.resp.eff_dates
       useToast().addToast(`Proposal successfully deleted`)
       const pStore = appProspectStore()
       if (pStore.prospect) pStore.getProspect(pStore.prospect.id, false);
