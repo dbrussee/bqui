@@ -145,7 +145,8 @@ const dashConfig = ref({
     // dashConfig.value.pickedRow = row
     doSearch(row, col)
   },
-  heading: `Dashboard for ${uStore.user?.fstnam} ${uStore.user?.lstnam} (${uStore.user?.id})` ,
+  heading: `Dashboard for ${uStore.user?.fstnam} ${uStore.user?.lstnam}`,
+  heading_extra: `(${uStore.user?.id})`,
   // onDblpick: () => { doSearch() },
   // pickedRow: null as any,
   columns: [
@@ -211,7 +212,7 @@ const qHandler = {
   },
   edit(quote:Iquote) {
     if (quote.prospect_id != pStore.prospect?.id) {
-      pStore.getProspect(quote.prospect_id)
+      pStore.getProspect(quote.prospect_id, true)
     }
     this.quote.value = {...quote}
     B.popup.showModal(this.popid)
