@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import BButton from '@/components/B/BButton.vue'
 import BPopup from '@/components/B/BPopup.vue'
+import BDropdownMenu from '@/components/B/BDropdownMenu.vue'
 import BTable from '@/components/B/BTable.vue'
 import BIcon from '@/components/B/BIcon.vue'
 import { B } from '@/composables/BUtils'
@@ -11,12 +12,7 @@ import { appUserStore } from '@/stores/AppUserStore'
 const uStore = appUserStore()
 import { ref } from 'vue'
 import { useSearchProspectPopup } from './useSearchProspectPopup'
-const { popRef, closeSearch, loadProspect } = useSearchProspectPopup()
-
-const statusPicker = ref()
-
-// const query = ref("")
-const queryTextRef = ref(null)
+const { closeSearch, loadProspect } = useSearchProspectPopup()
 
 const cfgSearchResults = ref({
   onPick: (row:any) => cfgSearchResults.value.pickedRow = row,
@@ -36,9 +32,6 @@ const searchHandler = ref({
     cfgSearchResults.value.pickedRow = null
     pStore.searchProspects().then(() => {
       if (pStore.searchResults.length > 0) {
-        // const tbox = (queryTextRef.value! as HTMLInputElement)
-        // tbox.select()
-        // tbox.focus()
         if (pStore.searchResults.length == 1) {
           cfgSearchResults.value.pickedRow = pStore.searchResults[0]
         }
@@ -48,7 +41,7 @@ const searchHandler = ref({
 })
 const setSearchStatus = (code:string):void => {
   pStore.searchParameters.status = code
-  statusPicker.value?.close()
+  // statusPicker.value?.close()
 }
 const headingText = ():string => {
   let txt = "Search "
@@ -59,7 +52,6 @@ const headingText = ():string => {
   txt += "Prospects "
   return txt
 }
-
 
 </script>
 <template>
@@ -81,29 +73,37 @@ const headingText = ():string => {
         <tbody>
           <tr>
             <th v-if="uStore.user?.rights.SEARCH_SCOPE.value == 'AGENCY'">Agent:</th>
-            <td v-if="uStore.user?.rights.SEARCH_SCOPE.value == 'AGENCY'">
-              <select v-model="pStore.searchParameters.agent" style="width: 12em;">
-                <option value="">any</option>
-                <option :value="uStore.user?.id">{{ uStore.user?.lstnam }}, {{ uStore.user?.fstnam }} (me)</option>
-                <option v-for="u of uStore.user?.agency_users" :key="u.id" :value="u.id">{{ u.lstnam }}, {{ u.fstnam }}</option>
-              </select>
+            <td v-if="uStore.user?.rights.SEARCH_SCOPE.value == 'AGENCY'" style="vertical-align: top; padding-right: 1em;">
+              <BDropdownMenu heading="Agency User"
+                :options="[
+                  {value:'', text:'Any Agent'},
+                  '--',
+                  {value:uStore.user?.id, text:`${uStore.user?.lstnam}, ${uStore.user?.fstnam} - ${uStore.user?.id} (me)`},
+                  ...(uStore.user?.agency_users || []).map(u => ({
+                    value: u.id,
+                    text: `${u.lstnam}, ${u.fstnam.trim()} - ${u.id}`
+                  }))
+                ]"
+                :value="pStore.searchParameters.agent"
+                @change="(val) => pStore.searchParameters.agent=val" />
             </td>
             <th>&nbsp;Min:</th><td><input v-model="pStore.searchParameters.min" placeholder="1" style="width:4em;"/></td>
             <th>&nbsp;Max:</th><td><input v-model="pStore.searchParameters.max" placeholder="999999" style="width:4em;"/></td>
             <th>&nbsp;Eff:</th><td><input v-model="pStore.searchParameters.eff" placeholder="any" style="width:6em;"/></td>
-            <th>&nbsp;Status:</th><td style="width: 10em;">
-              <BPopup ref="statusPicker" class="anchor" :icon="B.statusIcon(pStore.searchParameters.status)" pos="L2B" heading="Status Filter">{{B.codeToText.quoteStatus(pStore.searchParameters.status)}}
-                <template #body>
-                  <p><BButton type="button" @click="setSearchStatus('ANY')" class="anchor" :icon="B.statusIcon('ANY')">{{B.codeToText.quoteStatus("ANY")}}</BButton></p>
-                  <hr style="margin-top: .2em; margin-bottom: .2em;"/>
-                  <p><BButton type="button" @click="setSearchStatus('INPROG')" class="anchor" :icon="B.statusIcon('INPROG')">{{B.codeToText.quoteStatus("INPROG")}}</BButton></p>
-                  <p><BButton type="button" @click="setSearchStatus('PENDING')" class="anchor" :icon="B.statusIcon('PENDING')">{{B.codeToText.quoteStatus("PENDING")}}</BButton></p>
-                  <p><BButton type="button" @click="setSearchStatus('RATEREQ')" class="anchor" :icon="B.statusIcon('RATEREQ')">{{B.codeToText.quoteStatus("RATEREQ")}}</BButton></p>
-                  <p><BButton type="button" @click="setSearchStatus('READY')" class="anchor" :icon="B.statusIcon('READY')">{{B.codeToText.quoteStatus("READY")}}</BButton></p>
-                  <p><BButton type="button" @click="setSearchStatus('ENROLLED')" class="anchor" :icon="B.statusIcon('ENROLLED')">{{B.codeToText.quoteStatus("ENROLLED")}}</BButton></p>
-                  <p><BButton type="button" @click="setSearchStatus('EXPIRED')" class="anchor" :icon="B.statusIcon('EXPIRED')">{{B.codeToText.quoteStatus("EXPIRED")}}</BButton></p>
-                </template>
-              </BPopup>
+            <th>&nbsp;Status:</th><td style="width: 10em; vertical-align: top;">
+              <BDropdownMenu heading="Starting tab"
+                :options="[
+                  {value:'ANY', text:B.codeToText.quoteStatus('ANY'), icon:B.statusIcon('ANY')},
+                  '--',
+                  {value:'INPROG', text:B.codeToText.quoteStatus('INPROG'), icon:B.statusIcon('INPROG')},
+                  {value:'PENDING', text:B.codeToText.quoteStatus('PENDING'), icon:B.statusIcon('PENDING')},
+                  {value:'RATEREQ', text:B.codeToText.quoteStatus('RATEREQ'), icon:B.statusIcon('RATEREQ')},
+                  {value:'READY', text:B.codeToText.quoteStatus('READY'), icon:B.statusIcon('READY')},
+                  {value:'ENROLLED', text:B.codeToText.quoteStatus('ENROLLED'), icon:B.statusIcon('ENROLLED')},
+                  {value:'EXPIRED', text:B.codeToText.quoteStatus('EXPIRED'), icon:B.statusIcon('EXPIRED')},
+                ]"
+                :value="pStore.searchParameters.status"
+                @change="(val) => setSearchStatus(val)" />
             </td>
           </tr>
         </tbody>

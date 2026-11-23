@@ -273,6 +273,13 @@ const headingText = ():string => {
   return txt
 }
 
+const myProspectsName = () => {
+  const scope = uStore.user?.rights.SEARCH_SCOPE.value
+  if (scope == "GLOBAL") return "All Prospects"
+  if (scope == "AGENCY") return "Your Agency Prospects"
+  return "Your Prospects"
+}
+
 </script>
 <template>
   <BTable class="centerme" :config="dashConfig" :rows="monthsRange">
@@ -286,12 +293,12 @@ const headingText = ():string => {
     <template #column_EXPIRED="{row, setStyle, setHtml}">{{ setCount(row, 'EXPIRED', setStyle, setHtml) }}</template>
     <template #footer>
       <template v-if="uStore.user?.rights.SEARCH_SCOPE.value != 'GLOBAL'">
-        Filter:
-        <BIcon :icon="uStore.getUserSetting('dashboard_filter','').toUpperCase() == '' ? '#green circle-dot' : 'circle'" @click="setFilter('N')">
-          All Prospects</BIcon>
+        Show Counts For:
+        <BIcon :icon="uStore.getUserSetting('dashboard_filter','').toUpperCase() == '' ? '#green circle-dot' : 'circle'" @click="setFilter('N')"
+        >{{ myProspectsName() }}</BIcon>
         &nbsp;
-        <BIcon :icon="uStore.getUserSetting('dashboard_filter','').toUpperCase() == 'Y' ? '#green circle-dot' : 'circle'" @click="setFilter('Y')">
-          Current Prospect</BIcon>
+        <BIcon :icon="uStore.getUserSetting('dashboard_filter','').toUpperCase() == 'Y' ? '#green circle-dot' : 'circle'" @click="setFilter('Y')"
+        >Current Prospect Only</BIcon>
         </template>
 
     </template>

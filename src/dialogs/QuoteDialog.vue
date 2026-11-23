@@ -89,14 +89,13 @@ const internalHandler = {
     if (localQuote.value.id < 0) {
       qStore.quote = {...localQuote.value}
       const newQuote = await qStore.createQuote() as Iquote
-      // useToast().addToast(`Quote ${q.id} created`, "success")
+      localQuote.value = JSON.parse(JSON.stringify(newQuote))
       emit('save', newQuote)
     } else {
       const updatedQuote = await qStore.updateQuote(localQuote.value) as Iquote
       if (updatedQuote) {
         qStore.quote = {...localQuote.value}
         pStore.refreshQuote(updatedQuote as Iquote)
-        // useToast().addToast(`Quote ${q.id} saved`, "success")
         emit('save', updatedQuote)
       }
     }
@@ -135,6 +134,7 @@ const internalHandler = {
     if (localQuote.value.id < 0) {
       qStore.quote = {...localQuote.value}
       const newQuote = await qStore.createQuote()
+      localQuote.value = JSON.parse(JSON.stringify(newQuote))
       emit('submit', newQuote)
     } else {
       const updatedQuote = await qStore.updateQuote(localQuote.value)

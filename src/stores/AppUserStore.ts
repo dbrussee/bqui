@@ -143,7 +143,7 @@ export const appUserStore = defineStore("appUserStore", () => {
   function setTheme(themeString:string | null) {
     // No user... no change
     if (user.value == null || user.value.config == null) return
-    if (themeString == null) {
+    if (themeString == null || themeString == '') {
       removeUserSetting('theme', false).then(() => {
         applyTheme(null)
       })
@@ -247,7 +247,7 @@ export const appUserStore = defineStore("appUserStore", () => {
     if (!user.value) return
     B.working.set(working, "...")
     const fetcher = new BQAPIFetcher()
-    if (!code) {
+    if (!code || code == '') {
       await new BQAPIFetcher().callHonoAPI(`/user/config/${thing}`, "DELETE")
     } else {
       await new BQAPIFetcher().callHonoAPI(`/user/config/${thing}/${code}`, "PUT")

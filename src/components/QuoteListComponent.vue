@@ -68,6 +68,18 @@ const cfgQuotesList = ref({
   ]
 })
 
+const formatEffdatCell = (row:any, rn:number, setStyle:any) => {
+  if (rn > 0) {
+    const prior = pStore.quotes[rn-1] as Iquote
+    if (prior.effdat != row.effdat) {
+      setStyle((td:HTMLTableCellElement) => {
+        const tr = td.closest("tr")
+        if (tr) tr.style.borderTop = "2px solid sienna"
+      })
+    }
+  }
+  return B.format.effdat(row.effdat)
+}
 const formatStatusCell = (row:any, setStyle:any, setHtml:any) => {
   setStyle((td:HTMLTableCellElement) => {
     const classname = "status" + row.status
@@ -132,7 +144,7 @@ const quoteEventHandler = {
   async save(quote:Iquote) {
     findAndPickQuote(quote.id)
     useToast().addToast(`Quote ${quote.id} saved`, "success")
-    this.close()
+    // this.close()
   },
   name(quote:Iquote) { // Quote has already been saved with new name... just get it into the list
     findAndPickQuote(quote.id)
@@ -165,17 +177,8 @@ const quoteEventHandler = {
 </script>
 
 <template>
-  <!-- <div class="eff_quote_container"> -->
-    <!-- <div class="eff_list">
-      <BTable :config="cfgEffList" :rows="[]">
-        <template #footer>
-          <BButton style="visibility:hidden;">Beef</BButton>
-        </template>
-      </BTable>
-    </div> -->
-    <!-- <div class="quote_list"> -->
       <BTable :config="cfgQuotesList" :rows="pStore.quotes">
-        <template #column_effdat="{row}">{{ B.format.effdat(row.effdat) }}</template>
+        <template #column_effdat="{row, rn, setStyle}">{{ formatEffdatCell(row, rn, setStyle) }}</template>
         <!-- <template #column_proposals="{row}">{{ proposalCount(row) }}</template> -->
         <template #column_product="{row}">{{ row.qtype }} {{ row.rlob }}</template>
         <template #column_status="{row, setStyle, setHtml}"><BIcon :icon="B.statusIcon(row.status)">{{ formatStatusCell(row, setStyle, setHtml) }}</BIcon></template>

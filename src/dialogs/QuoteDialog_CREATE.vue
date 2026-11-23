@@ -58,7 +58,9 @@ const getRlobList = async () => {
         <th :style="{color: localQuote.effdat ? '': 'red'}">Effective:</th>
         <td>
           <select v-model="localQuote.effdat" @change="getRlobList()">
-            <option v-for="n in qStore.number_of_effdates" :key="n" :value="B.firstOfMonth(n+qStore.initial_effdate_offset)">{{ B.format.effdat(B.firstOfMonth(n+qStore.initial_effdate_offset)) }}</option>
+            <option v-for="n in qStore.number_of_effdates" :key="n"
+              :value="B.format.dateMMDDYYYY(B.firstOfMonth(n+qStore.initial_effdate_offset))"
+            >{{ B.format.effdat(B.firstOfMonth(n+qStore.initial_effdate_offset)) }}</option>
           </select>
         </td>
       </tr>

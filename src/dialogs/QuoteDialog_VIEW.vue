@@ -125,7 +125,7 @@ const getHasQuoteIcon = (row:any):string => {
 
 </script>
 
-<template v-else><!-- Post-INPROG status of any kind -->
+<template><!-- Post-INPROG status of any kind -->
   <table class="form-table" style="width: 100%">
     <tbody>
       <tr v-if="localQuote.id >= 0">

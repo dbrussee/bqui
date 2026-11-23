@@ -65,14 +65,15 @@ const pickedRowIndex = ref<number>(-1) // No row number
 const doPick = (isDouble:boolean, row:any, ri?:number, col?:IColumn, ci?:number) => {
   if (!isDouble) {
     if (row == props.config.pickedRow) {
-      pickedRowIndex.value = -1
-      // emit('unpick', row, ri, col, ci)
       if (props.config['onUnpick']) {
+        pickedRowIndex.value = -1
         props.config.onUnpick(row, ri, col, ci)
+      } else {
+        pickedRowIndex.value = ri as number
+        if (props.config['onPick']) props.config.onPick(row, ri, col, ci)
       }
     } else {
       pickedRowIndex.value = ri as number
-      // emit('pick')
       if (props.config['onPick']) props.config.onPick(row, ri, col, ci)
     }
   } else if (isDouble) {
@@ -251,9 +252,6 @@ const isPicked = (rowval:any):boolean => {
     <span v-if="props.config.heading_extra && props.config.heading_extra != ''" style="color:var(--body-text); font-size: .8em;">{{ props.config.heading_extra }}</span>
   </legend>
   <div style="width: fit-content">
-  <!-- <div v-if="props.config.heading && props.config.heading != ''" class="b-table-heading">
-    {{ props.config.heading }}
-  </div> -->
   <div class="b-table-container"
     ref="tableRef"
     tabindex="0"

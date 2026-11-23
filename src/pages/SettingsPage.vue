@@ -12,17 +12,14 @@ import BAnchor from "@/components/B/BAnchor.vue";
 import { ref, useId, computed } from "vue";
 import BButton from "@/components/B/BButton.vue";
 import BIcon from "@/components/B/BIcon.vue";
-import { useDark } from '@vueuse/core';
+import { usePreferredDark } from '@vueuse/core';
 import ClipboardIcon from "@/components/ClipboardIcon.vue";
 import BConfirm from "@/components/B/BConfirm.vue";
 import BInfo from "@/components/B/BInfo.vue";
 import BDropdownMenu from "@/components/B/BDropdownMenu.vue";
 
-const isDark = useDark({
-  storageKey: null // 🚫 Disables reading and writing to localStorage
-})
+const isPreferredDark = usePreferredDark()
 
-// const overrideRef = ref<InstanceType<typeof BPopup> | null>(null)
 const roleHandler = {
   popupId: useId(),
   open() { (document.getElementById(roleHandler.popupId) as HTMLDialogElement).showModal() },
@@ -169,37 +166,11 @@ const inspectRight = ():string => {
   return html
 }
 
-const getUserTheme = computed(():string => {
-  return uStore.getUserSetting('theme','')
-})
-const setTheme = (theme:string) => {
-  uStore.setTheme(theme)
-}
-const getStartTab = computed(():string => {
-  const tab = uStore.getUserSetting('start_tab','')
-  console.log("Start Tab:", tab)
-  return tab
-})
-
 const getRightLongDescription = ():string => {
   if (!rightsConfig.value.pickedRow) return ""
   const rightCode = rightsConfig.value.pickedRow.code
   return app.config.rights[rightCode].long_descr
 }
-
-const settingStartTabOptions = [
-  {value:'', text:'Dashboard', icon:'solid chart-simple_'},
-  {value:'PROSPECT', text:'Prospect', icon:'solid shop_'},
-  {value:'CENSUS', text:'Census', icon:'solid people-group_'},
-  {value:'PROPOSALS', text:'Proposals', icon:'file-pdf_'},
-  {value:'MSGS', text:'Messages', icon:'envelope_'},
-]
-const settingThemeOptions = [
-  {value:'', text:'Auto (' + (isDark ? 'Dark' : 'Light') + ')', icon: 'window-restore_'},
-  {value:'--', text:'--'},
-  {value:'dark', text:'Dark', icon:'solid moon_'},
-  {value:'light', text:'Light', icon:'sun_'},
-]
 
 </script>
 
@@ -233,15 +204,27 @@ const settingThemeOptions = [
             </td></tr>
             <tr><td colspan="2"><div class="buttonbar"/></td></tr>
             <tr><th>Theme:</th><td>
-              <BDropdownMenu heading="Theme" :options="settingThemeOptions" :value="getUserTheme" @change="(val) => setTheme(val)" />
-              <!-- <select @change="setTheme($event)" :value="getUserTheme">
-                <option value="">Auto ({{ isDark ? 'Dark' : 'Light' }})</option>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-              </select> -->
+              <BDropdownMenu heading="Theme"
+                :options="[
+                  {value:'', text:`Auto (${isPreferredDark ? 'Dark' : 'Light'})` },
+                  '--',
+                  {value:'dark', text:'Dark', icon:'solid moon_'},
+                  {value:'light', text:'Light', icon:'sun_'},
+                ]"
+                :value="uStore.getUserSetting('theme','')"
+                @change="(val) => uStore.setTheme(val)" />
             </td></tr>
             <tr><th>Starting Tab:</th><td>
-              <BDropdownMenu heading="Starting tab" :options="settingStartTabOptions" :value="getStartTab" @change="(val) => uStore.saveUserSetting('start_tab', val, false)" />
+              <BDropdownMenu heading="Starting tab"
+                :options="[
+                  {value:'', text:'Dashboard', icon:'solid chart-simple_'},
+                  {value:'PROSPECT', text:'Prospect', icon:'solid shop_'},
+                  {value:'CENSUS', text:'Census', icon:'solid people-group_'},
+                  {value:'PROPOSALS', text:'Proposals', icon:'file-pdf_'},
+                  {value:'MSGS', text:'Messages', icon:'envelope_'},
+                ]"
+                :value="uStore.getUserSetting('start_tab','')"
+                @change="(val) => uStore.saveUserSetting('start_tab', val, false)" />
             </td></tr>
             <tr><td colspan="2">
               <br/>
@@ -254,7 +237,6 @@ const settingThemeOptions = [
               <span v-for="(r,i) in uStore.user?.config.roles" :key="r">
                 {{ (i as number) > 0 ? ', ' : '' }}<span class="mono">{{ r }}</span>
               </span>
-              <!-- <span class="mono">{{ userStore.user?.config.roles.join(", ") }}</span> -->
             </td></tr>
           </tbody>
         </table>

@@ -21,11 +21,18 @@ watch(() => pStore.prospect, () => {
   }
 )
 const cfgAddQuoteList = ref({
-  onPick: (row:any) => {
+  pickedRow: null,
+  onPick: (row:any, ri:number, col:any, ci:number) => {
+    if (row != cfgAddQuoteList.value.pickedRow) {
+      cfgAddQuoteList.value.pickedRow = row
+    }
+    if (col?.id == 'extra') proposalHandler.toggleQuote(row)
+  },
+  onDblpick: (row:any) => {
     proposalHandler.toggleQuote(row)
   },
   heading: 'Available Quotes',
-  heading_extra: '(click rows to toggle selection)',
+  heading_extra: '(double-click rows to toggle selection)',
   height: "calc(100vh - 13.8em)",
   width: "calc(100vw - 200px - 10em - 1.8em)",
   no_rows_text: "No available quotes",
@@ -37,7 +44,7 @@ const cfgAddQuoteList = ref({
     { id: "nonstd", heading: "Design", width: "5em", flags: "C" },
     { id: "funding", heading: "Fund", width: "3em", flags: "C", cellclass: "mono" },
     { id: "product", heading: "Product", width: "5.5em", cellclass: "mono" },
-    { id: "status", heading: "Status", width: "10em" },
+    { id: "status", heading: "Quote Status", width: "10em" },
     { id: "descr", heading: "Name" },
   ]
 })
@@ -279,7 +286,13 @@ onMounted(() => {
         >{{ B.codeToText.nonstd(row.nonstd) }}</span>
       </template>
       <template #footer>
-        <BButton @click="proposalHandler.showOptions()" :disabled="quotesSummary.counts.total == 0" icon="file-pdf_" class="modern" gapright>Generate PDF...</BButton>
+        <BButton @click="proposalHandler.toggleQuote(cfgAddQuoteList.pickedRow)"
+          gapright
+          class="anchor"
+          :disabled="!cfgAddQuoteList.pickedRow"
+          icon="solid up-down"
+        >Toggle</BButton>
+        <BButton @click="proposalHandler.showOptions()" :disabled="quotesSummary.counts.total == 0" icon="file-pdf_" class="modern" gapleft gapright>Generate PDF...</BButton>
         <BConfirm class="modern" :disabled="quotesSummary.counts.total == 0 || quotesSummary.counts.not_ready > 0" icon="thumbs-up_" pos="T">Enroll Proposal?</BConfirm>
         <BConfirm style="float: right" class="anchor" :disabled="ppStore.currentProposal?.quotes.length != 0" pos="T2L" icon="#red trash-can_" @confirm="proposalHandler.delete">Delete Proposal?
           <template #message>
