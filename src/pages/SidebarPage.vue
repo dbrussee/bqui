@@ -21,8 +21,8 @@ function getProspectID():string {
 function getProspectName():string {
   if (!pStore.prospect?.id) return "No Prospect"
   if (pStore.prospWorking != null) return pStore.prospWorking as string
-  if (pStore.prospect.name) return pStore.prospect.name
-  return 'Unknown '
+  const distinctCount = new Set(pStore.quotes.map(item => item.effdat)).size;
+  return `${B.format.valueWithUnits(pStore.quotes.length, "Quote")}, ${B.format.valueWithUnits(distinctCount, 'Eff Date')}`
 }
 function getProposalsCount():string {
   if (!pStore.prospect?.id) return "No Prospect"
@@ -62,9 +62,9 @@ function getCensusCount():string {
         gtotal += sub.deps.length
       })
       if (gtotal == pStore.prospect.census.length) {
-        msg = 'Subs: ' + gtotal.toString()
+        msg = `${gtotal} ${B.format.plural(gtotal, 'Sub')}`
       } else {
-        msg = `Subs: ${pStore.prospect.census.length} / Total: ${gtotal}`
+        msg = `${pStore.prospect.census.length} ${B.format.plural(pStore.prospect.census.length, 'Sub')}, ${gtotal} Total`
       }
     }
   }

@@ -375,10 +375,11 @@ div.b-table-footer {
   border-top: 1px solid var(--separator-color);
   background-color: var(--table-footer-bg);
   color: var(--table-footer-text);
-
-  & button {
+  min-height: 2em;
+  vertical-align: bottom;
+  /* & button {
     margin-right: 5em;
-  }
+  } */
 
 }
 table {

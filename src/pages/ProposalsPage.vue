@@ -32,7 +32,6 @@ const cfgAddQuoteList = ref({
     proposalHandler.toggleQuote(row)
   },
   heading: 'Available Quotes',
-  heading_extra: '(double-click rows to toggle selection)',
   height: "calc(100vh - 13.8em)",
   width: "calc(100vw - 200px - 10em - 1.8em)",
   no_rows_text: "No available quotes",
@@ -294,7 +293,7 @@ onMounted(() => {
         >Toggle</BButton>
         <BButton @click="proposalHandler.showOptions()" :disabled="quotesSummary.counts.total == 0" icon="file-pdf_" class="modern" gapleft gapright>Generate PDF...</BButton>
         <BConfirm class="modern" :disabled="quotesSummary.counts.total == 0 || quotesSummary.counts.not_ready > 0" icon="thumbs-up_" pos="T">Enroll Proposal?</BConfirm>
-        <BConfirm style="float: right" class="anchor" :disabled="ppStore.currentProposal?.quotes.length != 0" pos="T2L" icon="#red trash-can_" @confirm="proposalHandler.delete">Delete Proposal?
+        <BConfirm class="modern" style="float: right" :disabled="ppStore.currentProposal?.quotes.length != 0" pos="T2L" icon="#red trash-can_" @confirm="proposalHandler.delete">Delete Proposal?
           <template #message>
             Delete this proposal?
             <p style='color:red'>This cannot be undone</p>

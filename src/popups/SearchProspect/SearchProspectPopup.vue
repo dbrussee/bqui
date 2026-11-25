@@ -12,7 +12,7 @@ import { appUserStore } from '@/stores/AppUserStore'
 const uStore = appUserStore()
 import { ref } from 'vue'
 import { useSearchProspectPopup } from './useSearchProspectPopup'
-const { closeSearch, loadProspect } = useSearchProspectPopup()
+const { popRef, closeSearch, loadProspect } = useSearchProspectPopup()
 
 const cfgSearchResults = ref({
   onPick: (row:any) => cfgSearchResults.value.pickedRow = row,
@@ -77,8 +77,8 @@ const headingText = ():string => {
               <BDropdownMenu heading="Agency User"
                 :options="[
                   {value:'', text:'Any Agent'},
-                  '--',
                   {value:uStore.user?.id, text:`${uStore.user?.lstnam}, ${uStore.user?.fstnam} - ${uStore.user?.id} (me)`},
+                  '--',
                   ...(uStore.user?.agency_users || []).map(u => ({
                     value: u.id,
                     text: `${u.lstnam}, ${u.fstnam.trim()} - ${u.id}`
