@@ -11,8 +11,7 @@
     "type-check": "vue-tsc --build",
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",
-    "lint:eslint": "eslint . --fix --cache",
-    "format": "prettier --write --experimental-cli src/"
+    "lint:eslint": "eslint . --fix --cache"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",
@@ -32,14 +31,12 @@
     "@vue/eslint-config-typescript": "^14.2.0",
     "@vue/tsconfig": "^0.9.1",
     "eslint": "^10.15.0",
-    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-oxlint": "~1.95.0",
     "eslint-plugin-vue": "^10.12.1",
     "exceljs": "^4.4.0",
     "jiti": "^2.6.1",
     "npm-run-all2": "^9.1.0",
     "oxlint": "~1.95.0",
-    "prettier": "3.10.1",
     "typescript": "~6.0.0",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.0.8",
