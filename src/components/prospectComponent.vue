@@ -144,7 +144,7 @@ const prospectCSZ = (prosp:any) => {
         <tr><th>Email:</th><td><input :readonly="uStore.isUserReadOnly()" name="grpemail" style="width: 30em;" v-model="handler.temp.value.email"></td></tr>
         <tr><th>Phone:</th><td><input :readonly="uStore.isUserReadOnly()" name="grpphone" style="width: 12em;" v-model="handler.temp.value.phone"></td></tr>
         <tr><th>Eligible:</th><td><input :readonly="uStore.isUserReadOnly()" name="estimate" style="width: 5em;" v-model="handler.temp.value.subs_estimate">
-          <span class="info">(estimate) - Census has {{ B.format.valueWithUnits(pStore.prospect.census?.length, 'subscriber') }}</span>
+          <span class="info">(estimate) - Census has {{ B.format.valueWithUnits(pStore.prospect.census?.length ?? 0, 'subscriber') }}</span>
         </td></tr>
         <tr><th>Address:</th><td><input :readonly="uStore.isUserReadOnly()" name="grpaddr1" style="width: 30em;" v-model="handler.temp.value.addr1"></td></tr>
         <tr><th></th><td><input :readonly="uStore.isUserReadOnly()" name="grpaddr2" style="width: 30em;" v-model="handler.temp.value.addr2"></td></tr>
