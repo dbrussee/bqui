@@ -7,11 +7,11 @@ import { appUserStore } from '@/stores/AppUserStore.ts';
 const uStore = appUserStore()
 import { QuoteStore } from '@/stores/QuoteStore.ts';
 const qStore = QuoteStore()
-import BTable from './B/BTable.vue';
+import BTable from '@/components/B/BTable.vue';
 import { B } from '@/composables/BUtils.ts';
-import BPopup from './B/BPopup.vue';
-import BButton from './B/BButton.vue';
-import BIcon from './B/BIcon.vue';
+import BPopup from '@/components/B/BPopup.vue';
+import BButton from '@/components/B/BButton.vue';
+import BIcon from '@/components/B/BIcon.vue';
 import type { Iquote } from '@/types';
 import QuoteDialog from '@/dialogs/QuoteDialog.vue';
 import { useToast } from '@/composables/useToast'
@@ -40,12 +40,13 @@ const cfgEffList = ref({
   ]
 })
 const cfgQuotesList = ref({
+  heading: "Quotes List",
   onPick: (row:any) => {
     cfgQuotesList.value.pickedRow = row
     // cfgQuotesList.value.pickedRowNumber = rn
   },
   onDblpick: () => { quoteEventHandler.edit(cfgQuotesList.value.pickedRow) },
-  height: "calc(100vh - 11.7em)",
+  height: "calc(100vh - 9.5em)",
   // width: "calc(100vw - 200px - .9em - 7em)",
   width: "calc(100vw - 200px - .9em)",
   pickedRow: null as any,

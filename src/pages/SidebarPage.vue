@@ -11,6 +11,8 @@ import { appProspectStore } from "@/stores/ProspectStore";
 const pStore = appProspectStore();
 import { proposalStore } from "@/stores/ProposalStore";
 const ppStore = proposalStore()
+import { QuoteStore } from "@/stores/QuoteStore";
+const qStore = QuoteStore()
 import { B } from "@/composables/BUtils";
 
 function getProspectID():string {
@@ -19,6 +21,10 @@ function getProspectID():string {
   return ' unknown'
 }
 function getProspectName():string {
+  if (!pStore.prospect?.id) return ""
+  return pStore.prospect.name
+}
+function getProspectQuotes():string {
   if (!pStore.prospect?.id) return "No Prospect"
   if (pStore.prospWorking != null) return pStore.prospWorking as string
   const distinctCount = new Set(pStore.quotes.map(item => item.effdat)).size;
@@ -90,6 +96,11 @@ function getCensusCount():string {
         :working="pStore.censusWorking"
         shortname="Census"
         :longname="getCensusCount()" />
+    <SidebarItem @click="pageStore.page = 'QUOTES'" :current="pageStore.page == 'QUOTES'"
+        icon="solid quote-right_"
+        :working="qStore.working"
+        :shortname="`Quotes`"
+        :longname="getProspectQuotes()" />
     <SidebarItem @click="pageStore.page = 'PROPOSALS'" :current="pageStore.page == 'PROPOSALS'"
         icon="file-pdf_"
         :working="ppStore.working"

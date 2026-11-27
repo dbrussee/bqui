@@ -113,13 +113,16 @@ const decodeSource = (configRight:any, setStyle:any, setHtml:any):void => {
     if (!rightCode) setHtml("What?")
     const userRight = uStore.user?.rights[rightCode]
     if (userRight.source == "@USER") {
-      cell.style.color = "goldenrod"
+      cell.style.color = "firebrick"
+      cell.style.textShadow = ""
       setHtml("User")
     } else if (userRight.source == "@DFLT") {
       cell.style.color = ""
+      cell.style.textShadow = ""
       setHtml("")
     } else {
       cell.style.color = ""
+      cell.style.textShadow = ""
       cell.classList.add("mono")
       setHtml(`<i>${userRight.source}</i>`)
     }
@@ -220,6 +223,7 @@ const getRightLongDescription = ():string => {
                   {value:'', text:'Dashboard', icon:'solid chart-simple_'},
                   {value:'PROSPECT', text:'Prospect', icon:'solid shop_'},
                   {value:'CENSUS', text:'Census', icon:'solid people-group_'},
+                  {value:'QUOTES', text:'Quotes', icon:'solid quote-right_'},
                   {value:'PROPOSALS', text:'Proposals', icon:'file-pdf_'},
                   {value:'MSGS', text:'Messages', icon:'envelope_'},
                 ]"

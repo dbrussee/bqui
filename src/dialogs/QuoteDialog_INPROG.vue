@@ -166,7 +166,7 @@ const getPlancodeDetails = (qtype:string, plncod:string):any => {
   <div class="buttonbar">
     <BConfirm v-if="uStore.getUserRightValue('QUOTE_DELETE') == 'Y'" style="float: left;" class="anchor" gapright @confirm="handler.delete"
       pos="T2R"
-      :disabled="uStore.isUserReadOnly()"
+      :disabled="uStore.isUserReadOnly() || localQuote.id < 0"
       tabindex="-1"
       heading="Permanently Delete Quote"
       icon="trash-can_">

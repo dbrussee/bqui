@@ -18,7 +18,7 @@ export const ProspectSchema = z.object({
   contact: z.string(), phone: z.string(), email: z.string(),
   census: z.array(z.custom<ICensusMember>()).optional(),
   last_quote: QuoteSchema.nullable(), last_quote_id: z.number().nullable(),
-  crtusr: z.string(), crttms: z.coerce.date(), updtusr: z.string(), updtms: z.coerce.date(),
+  crtusr: z.string(), crttms: z.coerce.date(), updusr: z.string(), updtms: z.coerce.date(),
 }).strict();
 
 // Automatically infer your exact Iprospect type signature from the schema

@@ -75,7 +75,7 @@ const doEmit = (val:string) => {
       :icon="current.icon">{{ current.text }}<BIcon style="font-size:.7em;" icon="solid _angle-down"/>
     <template #body>
       <template v-for="(opt, rn) in props.options" :key="rn">
-        <hr v-if="opt == '--'" style="border-color: sienna; margin-top: -.2em; margin-bottom: .5em;"/>
+        <hr v-if="opt == '--'" style="margin-top: -.2em; margin-bottom: .5em;"/>
         <p v-else><BButton @click="doEmit(opt.value)" class="anchor" :icon="opt.icon">{{opt.text}}</BButton></p>
       </template>
     </template>

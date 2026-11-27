@@ -13,6 +13,7 @@ import MessagesPage from './MessagesPage.vue'
 import CensusPage from './CensusPage.vue';
 import DashboardPage from './DashboardPage.vue';
 import { watch } from 'vue';
+import QuotesPage from './QuotesPage.vue';
 
 
 watch(
@@ -35,6 +36,7 @@ watch(
   <div v-if="userStore.user?.id">
     <DashboardPage v-if="pageStore.page == 'DASHBOARD'" />
     <ProspectsPage v-if="pageStore.page == 'PROSPECT'" />
+    <QuotesPage v-if="pageStore.page == 'QUOTES'" />
     <CensusPage v-if="pageStore.page == 'CENSUS'" />
     <MessagesPage v-if="pageStore.page == 'MSGS'" />
     <SettingsPage v-if="pageStore.page == 'SETTINGS'" />
